@@ -1,0 +1,114 @@
+body,
+html {
+  margin: 0;
+  overflow: hidden;
+  font-family: Meiryo, sans-serif;
+  -webkit-app-region: drag;
+}
+
+.hidden {
+  visibility: hidden !important;
+}
+
+.rounded {
+  border-radius: 4px;
+}
+
+.bar {
+  padding-left: 10px;
+  padding-right: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  white-space: nowrap;
+}
+
+#settings-container {
+  margin: 8px;
+  width: calc(100% - 16px);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background-color: white;
+  position: absolute;
+  top: 20px;
+  bottom: 0;
+  border: 3px solid grey;
+  box-sizing: border-box;
+}
+
+#settings {
+  display: grid;
+  align-items: center;
+  grid-template-columns: repeat(1, auto auto);
+  grid-gap: 12px;
+  margin: 12px;
+  font-size: 12px;
+  -webkit-app-region: drag;
+}
+
+input {
+  padding: 2px;
+}
+
+.settings-title {
+  grid-column-end: span 2;
+  justify-self: center;
+  font-size: larger;
+  font-weight: bold;
+}
+
+.settings-helptext {
+  grid-column-end: span 2;
+  justify-self: center;
+  color: grey;
+}
+
+.select-container {
+  position: relative;
+  width: 100%;
+}
+
+.select-active {
+  padding: 2px;
+  border: 1px solid grey;
+  height: 100%;
+  cursor: pointer;
+}
+
+.select-active::after {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  content: '';
+  box-sizing: border-box;
+  margin-right: 5px;
+  width: 10px;
+  height: 10px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 10px solid black;
+  border-bottom: none;
+}
+
+.select-items {
+  position: absolute;
+  background-color: white;
+  width: 100%;
+  z-index: 1;
+  box-sizing: border-box;
+  border: 1px solid grey;
+}
+
+.select-item {
+  padding: 2px;
+  height: 100%;
+  cursor: pointer;
+}
+
+.select-item:hover {
+  background-color: rgba(30, 144, 255);
+}
+
+.resize-background {
+  /* not fully transparent to make it easier to move */
+  background-color: rgba(0, 0, 150, 0.2);
+}

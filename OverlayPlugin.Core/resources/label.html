@@ -1,0 +1,109 @@
+﻿<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+
+        /*
+            表示設定 (1)
+        */
+
+        * {
+            /* フォント （一部のフォントは上手く適用されない） */
+            font-family: "Meiryo";
+            font-size: 12px;
+        }
+
+        body, html {
+            margin: 0;
+        }
+
+        html {
+            height: 100%;
+
+            /* 外枠 */
+            /*border: 1px solid rgba(0,0,0,0.1);*/
+            
+            /* はみ出た内容はスクロールバーを表示させずに隠す
+             * 今のところ、ブラウザへの入力はできないので表示させても無意味 */
+            overflow: hidden;
+            
+            /* 背景色 */
+            background-color: transparent;
+        }
+        
+        .resizeHandle {
+            /* リサイズ用のハンドル
+             * リサイズができる場所はウィンドウ右下の16x16ピクセルの場所
+             * この部分が完全に透明だとマウス入力が透過してしまってサイズを変更できなくなる */
+            background-image: url(handle.png);
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            box-sizing: border-box;
+        }
+
+        /* キャラクターデータのテキストの設定 */
+        #labelBody {
+            color: #E2EBF5;
+            text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
+            font-weight: 300;
+            overflow: hidden;
+        }
+
+    </style>
+    <script>
+
+        // 
+        // プラグインから onOverlayDataUpdate イベントが発行されるので、それを受信する
+        // イベントハンドラの第一引数の detail プロパティ内にプラグインから送信されたデータが入る
+        //
+        // * detail.text       表示するテキストデータ
+        // * detail.isHTML     HTML で表示するか否か
+        //
+
+        //
+        // 以下表示用スクリプト
+        //
+
+        // onOverlayStateUpdate イベントを購読
+        document.addEventListener("onOverlayStateUpdate", function (e) {
+            if (!e.detail.isLocked) {
+                displayResizeHandle();
+            } else {
+                hideResizeHandle();
+            }
+        });
+
+        function displayResizeHandle() {
+            document.documentElement.classList.add("resizeHandle");
+        }
+
+        function hideResizeHandle() {
+            document.documentElement.classList.remove("resizeHandle");
+        }
+
+        // onOverlayDataUpdate イベントを購読
+        document.addEventListener("onOverlayDataUpdate", function (e) {
+            update(e.detail);
+        });
+
+        // 表示要素の更新
+        function update(data) {
+            var elem = document.getElementById("labelBody");
+            if (data.isHTML) {
+                elem.innerHTML = data.text;
+            } else {
+                elem.innerText = data.text;
+            }
+        }
+
+    </script>
+</head>
+<body>
+
+    <div id="labelBody">
+        <!-- ここにテキストが入る -->
+    </div>
+
+</body>
+</html>

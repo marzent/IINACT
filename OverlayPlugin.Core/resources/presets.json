@@ -1,0 +1,129 @@
+﻿{
+  "Kagerou": {
+    "type": "MiniParse",
+    "url": "https://hibiyasleep.github.io/kagerou/overlay/",
+    "size": [500, 300],
+    "supports": ["legacy", "actws"]
+  },
+  "MopiMopi": {
+    "type": "MiniParse",
+    "url": "https://haeruhaeru.github.io/mopimopi/",
+    "size": [600, 500],
+    "supports": ["actws"]
+  },
+  "Ember Overlay": {
+    "type": "MiniParse",
+    "url": "https://goldenchrysus.github.io/ffxiv/ember-overlay/",
+    "size": [600, 400],
+    "supports": ["modern"]
+  },
+  "Ember Spell Timers": {
+    "type": "MiniParse",
+    "url": "https://goldenchrysus.github.io/ffxiv/ember-overlay/?mode=spells",
+    "size": [300, 400],
+    "supports": ["modern"]
+  },
+  "Horizoverlay": {
+    "type": "MiniParse",
+    "url": "https://bsides.github.io/horizoverlay/",
+    "size": ["90%", 300],
+    "supports": ["legacy", "actws"]
+  },
+  "Ikegami": {
+    "type": "MiniParse",
+    "url": "https://idyllshi.re/ikegami/",
+    "size": ["90%", 500],
+    "supports": ["legacy", "actws"]
+  },
+  "Skyline": {
+    "type": "MiniParse",
+    "url": "https://skyline.dsrkafuu.net",
+    "size": ["90%", 500],
+    "supports": ["legacy", "actws"]
+  },
+  "Enmity (Relative Values)": {
+    "type": "MiniParse",
+    "url": "%%/enmity/enmity_relative.html",
+    "size": [300, 400],
+    "supports": ["modern"]
+  },
+  "Enmity (Absolute Values)": {
+    "type": "MiniParse",
+    "url": "%%/enmity/enmity_absolute.html",
+    "size": [300, 400],
+    "supports": ["modern"]
+  },
+  "Enmity (Aggrolist)": {
+    "type": "MiniParse",
+    "url": "%%/enmity/aggrolist.html",
+    "size": [300, 400],
+    "supports": ["modern"]
+  },
+  "SkillDisplay": {
+    "type": "MiniParse",
+    "url": "https://rawrington.github.io/SkillDisplay/",
+    "size": [800, 300],
+    "supports": ["actws"]
+  },
+  "Kagami": {
+    "type": "MiniParse",
+    "url": "https://ramram1048.github.io/kagami/",
+    "size": [800, 400],
+    "supports": ["modern"]
+  },
+  "Basic RainbowMage": {
+    "type": "MiniParse",
+    "url": "%%/miniparse.html",
+    "size": [700, 300],
+    "supports": ["modern"]
+  },
+  "Klondike": {
+    "type": "MiniParse",
+    "url": "https://kalilistic.github.io/klondike/",
+    "size": [200, 290],
+    "supports": ["modern"]
+  },
+  "NextUI": {
+    "type": "MiniParse",
+    "url": "https://kaminaris.github.io/Next-UI/",
+    "size": ["100%", "100%"],
+    "position": [0, 0],
+    "supports": ["modern"]
+  },
+  "Target Bar": {
+    "type": "MiniParse",
+    "url": "%%/targetbars/target.html",
+    "size": [500, 600],
+    "supports": ["modern"]
+  },
+  "Focus Target Bar": {
+    "type": "MiniParse",
+    "url": "%%/targetbars/focus_target.html",
+    "size": [500, 600],
+    "supports": ["modern"]
+  },
+  "Hover Target Bar": {
+    "type": "MiniParse",
+    "url": "%%/targetbars/hover_target.html",
+    "size": [500, 600],
+    "supports": ["modern"]
+  },
+  "Target of Target Bar": {
+    "type": "MiniParse",
+    "url": "%%/targetbars/target_of_target.html",
+    "size": [500, 600],
+    "supports": ["modern"]
+  },
+   "Deep Dungeon Overlay": {
+    "type": "MiniParse",
+    "url": "https://iamlokken.github.io/DeepDungeonOverlay/overlay/",
+    "size": [300, 650],
+    "supports": ["modern"]
+  },
+   "Deep Dungeon Target Info": {
+    "type": "MiniParse",
+    "url": "https://iamlokken.github.io/DeepDungeonOverlay/overlay/targetinfo/",
+    "size": [500, 70],
+    "supports": ["modern"]
+  }
+}

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WSStartFailed" xml:space="preserve">
+    <value>WS: Start fehlgeschlagen: {0}</value>
+  </data>
+  <data name="ListSortFailed" xml:space="preserve">
+    <value>Liste konnte nicht nach {0} sortiert werden: {1}</value>
+  </data>
+  <data name="WSLoadingCert" xml:space="preserve">
+    <value>WS: SSL-Zertifikat {0} wird geladen ...</value>
+  </data>
+  <data name="PresetUsesUnsupportedType" xml:space="preserve">
+    <value>Voreinstellung {0} benutzt eine nicht unterstütze Art {1}!</value>
+  </data>
+  <data name="WSMessageSendFailed" xml:space="preserve">
+    <value>Nachricht konnte nicht gesendet werden: {0}</value>
+  </data>
+  <data name="PromptSelectPreset" xml:space="preserve">
+    <value>Bitte wähle eineVoreinstellung aus.</value>
+  </data>
+  <data name="EventHandlerException" xml:space="preserve">
+    <value>Ereignis {0} konnte nicht an {1} gesendet werden! {2}</value>
+  </data>
+  <data name="WSShutdownError" xml:space="preserve">
+    <value>WS: Herunterfahren fehlgeschlagen. {0}</value>
+  </data>
+  <data name="MapOverlayLabel" xml:space="preserve">
+    <value>LabelOverlay</value>
+  </data>
+  <data name="MissingEventSubError" xml:space="preserve">
+    <value>Abonnement für fehlendes Ereignis "{0}"!</value>
+  </data>
+  <data name="WSNotConfidentLink" xml:space="preserve">
+    <value>Dieser Link funktioniert eventuel nicht wenn das Overlay ACTWebSocket nicht unterstützt.</value>
+  </data>
+  <data name="OverlayApiMissingEventsField" xml:space="preserve">
+    <value>Fehlendes Ereignissefeld im Abonnementaufruf: {0}!</value>
+  </data>
+  <data name="NetworkParserInitException" xml:space="preserve">
+    <value>Netzwerkparser konnte nicht eingerichtet werden: {0}</value>
+  </data>
+  <data name="WSIndexPage" xml:space="preserve">
+    <value>&lt;h1&gt;Es Funktioniert!&lt;/h1&gt;
+        &lt;p&gt;
+            Wenn einer dieser Links mit dem Präfix &amp;quot;Lokal:&amp;quot; angezeigt wird und nicht angeklickt werden kann, liegt dies daran,
+            dass in diesem Overlays lokale Dateien angezeigt werden und Webbrowser es Websiten nicht erlauben, Links zu lokalen Dateien zu erstellen.
+        &lt;/p&gt;
+        &lt;p&gt;
+            Kopiere den Link und füge ihn in der Adressleiste ein.
+        &lt;/p&gt;</value>
+  </data>
+  <data name="FFXIVDataSubscriptionException" xml:space="preserve">
+    <value>FFXIV Daten-Subscription konnte nicht abgerufen werden: {0}</value>
+  </data>
+  <data name="ErrorCouldNotLoadPresets" xml:space="preserve">
+    <value>NewOverlayDialog: Fehler beim laden der Voreinstellungen: {0}</value>
+  </data>
+  <data name="EventConfigTab" xml:space="preserve">
+    <value>Event Einstellungen</value>
+  </data>
+  <data name="WSUnsubFail" xml:space="preserve">
+    <value>Abmeldung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="OverlayApiSubscribed" xml:space="preserve">
+    <value>{0}: Hat {1} abonniert</value>
+  </data>
+  <data name="CustomPresetLabel" xml:space="preserve">
+    <value>Benutzerdefiniert</value>
+  </data>
+  <data name="ErrorOverlayNameNotUnique" xml:space="preserve">
+    <value>Der Name sollte einzigartig sein.</value>
+  </data>
+  <data name="MapOverlayMiniParse" xml:space="preserve">
+    <value>MiniParseOverlay</value>
+  </data>
+  <data name="MissingEventDispatchError" xml:space="preserve">
+    <value>Versucht, nicht registrierten Ereignistyp "{0}" zu versenden!</value>
+  </data>
+  <data name="HotkeyActionToggleClickthrough" xml:space="preserve">
+    <value>Durchklicken umschalten</value>
+  </data>
+  <data name="IncompatibleAddon" xml:space="preserve">
+    <value>Inkompatibles Addon {0} erkannt. Bitte so schnell wie möglich aktualisieren!!</value>
+  </data>
+  <data name="MapOverlaySpellTimer" xml:space="preserve">
+    <value>SpellTimerOverlay</value>
+  </data>
+  <data name="OverlayApiMissingEventsFieldUnsub" xml:space="preserve">
+    <value>Fehlendes Ereignissefeld beim Abmelden: {0}!</value>
+  </data>
+  <data name="GeneralTab" xml:space="preserve">
+    <value>Allgemein</value>
+  </data>
+  <data name="MapESMiniParse" xml:space="preserve">
+    <value>MiniParseEventSource</value>
+  </data>
+  <data name="NetworkParserNoFfxiv" xml:space="preserve">
+    <value>Machina oder das FFXIV-Plugin konnten nicht gefunden werden. Dies ist nur dann ein Problem, wenn Sie ACT mit FFXIV verwenden.</value>
+  </data>
+  <data name="UnregisterHotkeyError" xml:space="preserve">
+    <value>Hotkey {0} konnte in DisableHotKeys() nicht abgemeldet werden.</value>
+  </data>
+  <data name="PromptSelectOverlayType" xml:space="preserve">
+    <value>Bitte Overlay-Typ auswählen.</value>
+  </data>
+  <data name="OverlayBaseRegisterHotkeyError" xml:space="preserve">
+    <value>Hotkey konnte nicht registriert werden: {0}!</value>
+  </data>
+  <data name="TabsESLabel" xml:space="preserve">
+    <value>Ereignisquelle</value>
+  </data>
+  <data name="RegisterHotkeyError" xml:space="preserve">
+    <value>Fehler beim registrieren des Hotkeys {0}, {1} in EnableHotKeys().</value>
+  </data>
+  <data name="OverlayApiInvalidHandlerCall" xml:space="preserve">
+    <value>Ungültiger Handler-Aufruf empfangen: {0}</value>
+  </data>
+  <data name="ErrorOverlayNameEmpty" xml:space="preserve">
+    <value>Der Name darf nicht leer sein oder nur aus Leerzeichen bestehen</value>
+  </data>
+  <data name="MapOverlayShortMiniParse" xml:space="preserve">
+    <value>MiniParse</value>
+  </data>
+  <data name="MapOverlayShortLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="WSHandlerException" xml:space="preserve">
+    <value>WS: Handler-Aufruf fehlgeschlagen: {0}</value>
+  </data>
+  <data name="JsHandlerCallException" xml:space="preserve">
+    <value>JS-Handler-Aufruf fehlgeschlagen: {0}</value>
+  </data>
+  <data name="WSInvalidDataRecv" xml:space="preserve">
+    <value>Ungültige Daten empfangen: {0}; {1}</value>
+  </data>
+  <data name="OverlayPreviewName" xml:space="preserve">
+    <value>Vorschau</value>
+  </data>
+  <data name="HotkeyActionToggleEnabled" xml:space="preserve">
+    <value>Umschalten aktiviert</value>
+  </data>
+  <data name="MissingHandlerError" xml:space="preserve">
+    <value>Versucht, fehlenden Handler "{0}" aufzurufen!</value>
+  </data>
+  <data name="MapOverlayShortSpellTimer" xml:space="preserve">
+    <value>SpellTimer</value>
+  </data>
+  <data name="HotkeyActionToggleVisible" xml:space="preserve">
+    <value>sichtbar/versteckt umschalten</value>
+  </data>
+  <data name="WSNewSubFail" xml:space="preserve">
+    <value>Neues Abonnement konnte nicht verarbeitet werden: {0}</value>
+  </data>
+  <data name="ActwsShimEnabled" xml:space="preserve">
+    <value>ACTWS Kompatibilität aktiviert.</value>
+  </data>
+  <data name="FFXIVDataRepositoryException" xml:space="preserve">
+    <value>FFXIV Daten-Repository konnte nicht abgerufen werden: {0}</value>
+  </data>
+  <data name="HotkeyActionToggleLock" xml:space="preserve">
+    <value>Sperren umschalten</value>
+  </data>
+  <data name="DuplicateHandlerError" xml:space="preserve">
+    <value>Doppelter Handler für Name {0}!</value>
+  </data>
+  <data name="InitOverlayLocalFileIsMissing" xml:space="preserve">
+    <value>InitializeOverlay: Lokale Datei {0} existiert nicht!</value>
+  </data>
+  <data name="InitOverlayUrlError" xml:space="preserve">
+    <value>InitializeOverlay: URI-Analysefehler! Bitte konfigurieren Sie die URL neu. (Config.Url = {0}): {1}</value>
+  </data>
+</root>

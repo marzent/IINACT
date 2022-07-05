@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>  <data name="sslBox.Text" xml:space="preserve">
+    <value>启用SSL</value>
+  </data>
+  <data name="statusLabel.Text" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="stopBtn.Text" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>端口：</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>IP地址</value>
+  </data>
+  <data name="genSslBtn.Text" xml:space="preserve">
+    <value>生成SSL证书</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="startBtn.Text" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="logDisplay.Text" xml:space="preserve">
+    <value>仅在您*知道*您需要SSL时才需启用它。通常，仅当您想与其他人或其他设备共享悬浮窗时才需要此功能。请在“共享悬浮窗”选项卡中进行设置。它的设置过程更加容易，可以让您与其他人共享悬浮窗（只需为其提供生成的链接），并且仍然可以与OBS和其他工具一起使用。
+
+
+SSL功能仅在您拥有SSL证书的情况下才能启用。您可以单击上方的按钮自动生成一个，或将PKCS#12文件放置在%AppData%\Advanced Combat Tracker\Config\OverlayPluginSSL.p12中并重新启动ACT。
+
+然后，您将可以启用SSL功能。</value>
+  </data>
+
+  <data name="label4.Text" xml:space="preserve">
+    <value>悬浮窗：</value>
+  </data>
+  <data name="ctxMenuLinkCopy.Text" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="lblUrlConfidentWarning.Text" xml:space="preserve">
+    <value>如果此悬浮窗不支持ACTWebSocket，则此链接可能不会生效。</value>
+  </data>
+  <data name="label5.Text" xml:space="preserve">
+    <value>悬浮窗链接：</value>
+  </data>
+  <data name="simpStartBtn.Text" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="settingsPage.Text" xml:space="preserve">
+    <value>直播/本地悬浮窗</value>
+  </data>
+  <data name="lblWsserverIntro.Text" xml:space="preserve">
+    <value>此处是对后两个选项卡的简介：
+
+直播/本地悬浮窗：如果您通过此选项卡启动WS服务器，您就可以在这台电脑上使用生成的链接 （例如在OBS中，XL的overlay plugin中，等等）。如果您对网络和SSL略知一二，您甚至可以在您的局域网中的其他设备上使用它。但是一般来说，我建议使用共享悬浮窗选项卡，因为它更易于使用。
+
+共享悬浮窗：如果您通过此选项卡启动WS服务器，则可以在连接到互联网的任何设备上使用生成的链接（例如您的手机、平板电脑、朋友的电脑，等等）。您可以与其他人共享这些链接。
+
+最后，如果您通过“直播/本地悬浮窗”选项卡启动了WS服务器, 它将在ACT启动时自动重新启动。如果是通过“共享悬浮窗”选项卡启动的, 它不会自动启动，因为您每次都将获得一个新的链接。备注：如果这让您感到困扰，请在ACT Discord（或在OverlayPlugin的GitHub仓库）中要求ngld修复此问题。有很多方法可以解决这个问题，但是我不确定有多少人需要这个功能。
+</value>
+  </data>
+  <data name="simpStatusLbl.Text" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="simpStatusLabel.Text" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="tunnelPage.Text" xml:space="preserve">
+    <value>共享悬浮窗</value>
+  </data>
+  <data name="introPage.Text" xml:space="preserve">
+    <value>简介</value>
+  </data>
+  <data name="regionLabel.Text" xml:space="preserve">
+    <value>地区：</value>
+  </data>
+  <data name="simpStopBtn.Text" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="urlGeneratorBox.Text" xml:space="preserve">
+    <value>链接生成器</value>
+  </data>
+</root>

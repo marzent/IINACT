@@ -1,0 +1,48 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>targetinfo</title>
+  <link rel="stylesheet" href="css/targetinfo.css">
+</head>
+
+<body id="targetinfo" v-class="resize-handle: !locked">
+  <!-- outer -->
+  <div class="outer {{hide ? 'hide' : ''}}">
+    <!-- innner -->
+    <div v-if="updated" class="inner">
+      <div class="background"></div>
+
+      <!-- Target (repeat) -->
+      <div id="target" v-repeat="t: targets">
+        <div class="box">
+          <div class="gauge {{t | hpcolor}}" style="width: {{t | hppercent}}%"></div>
+          <div class="name">
+            <span class="header">{{t.Key}}: </span>
+            <span class="value">{{t.Name}}</span>
+          </div>
+        </div>
+        <div>
+          <span class="header">HP: </span>
+          <span class="value">{{t | hppercent}}% ({{t.CurrentHP}}/{{t.MaxHP}})</span>
+          <div style="float: right">
+            <span class="header">{{strings.distance}}: </span>
+            <span class="value">{{t.Distance}}m</span>
+          </div>
+        </div>
+      </div>
+      <!-- end of Target (repeat) -->
+
+    </div>
+    <!-- inner -->
+  </div>
+  <!-- outer -->
+
+  <!-- load js -->
+  <script src="https://unpkg.com/vue@0.12.7/dist/vue.min.js"></script>
+  <script src="https://ngld.github.io/OverlayPlugin/assets/shared/common.min.js"></script>
+  <script src="js/funcs.js"></script>
+  <script src="js/targetinfo.js"></script>
+</body>
+
+</html>

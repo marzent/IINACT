@@ -1,0 +1,178 @@
+* {
+  font-family: "Meiryo";
+  font-size: 12px;
+  font-weight: normal;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.text-lowercase { text-transform: lowercase; }
+.text-uppercase { text-transform: uppercase; }
+.text-capitalize { text-transform: capitalize; }
+
+.blue {
+  color: #E2EBF5;
+  text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
+}
+
+.gold {
+  color: #DED7BE;
+  text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
+}
+
+.resize-handle {
+  background-image: url(handle.png);
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+
+#enmity .hide { display: none; }
+
+#enmity .outer {
+  height: 100%;
+  padding: 10px;
+}
+
+#enmity .inner {
+  position: relative;
+  padding: 10px;
+}
+
+#enmity .inner .background {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  -webkit-filter: blur(5px);
+  z-index: -1;
+}
+
+#toggle-collapse {
+  cursor: pointer;
+  float: right;
+}
+
+/* HP Colors */
+.green { background-color: rgba(38, 214, 70, 0.75); }
+.yellow { background-color: rgba(201, 204, 36, 0.75); }
+.orange { background-color: rgba(239, 151, 43, 0.75); }
+.red { background-color: rgba(255, 45, 45, 0.75); }
+
+/* Role Colors */
+.TANK { background-color: rgba(52,67,150,0.75); }
+.HEALER { background-color: rgba(57,101,39,0.75); }
+.DPS { background-color: rgba(101, 50, 50, 0.75); }
+.UNKNOWN { background-color: rgba(211,211,211,0.75); }
+.Pet { background-color: rgba(150,147,52,0.75); }
+
+.box { position: relative; }
+
+.content {
+  display: flex;
+  flex-direction: row;
+}
+
+.name {
+  display: inline-block;
+  order: 1;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.enmity {
+  flex-shrink: 0;
+  order: 2;
+  padding-left: 10px;
+  align-self: flex-end;
+}
+
+#target {
+  border-bottom: 1px solid #DED7BE;
+  color: #DED7BE;
+  text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
+  font-weight: 300;
+  white-space: nowrap;
+  padding: 2px;
+  overflow: hidden;
+}
+
+#target .name {
+  width: 100%;
+  position: relative;
+  bottom: 0;
+}
+
+#target .gauge {
+  position: absolute;
+  display: block;
+  bottom: 2px;
+  height: 4px;
+  z-index: -1;
+}
+
+#target .header {
+  color: #DED7BE;
+  text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
+  font-weight: 300;
+  white-space: nowrap;
+  text-align: left;
+}
+
+#target .value, #entries .name {
+  color: #E2EBF5;
+  text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
+  font-weight: 300;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Enmity entries */
+#entries {
+ padding: 0px 1px 1px 1px;
+}
+
+#entries .enmity {
+  float: right;
+  color: #E2EBF5;
+  text-shadow: -1px 0 3px #217AA2, 0 1px 3px #217AA2, 1px 0 3px #217AA2, 0 -1px 3px #217AA2;
+  font-weight: 300;
+}
+
+#entries .content .me {
+  color: #FFFF00;
+  text-shadow: -1px 0 2px #594709, 0 1px 2px #594709, 1px 0 2px #594709, 0 -1px 2px #594709;
+}
+
+#entries .content {
+  position: relative;
+  bottom: 0;
+  clear: both;
+}
+
+#entries .gauge {
+  position: absolute;
+  display: block;
+  bottom: 2px;
+  height: 5px;
+  z-index: -1;
+}
+

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>  <data name="ActwsShimEnabled" xml:space="preserve">
+    <value>ACTWS兼容性功能已启用。</value>
+  </data>
+
+
+  <data name="WSInvalidDataRecv" xml:space="preserve">
+    <value>收到无效数据：{0}; {1}</value>
+  </data>
+  <data name="OverlayApiSubscribed" xml:space="preserve">
+    <value>{0}：已订阅{1}</value>
+  </data>
+  <data name="WSLoadingCert" xml:space="preserve">
+    <value>WS：正在加载SSL证书{0}...</value>
+  </data>
+  <data name="ListSortFailed" xml:space="preserve">
+    <value>以{0}: {1}排序列表失败</value>
+  </data>
+  <data name="InitOverlayLocalFileIsMissing" xml:space="preserve">
+    <value>初始化插件：本地文件{0}不存在！</value>
+  </data>
+  <data name="WSUnsubFail" xml:space="preserve">
+    <value>处理退订失败：{0}</value>
+  </data>
+  <data name="RegisterHotkeyError" xml:space="preserve">
+    <value>在EnableHotKeys()注册热键{0}, {1}失败。</value>
+  </data>
+  <data name="WSMessageSendFailed" xml:space="preserve">
+    <value>发送信息失败：{0}</value>
+  </data>
+  <data name="NetworkParserInitException" xml:space="preserve">
+    <value>无法设置网络解析器：{0}</value>
+  </data>
+  <data name="OverlayBaseRegisterHotkeyError" xml:space="preserve">
+    <value>注册热键：{0}失败！</value>
+  </data>
+  <data name="WSNewSubFail" xml:space="preserve">
+    <value>处理新订阅失败：{0}</value>
+  </data>
+  <data name="WSIndexPage" xml:space="preserve">
+    <value>&lt;h1&gt;It Works!&lt;/h1&gt;
+        &lt;p&gt;
+            如果这些链接中有任何一个以&amp;quot;Local:&amp;quot;为前缀显示且不可点击，那是因为
+            这些悬浮窗显示本地文件，并且网页浏览器不允许网站链接到本地文件。
+        &lt;/p&gt;
+        &lt;p&gt;
+            您必须复制&amp;amp;并粘贴到您的地址栏中。
+        &lt;/p&gt;</value>
+  </data>
+  <data name="WSStartFailed" xml:space="preserve">
+    <value>WS:启动失败：{0}</value>
+  </data>
+  <data name="InitOverlayUrlError" xml:space="preserve">
+    <value>初始化插件：路径解析错误！请重新设置悬浮窗路径(Config.Url = {0}): {1}</value>
+  </data>
+  <data name="WSShutdownError" xml:space="preserve">
+    <value>WS:关闭失败：{0}</value>
+  </data>
+  <data name="IncompatibleAddon" xml:space="preserve">
+    <value>检测到不兼容的插件{0}。请尽快更新！！</value>
+  </data>
+  <data name="UnregisterHotkeyError" xml:space="preserve">
+    <value>在DisableHotKeys()反注册热键{0}失败。</value>
+  </data>
+  <data name="PromptSelectOverlayType" xml:space="preserve">
+    <value>请选择悬浮窗类型。</value>
+  </data>
+  <data name="MapOverlayShortSpellTimer" xml:space="preserve">
+    <value>技能冷却</value>
+  </data>
+  <data name="HotkeyActionToggleLock" xml:space="preserve">
+    <value>切换悬浮窗 锁定</value>
+  </data>
+  <data name="MapOverlayShortMiniParse" xml:space="preserve">
+    <value>数据统计</value>
+  </data>
+  <data name="MapOverlayShortLabel" xml:space="preserve">
+    <value>标签</value>
+  </data>
+  <data name="HotkeyActionToggleVisible" xml:space="preserve">
+    <value>切换悬浮窗 显示/隐藏</value>
+  </data>
+  <data name="HotkeyActionToggleClickthrough" xml:space="preserve">
+    <value>切换悬浮窗 鼠标穿透</value>
+  </data>
+  <data name="TabsESLabel" xml:space="preserve">
+    <value>事件源</value>
+  </data>
+  <data name="GeneralTab" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="MapOverlaySpellTimer" xml:space="preserve">
+    <value>技能冷却悬浮窗</value>
+  </data>
+  <data name="ErrorOverlayNameEmpty" xml:space="preserve">
+    <value>名称不得为空或只有空格。</value>
+  </data>
+  <data name="ErrorOverlayNameNotUnique" xml:space="preserve">
+    <value>名称不得重复。</value>
+  </data>
+  <data name="MapOverlayMiniParse" xml:space="preserve">
+    <value>数据统计悬浮窗</value>
+  </data>
+  <data name="MapOverlayLabel" xml:space="preserve">
+    <value>标签悬浮窗</value>
+  </data>
+  <data name="MapESMiniParse" xml:space="preserve">
+    <value>设置</value>
+  </data>  <data name="DuplicateHandlerError" xml:space="preserve">
+    <value>名称{0}重复处理！</value>
+  </data>
+  <data name="WSNotConfidentLink" xml:space="preserve">
+    <value>如果此悬浮窗不支持ACTWebSocket，则此链接可能不会生效。</value>
+  </data>
+  <data name="JsHandlerCallException" xml:space="preserve">
+    <value>JS处理程序调用失败: {0}</value>
+  </data>
+  <data name="OverlayApiMissingEventsFieldUnsub" xml:space="preserve">
+    <value>取消订阅呼叫缺少事件字段：{0}</value>
+  </data>
+  <data name="WSHandlerException" xml:space="preserve">
+    <value>WS：处理程序调用失败：{0}</value>
+  </data>
+  <data name="OverlayApiInvalidHandlerCall" xml:space="preserve">
+    <value>收到无效的处理程序调用：{0}</value>
+  </data>
+  <data name="OverlayApiMissingEventsField" xml:space="preserve">
+    <value>订阅呼叫中缺少事件字段：{0}</value>
+  </data>
+  <data name="MissingHandlerError" xml:space="preserve">
+    <value>尝试调用不存在的处理程序"{0}"！</value>
+  </data>
+  <data name="FFXIVDataRepositoryException" xml:space="preserve">
+    <value>FFXIV DataRepository检索失败：{0}</value>
+  </data>
+  <data name="MissingEventDispatchError" xml:space="preserve">
+    <value>试图发送未注册的事件类型"{0}"！</value>
+  </data>
+  <data name="MissingEventSubError" xml:space="preserve">
+    <value>缺少事件"{0}"的订阅！</value>
+  </data>
+  <data name="FFXIVDataSubscriptionException" xml:space="preserve">
+    <value>FFXIV DataSubscription检索失败：{0}</value>
+  </data>
+  <data name="EventHandlerException" xml:space="preserve">
+    <value>无法将事件{0}发送到{1}！ {2}</value>
+  </data>
+  <data name="ErrorCouldNotLoadPresets" xml:space="preserve">
+    <value>新悬浮窗对话框：加载预设悬浮窗失败：{0}</value>
+  </data>
+  <data name="PromptSelectPreset" xml:space="preserve">
+    <value>请选择一个预设悬浮窗。</value>
+  </data>
+  <data name="OverlayPreviewName" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="CustomPresetLabel" xml:space="preserve">
+    <value>自订</value>
+  </data>
+  <data name="PresetUsesUnsupportedType" xml:space="preserve">
+    <value>预设{0}使用不受支持的类型{1}！</value>
+  </data>
+  <data name="NetworkParserNoFfxiv" xml:space="preserve">
+    <value>找不到Machina或FFXIV插件。仅当您将ACT与FFXIV一起使用时才是问题。</value>
+  </data>
+  <data name="EventConfigTab" xml:space="preserve">
+    <value>基本设置</value>
+  </data>
+  <data name="HotkeyActionToggleEnabled" xml:space="preserve">
+    <value>切换悬浮窗 启用/关闭</value>
+  </data>
+  <data name="LogNotConnectedError" xml:space="preserve">
+    <value>错误：未连接到日志。</value>
+  </data>
+</root>

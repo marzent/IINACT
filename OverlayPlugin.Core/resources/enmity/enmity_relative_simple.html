@@ -1,0 +1,52 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>enmity_relative_simple</title>
+  <link rel="stylesheet" href="css/enmity.css">
+</head>
+
+<body id="enmity" v-class="resize-handle: !locked">
+
+  <!-- outer -->
+  <div class="outer {{hide ? 'hide' : ''}}">
+    <!-- innner -->
+    <div v-if="updated" class="inner {{target.Type != 2 ? 'hide' : ''}}">
+      <div class="background"></div>
+
+      <!-- Target -->
+      <div>
+        <div id="target">
+          <span class="value">{{target.Name}}</span>
+        </div>
+      </div>
+      <!-- end of Target -->
+
+      <!-- Enmity Entries -->
+      <div>
+        <div id="entries" class="box" v-repeat="e: entries">
+          <!-- Name -->
+          <div class="content">
+            <span class="name {{e.isMe ? 'me' : '' }}">{{$index + 1}}.{{e | you}}</span>
+            <span class="enmity">{{e.RelativeEnmity | relnumformat}}</span>
+          </div>
+          <!-- Gauge -->
+          <div class="gauge {{e | jobrole}}" style="width: {{e.HateRate}}%"></div>
+        </div>
+      </div>
+      <!-- end of Enmity Entries -->
+
+    </div>
+    <!-- end of inner -->
+  </div>
+  <!-- end of outer -->
+
+  <!-- load js -->
+  <script src="https://unpkg.com/vue@0.12.7/dist/vue.min.js"></script>
+  <script src="https://ngld.github.io/OverlayPlugin/assets/shared/common.min.js"></script>
+  <script src="../enmity_target_funcs.js"></script>
+  <script src="js/funcs.js"></script>
+  <script src="js/enmity.js"></script>
+</body>
+
+</html>

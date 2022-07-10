@@ -13,7 +13,7 @@ This will **not** render overlays by itself, use something like [Browsingway](ht
 - Will generally stay out of your way, doesn't take away focus when launched, only lives as a tray icon and quits itself once the game closes
 - Doesn't use legacy technology that hurts Linux and macOS users
 - More robust Web Socket server than what Overlay Plugin currently uses
-- RPCAP support
+- RPCAP support (for the poor Flatpak users)
 
 ## How to build?
 
@@ -24,4 +24,7 @@ Just place the FFXIV_ACT_Plugin.dll and its SDK files in the external_dependenci
 
 - Doesn't have any sort of auto-update system
 - Cactbot may work *with issues* (the configuration is currently not saved for sure)
-- Not all parse settings exposed in the GUI are properly implemented yet
+- TTS is not fully implemented yet
+
+
+PRs are always welcome :)

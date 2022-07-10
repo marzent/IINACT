@@ -59,8 +59,10 @@ public class FfxivActPluginWrapper {
 
         Monitor = scanPackets.GetField<FFXIVNetworkMonitor>("_monitor");
 
-        var rpcapEnabled = Settings.Default.RPcap;
-        Monitor.RPCap.host = rpcapEnabled ? "127.0.0.1" : "";
+        Monitor.RPCap.host = Settings.Default.RPcap ? Settings.Default.RPcapHost : "";
+        Monitor.RPCap.port = Settings.Default.RPcapPort;
+        Monitor.RPCap.username = Settings.Default.RPcapUsername;
+        Monitor.RPCap.password = Settings.Default.RPcapPassword;
 
         _dataCollection.StartMemory();
 
@@ -83,13 +85,19 @@ public class FfxivActPluginWrapper {
         while (!readProcesses.Read64(true).Any())
             Thread.Sleep(500);
 
-        ParseSettings = new ParseSettings {
+        ParseSettings = new ParseSettings() {
+            DisableDamageShield = Settings.Default.DisableDamageShield,
+            DisableCombinePets = Settings.Default.DisableCombinePets,
             LanguageID = (Language)Settings.Default.Language,
-            ShowDebug = false
+            ParseFilter = (ParseFilterMode)Settings.Default.ParseFilterMode,
+            SimulateIndividualDoTCrits = Settings.Default.SimulateIndividualDoTCrits,
+            ShowRealDoTTicks = Settings.Default.ShowRealDoTTicks,
+            ShowDebug = Settings.Default.ShowDebug,
+            EnableBenchmarks = false
         };
         settingsMediator.ParseSettings = ParseSettings;
 
-        settingsMediator.ProcessException = OnProcessException; 
+        settingsMediator.ProcessException = OnProcessException;
 
         var logOutput = _dataCollection.GetField<LogOutput>("_logOutput");
         var logFormat = _dataCollection.GetField<LogFormat>("_logFormat");

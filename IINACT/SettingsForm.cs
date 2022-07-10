@@ -11,12 +11,21 @@ namespace IINACT {
         public SettingsForm() {
             InitializeComponent();
             comboBoxLang.DataSource = Enum.GetValues(typeof(Language));
-            comboBoxLang.SelectedIndex = Settings.Default.Language;
+            comboBoxLang.SelectedIndex = Settings.Default.Language - 1;
             comboBoxLang.SelectedIndexChanged += comboBoxLang_SelectedIndexChanged;
             comboBoxFilter.DataSource = Enum.GetValues(typeof(ParseFilterMode));
             comboBoxFilter.SelectedIndex = Settings.Default.ParseFilterMode;
             comboBoxFilter.SelectedIndexChanged += comboBoxFilter_SelectedIndexChanged;
-            rpcapCheckBox.Checked = Settings.Default.RPcap;
+            checkBoxShield.Checked = Settings.Default.DisableDamageShield;
+            checkBoxPets.Checked = Settings.Default.DisableCombinePets;
+            checkBoxDotCrit.Checked = Settings.Default.SimulateIndividualDoTCrits;
+            checkBoxDotTick.Checked = Settings.Default.ShowRealDoTTicks;
+            checkBoxDebug.Checked = Settings.Default.ShowDebug;
+            checkBoxRpcap.Checked = Settings.Default.RPcap;
+            textBoxHost.Text = Settings.Default.RPcapHost;
+            textBoxPort.Text = $@"{Settings.Default.RPcapPort}";
+            textBoxUsername.Text = Settings.Default.RPcapUsername;
+            textBoxPassword.Text = Settings.Default.RPcapPassword;
             rpcapSectionPanel.Height = Settings.Default.RPcap ? 200 : 0;
 
 
@@ -55,7 +64,7 @@ namespace IINACT {
         }
 
         private void comboBoxLang_SelectedIndexChanged(object? sender, EventArgs e) {
-            Settings.Default.Language = comboBoxLang.SelectedIndex;
+            Settings.Default.Language = comboBoxLang.SelectedIndex + 1;
             Settings.Default.Save();
         }
 
@@ -70,9 +79,58 @@ namespace IINACT {
             Hide();
         }
 
+        private void checkBoxShield_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.DisableDamageShield = checkBoxShield.Checked;
+            Settings.Default.Save();
+        }
+
+        private void checkBoxPets_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.DisableCombinePets = checkBoxPets.Checked;
+            Settings.Default.Save();
+        }
+
+        private void checkBoxDotCrit_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.SimulateIndividualDoTCrits = checkBoxDotCrit.Checked;
+            Settings.Default.Save();
+        }
+
+        private void checkBoxDotTick_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.ShowRealDoTTicks = checkBoxDotTick.Checked;
+            Settings.Default.Save();
+        }
+
+        private void checkBoxDebug_CheckedChanged(object sender, EventArgs e) {
+            Settings.Default.ShowDebug = checkBoxDebug.Checked;
+            Settings.Default.Save();
+        }
+
         private void RpcapCheckBox_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.RPcap = rpcapCheckBox.Checked;
+            Settings.Default.RPcap = checkBoxRpcap.Checked;
+            Settings.Default.Save();
             rpcapSectionPanel.Height = Settings.Default.RPcap ? 200 : 0;
         }
+
+        private void TextBoxHost_TextChanged(object sender, EventArgs e) {
+            Settings.Default.RPcapHost = textBoxHost.Text;
+            Settings.Default.Save();
+        }
+
+        private void TextBoxPort_TextChanged(object sender, EventArgs e)
+        {
+            if (!int.TryParse(textBoxPort.Text, out var port)) return;
+            Settings.Default.RPcapPort = port;
+            Settings.Default.Save();
+        }
+
+        private void TextBoxUsername_TextChanged(object sender, EventArgs e) {
+            Settings.Default.RPcapUsername = textBoxUsername.Text;
+            Settings.Default.Save();
+        }
+
+        private void TextBoxPassword_TextChanged(object sender, EventArgs e) {
+            Settings.Default.RPcapPassword = textBoxPassword.Text;
+            Settings.Default.Save();
+        }
+
     }
 }

@@ -8,11 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <ApplicationIcon>Icon-MacOS-512x512@2x.ico</ApplicationIcon>
+    <ApplicationIcon>Icon-IINACT-512x512@2x.ico</ApplicationIcon>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Icon-MacOS-512x512@2x.ico" />
+    <Content Include="Icon-IINACT-512x512%402x.ico" />
   </ItemGroup>
 
   <ItemGroup>

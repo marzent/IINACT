@@ -35,7 +35,7 @@ namespace IINACT {
             this.checkBoxDotTick = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxDotCrit = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxPets = new DarkUI.Controls.DarkCheckBox();
-            this.rpcapCheckBox = new DarkUI.Controls.DarkCheckBox();
+            this.checkBoxRpcap = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxShield = new DarkUI.Controls.DarkCheckBox();
             this.darkLabel2 = new DarkUI.Controls.DarkLabel();
             this.comboBoxFilter = new DarkUI.Controls.DarkComboBox();
@@ -48,13 +48,13 @@ namespace IINACT {
             this.darkLabel9 = new DarkUI.Controls.DarkLabel();
             this.darkLabel8 = new DarkUI.Controls.DarkLabel();
             this.darkLabel7 = new DarkUI.Controls.DarkLabel();
-            this.darkTextBox4 = new DarkUI.Controls.DarkTextBox();
-            this.darkTextBox3 = new DarkUI.Controls.DarkTextBox();
+            this.textBoxPassword = new DarkUI.Controls.DarkTextBox();
+            this.textBoxUsername = new DarkUI.Controls.DarkTextBox();
             this.darkLabel6 = new DarkUI.Controls.DarkLabel();
             this.darkLabel5 = new DarkUI.Controls.DarkLabel();
-            this.darkTextBox2 = new DarkUI.Controls.DarkTextBox();
+            this.textBoxPort = new DarkUI.Controls.DarkTextBox();
             this.darkLabel4 = new DarkUI.Controls.DarkLabel();
-            this.darkTextBox1 = new DarkUI.Controls.DarkTextBox();
+            this.textBoxHost = new DarkUI.Controls.DarkTextBox();
             this.darkLabel3 = new DarkUI.Controls.DarkLabel();
             this.darkSectionPanel4 = new DarkUI.Controls.DarkSectionPanel();
             this.debugBox = new DarkUI.Controls.DarkTextBox();
@@ -82,7 +82,7 @@ namespace IINACT {
             this.darkSectionPanel1.Controls.Add(this.checkBoxDotTick);
             this.darkSectionPanel1.Controls.Add(this.checkBoxDotCrit);
             this.darkSectionPanel1.Controls.Add(this.checkBoxPets);
-            this.darkSectionPanel1.Controls.Add(this.rpcapCheckBox);
+            this.darkSectionPanel1.Controls.Add(this.checkBoxRpcap);
             this.darkSectionPanel1.Controls.Add(this.checkBoxShield);
             this.darkSectionPanel1.Controls.Add(this.darkLabel2);
             this.darkSectionPanel1.Controls.Add(this.comboBoxFilter);
@@ -114,6 +114,7 @@ namespace IINACT {
             this.checkBoxDebug.Size = new System.Drawing.Size(250, 19);
             this.checkBoxDebug.TabIndex = 8;
             this.checkBoxDebug.Text = "(DEBUG) Forward Debug Fields to Overlays";
+            this.checkBoxDebug.CheckedChanged += new System.EventHandler(this.checkBoxDebug_CheckedChanged);
             // 
             // checkBoxDotTick
             // 
@@ -123,6 +124,7 @@ namespace IINACT {
             this.checkBoxDotTick.Size = new System.Drawing.Size(213, 19);
             this.checkBoxDotTick.TabIndex = 7;
             this.checkBoxDotTick.Text = "(DEBUG) Also Show \'Real\' DoT Ticks";
+            this.checkBoxDotTick.CheckedChanged += new System.EventHandler(this.checkBoxDotTick_CheckedChanged);
             // 
             // checkBoxDotCrit
             // 
@@ -132,6 +134,7 @@ namespace IINACT {
             this.checkBoxDotCrit.Size = new System.Drawing.Size(226, 19);
             this.checkBoxDotCrit.TabIndex = 6;
             this.checkBoxDotCrit.Text = "(DEBUG) Simulate Individual DoT Crits";
+            this.checkBoxDotCrit.CheckedChanged += new System.EventHandler(this.checkBoxDotCrit_CheckedChanged);
             // 
             // checkBoxPets
             // 
@@ -141,16 +144,17 @@ namespace IINACT {
             this.checkBoxPets.Size = new System.Drawing.Size(205, 19);
             this.checkBoxPets.TabIndex = 5;
             this.checkBoxPets.Text = "Disable Combine Pets with Owner";
+            this.checkBoxPets.CheckedChanged += new System.EventHandler(this.checkBoxPets_CheckedChanged);
             // 
-            // rpcapCheckBox
+            // checkBoxRpcap
             // 
-            this.rpcapCheckBox.AutoSize = true;
-            this.rpcapCheckBox.Location = new System.Drawing.Point(416, 152);
-            this.rpcapCheckBox.Name = "rpcapCheckBox";
-            this.rpcapCheckBox.Size = new System.Drawing.Size(150, 19);
-            this.rpcapCheckBox.TabIndex = 11;
-            this.rpcapCheckBox.Text = "(EXPERT) Enable RPCAP";
-            this.rpcapCheckBox.CheckedChanged += new System.EventHandler(this.RpcapCheckBox_CheckedChanged);
+            this.checkBoxRpcap.AutoSize = true;
+            this.checkBoxRpcap.Location = new System.Drawing.Point(416, 152);
+            this.checkBoxRpcap.Name = "checkBoxRpcap";
+            this.checkBoxRpcap.Size = new System.Drawing.Size(150, 19);
+            this.checkBoxRpcap.TabIndex = 11;
+            this.checkBoxRpcap.Text = "(EXPERT) Enable RPCAP";
+            this.checkBoxRpcap.CheckedChanged += new System.EventHandler(this.RpcapCheckBox_CheckedChanged);
             // 
             // checkBoxShield
             // 
@@ -160,6 +164,7 @@ namespace IINACT {
             this.checkBoxShield.Size = new System.Drawing.Size(199, 19);
             this.checkBoxShield.TabIndex = 4;
             this.checkBoxShield.Text = "Disable Damage Shield Estimates";
+            this.checkBoxShield.CheckedChanged += new System.EventHandler(this.checkBoxShield_CheckedChanged);
             // 
             // darkLabel2
             // 
@@ -207,13 +212,13 @@ namespace IINACT {
             this.rpcapSectionPanel.Controls.Add(this.darkLabel9);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel8);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel7);
-            this.rpcapSectionPanel.Controls.Add(this.darkTextBox4);
-            this.rpcapSectionPanel.Controls.Add(this.darkTextBox3);
+            this.rpcapSectionPanel.Controls.Add(this.textBoxPassword);
+            this.rpcapSectionPanel.Controls.Add(this.textBoxUsername);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel6);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel5);
-            this.rpcapSectionPanel.Controls.Add(this.darkTextBox2);
+            this.rpcapSectionPanel.Controls.Add(this.textBoxPort);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel4);
-            this.rpcapSectionPanel.Controls.Add(this.darkTextBox1);
+            this.rpcapSectionPanel.Controls.Add(this.textBoxHost);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel3);
             this.rpcapSectionPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.rpcapSectionPanel.Location = new System.Drawing.Point(0, 190);
@@ -285,26 +290,28 @@ namespace IINACT {
             this.darkLabel7.TabIndex = 9;
             this.darkLabel7.Text = "Username:";
             // 
-            // darkTextBox4
+            // textBoxPassword
             // 
-            this.darkTextBox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.darkTextBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.darkTextBox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkTextBox4.Location = new System.Drawing.Point(82, 123);
-            this.darkTextBox4.Name = "darkTextBox4";
-            this.darkTextBox4.Size = new System.Drawing.Size(227, 23);
-            this.darkTextBox4.TabIndex = 8;
-            this.darkTextBox4.UseSystemPasswordChar = true;
+            this.textBoxPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
+            this.textBoxPassword.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.textBoxPassword.Location = new System.Drawing.Point(82, 123);
+            this.textBoxPassword.Name = "textBoxPassword";
+            this.textBoxPassword.Size = new System.Drawing.Size(227, 23);
+            this.textBoxPassword.TabIndex = 8;
+            this.textBoxPassword.UseSystemPasswordChar = true;
+            this.textBoxPassword.TextChanged += new System.EventHandler(this.TextBoxPassword_TextChanged);
             // 
-            // darkTextBox3
+            // textBoxUsername
             // 
-            this.darkTextBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.darkTextBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.darkTextBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkTextBox3.Location = new System.Drawing.Point(82, 94);
-            this.darkTextBox3.Name = "darkTextBox3";
-            this.darkTextBox3.Size = new System.Drawing.Size(227, 23);
-            this.darkTextBox3.TabIndex = 7;
+            this.textBoxUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
+            this.textBoxUsername.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxUsername.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.textBoxUsername.Location = new System.Drawing.Point(82, 94);
+            this.textBoxUsername.Name = "textBoxUsername";
+            this.textBoxUsername.Size = new System.Drawing.Size(227, 23);
+            this.textBoxUsername.TabIndex = 7;
+            this.textBoxUsername.TextChanged += new System.EventHandler(this.TextBoxUsername_TextChanged);
             // 
             // darkLabel6
             // 
@@ -326,15 +333,16 @@ namespace IINACT {
             this.darkLabel5.TabIndex = 5;
             this.darkLabel5.Text = "Port:";
             // 
-            // darkTextBox2
+            // textBoxPort
             // 
-            this.darkTextBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.darkTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.darkTextBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkTextBox2.Location = new System.Drawing.Point(82, 65);
-            this.darkTextBox2.Name = "darkTextBox2";
-            this.darkTextBox2.Size = new System.Drawing.Size(227, 23);
-            this.darkTextBox2.TabIndex = 4;
+            this.textBoxPort.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
+            this.textBoxPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxPort.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.textBoxPort.Location = new System.Drawing.Point(82, 65);
+            this.textBoxPort.Name = "textBoxPort";
+            this.textBoxPort.Size = new System.Drawing.Size(227, 23);
+            this.textBoxPort.TabIndex = 4;
+            this.textBoxPort.TextChanged += new System.EventHandler(this.TextBoxPort_TextChanged);
             // 
             // darkLabel4
             // 
@@ -346,15 +354,16 @@ namespace IINACT {
             this.darkLabel4.TabIndex = 3;
             this.darkLabel4.Text = "Specifies the host (e.g. \"foo.bar.com\") we want to connect to. \r\n";
             // 
-            // darkTextBox1
+            // textBoxHost
             // 
-            this.darkTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.darkTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.darkTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkTextBox1.Location = new System.Drawing.Point(82, 36);
-            this.darkTextBox1.Name = "darkTextBox1";
-            this.darkTextBox1.Size = new System.Drawing.Size(227, 23);
-            this.darkTextBox1.TabIndex = 2;
+            this.textBoxHost.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
+            this.textBoxHost.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBoxHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.textBoxHost.Location = new System.Drawing.Point(82, 36);
+            this.textBoxHost.Name = "textBoxHost";
+            this.textBoxHost.Size = new System.Drawing.Size(227, 23);
+            this.textBoxHost.TabIndex = 2;
+            this.textBoxHost.TextChanged += new System.EventHandler(this.TextBoxHost_TextChanged);
             // 
             // darkLabel3
             // 
@@ -453,20 +462,20 @@ namespace IINACT {
         private DarkSectionPanel rpcapSectionPanel;
         private DarkLabel darkLabel6;
         private DarkLabel darkLabel5;
-        private DarkTextBox darkTextBox2;
+        private DarkTextBox textBoxPort;
         private DarkLabel darkLabel4;
-        private DarkTextBox darkTextBox1;
+        private DarkTextBox textBoxHost;
         private DarkLabel darkLabel3;
         private DarkSectionPanel darkSectionPanel4;
         private DarkLabel darkLabel12;
         private DarkLabel darkLabel11;
         private DarkLabel darkLabel10;
         private DarkLabel darkLabel9;
-        private DarkCheckBox rpcapCheckBox;
+        private DarkCheckBox checkBoxRpcap;
         private DarkLabel darkLabel8;
         private DarkLabel darkLabel7;
-        private DarkTextBox darkTextBox4;
-        private DarkTextBox darkTextBox3;
+        private DarkTextBox textBoxPassword;
+        private DarkTextBox textBoxUsername;
         private DarkTextBox debugBox;
         private DarkLabel darkLabel14;
         private Panel opPanel;

@@ -64,7 +64,7 @@
       <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Common">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Common.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

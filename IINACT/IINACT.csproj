@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="DarkModeUI" Version="3.1.0" />
     <PackageReference Include="Lib.Harmony" Version="2.2.1" />
-    <PackageReference Include="Machina.FFXIV" Version="2.3.3.9" />
+    <PackageReference Include="Machina.FFXIV" Version="*" />
     <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
@@ -32,25 +32,25 @@
       <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Common">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Common.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Config">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Config.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Config.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Logfile">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Memory">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Memory.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Memory.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Network">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Network.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Network.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Parse">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Parse.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Parse.dll</HintPath>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Resource">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.Resource.dll</HintPath>
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
     </Reference>
   </ItemGroup>
 

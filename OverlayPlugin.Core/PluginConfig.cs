@@ -4,11 +4,9 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace RainbowMage.OverlayPlugin
-{
+namespace RainbowMage.OverlayPlugin {
     [Serializable]
-    public class PluginConfig : IPluginConfig
-    {
+    public class PluginConfig : IPluginConfig {
         private const string BACKUP_SUFFIX = ".backup";
         private TinyIoCContainer _container;
 
@@ -19,137 +17,108 @@ namespace RainbowMage.OverlayPlugin
         private string filePath;
 
         private bool _followLatestLog;
-        public bool FollowLatestLog
-        {
+        public bool FollowLatestLog {
             get => _followLatestLog;
-            set
-            {
+            set {
                 _followLatestLog = value;
                 isDirty = true;
             }
         }
 
         private bool _hideOverlaysWhenNotActive;
-        public bool HideOverlaysWhenNotActive
-        {
+        public bool HideOverlaysWhenNotActive {
             get => _hideOverlaysWhenNotActive;
-            set
-            {
+            set {
                 _hideOverlaysWhenNotActive = value;
                 isDirty = true;
             }
         }
 
         private bool _hideOverlayDuringCutscene;
-        public bool HideOverlayDuringCutscene
-        {
+        public bool HideOverlayDuringCutscene {
             get => _hideOverlayDuringCutscene;
-            set
-            {
+            set {
                 _hideOverlayDuringCutscene = value;
                 isDirty = true;
             }
         }
 
         private bool _errorReports;
-        public bool ErrorReports
-        {
+        public bool ErrorReports {
             get => _errorReports;
-            set
-            {
+            set {
                 _errorReports = value;
                 isDirty = true;
             }
         }
 
         private bool _updateCheck;
-        public bool UpdateCheck
-        {
+        public bool UpdateCheck {
             get => _updateCheck;
-            set
-            {
+            set {
                 _updateCheck = value;
                 isDirty = true;
             }
         }
 
         private string _WSServerIP;
-        public string WSServerIP
-        {
+        public string WSServerIP {
             get => _WSServerIP;
-            set
-            {
+            set {
                 _WSServerIP = value;
                 isDirty = true;
             }
         }
 
         private int _WSServerPort;
-        public int WSServerPort
-        {
+        public int WSServerPort {
             get => _WSServerPort;
-            set
-            {
+            set {
                 _WSServerPort = value;
                 isDirty = true;
             }
         }
 
         private bool _WSServerSSL;
-        public bool WSServerSSL
-        {
+        public bool WSServerSSL {
             get => _WSServerSSL;
-            set
-            {
+            set {
                 _WSServerSSL = value;
                 isDirty = true;
             }
         }
 
         private bool _WSServerRunning;
-        public bool WSServerRunning
-        {
+        public bool WSServerRunning {
             get => _WSServerRunning;
-            set
-            {
+            set {
                 _WSServerRunning = value;
                 isDirty = true;
             }
         }
 
         private string _tunnelRegion;
-        public string TunnelRegion
-        {
+        public string TunnelRegion {
             get => _tunnelRegion;
-            set
-            {
+            set {
                 _tunnelRegion = value;
                 isDirty = true;
             }
         }
 
         [JsonIgnore]
-        public Version Version
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(this.VersionString))
-                {
+        public Version Version {
+            get {
+                if (string.IsNullOrEmpty(this.VersionString)) {
                     return null;
-                }
-                else
-                {
+                } else {
                     return new Version(this.VersionString);
                 }
             }
-            set
-            {
-                if (value != null)
-                {
+            set {
+                if (value != null) {
                     this.VersionString = value.ToString();
-                }
-                else
-                {
+                } else {
                     this.VersionString = null;
                 }
             }
@@ -157,22 +126,18 @@ namespace RainbowMage.OverlayPlugin
 
         private string _versionString;
         [JsonProperty("Version")]
-        public string VersionString
-        {
+        public string VersionString {
             get => _versionString;
-            set
-            {
+            set {
                 _versionString = value;
                 isDirty = true;
             }
         }
 
         private DateTime _lastUpdateCheck;
-        public DateTime LastUpdateCheck
-        {
+        public DateTime LastUpdateCheck {
             get => _lastUpdateCheck;
-            set
-            {
+            set {
                 _lastUpdateCheck = value;
                 isDirty = true;
             }
@@ -180,11 +145,9 @@ namespace RainbowMage.OverlayPlugin
 
         private bool _isFirstLaunch;
         [JsonIgnore]
-        public bool IsFirstLaunch
-        {
+        public bool IsFirstLaunch {
             get => _isFirstLaunch;
-            set
-            {
+            set {
                 _isFirstLaunch = value;
                 isDirty = true;
             }
@@ -201,8 +164,7 @@ namespace RainbowMage.OverlayPlugin
         [JsonIgnore]
         private ILogger logger;
 
-        public PluginConfig(string configPath, TinyIoCContainer container)
-        {
+        public PluginConfig(string configPath, TinyIoCContainer container) {
             if (configPath == null) throw new Exception("Invalid config path passed to PluginConfig!");
 
             this._container = container;
@@ -221,43 +183,34 @@ namespace RainbowMage.OverlayPlugin
             var useBackup = true;
             var initEmpty = false;
 
-            if (File.Exists(configPath))
-            {
-                try
-                {
+            if (File.Exists(configPath)) {
+                try {
                     LoadJson(configPath);
                     useBackup = false;
-                } catch (Exception ex)
-                {
+                }
+                catch (Exception ex) {
                     logger.Log(LogLevel.Error, "LoadConfig: Failed to load configuration: {0}", ex);
                 }
-            } else
-            {
+            } else {
                 useBackup = true;
             }
 
-            if (useBackup)
-            {
-                if (File.Exists(configPath + BACKUP_SUFFIX))
-                {
+            if (useBackup) {
+                if (File.Exists(configPath + BACKUP_SUFFIX)) {
                     logger.Log(LogLevel.Info, "LoadConfig: Loading backup config...");
 
-                    try
-                    {
+                    try {
                         LoadJson(configPath + BACKUP_SUFFIX);
-                    } catch (Exception ex)
-                    {
+                    }
+                    catch (Exception ex) {
                         logger.Log(LogLevel.Error, "LoadConfig: Failed to load backup: {0}", ex);
                     }
-                }
-                else
-                {
+                } else {
                     initEmpty = true;
                 }
             }
 
-            if (initEmpty)
-            {
+            if (initEmpty) {
                 this.Overlays = new OverlayConfigList<IOverlayConfig>(logger);
 
                 this.WSServerIP = "127.0.0.1";
@@ -269,35 +222,33 @@ namespace RainbowMage.OverlayPlugin
             this.isDirty = false;
         }
 
-        public void MarkDirty()
-        {
+        public void MarkDirty() {
             isDirty = true;
         }
 
-        public void SaveJson(bool force = false)
-        {
+        public void Save() {
+            SaveJson(true);
+        }
+
+        public void SaveJson(bool force = false) {
             if (!force && !isDirty) return;
 
             // Create a backup of the old config
-            if (File.Exists(filePath))
-            {
+            if (File.Exists(filePath)) {
                 // First, make sure it's actually valid.
                 var oldConfigValid = false;
-                try
-                {
-                    using (var stream = new StreamReader(filePath))
-                    {
+                try {
+                    using (var stream = new StreamReader(filePath)) {
                         var reader = new JsonTextReader(stream);
                         JToken.ReadFrom(reader);
                     }
                     oldConfigValid = true;
-                } catch (Exception ex)
-                {
+                }
+                catch (Exception ex) {
                     logger.Log(LogLevel.Error, "Failed to read old config. Skipping backup... {0}", ex);
                 }
 
-                if (oldConfigValid)
-                {
+                if (oldConfigValid) {
                     File.Copy(filePath, filePath + BACKUP_SUFFIX, true);
                 }
             }
@@ -305,15 +256,13 @@ namespace RainbowMage.OverlayPlugin
             // Convert Overlays
             OverlayObjects = new List<JObject>();
 
-            foreach (var item in this.Overlays)
-            {
+            foreach (var item in this.Overlays) {
                 var obj = JObject.FromObject(item);
                 obj["$type"] = item.GetType().FullName + ", " + item.GetType().Assembly.GetName();
                 OverlayObjects.Add(obj);
             }
 
-            using (var stream = new StreamWriter(filePath))
-            {
+            using (var stream = new StreamWriter(filePath)) {
                 var serializer = new JsonSerializer();
                 serializer.Formatting = Formatting.Indented;
                 serializer.TypeNameHandling = TypeNameHandling.Auto;
@@ -323,10 +272,8 @@ namespace RainbowMage.OverlayPlugin
             isDirty = false;
         }
 
-        private void LoadJson(string configPath)
-        {
-            using (var stream = new StreamReader(configPath))
-            {
+        private void LoadJson(string configPath) {
+            using (var stream = new StreamReader(configPath)) {
                 var reader = new JsonTextReader(stream);
                 var serializer = new JsonSerializer();
                 serializer.TypeNameHandling = TypeNameHandling.Auto;
@@ -339,25 +286,21 @@ namespace RainbowMage.OverlayPlugin
             var overlayLeftOvers = new List<JObject>();
             this.Overlays = new OverlayConfigList<IOverlayConfig>(this.logger);
 
-            foreach (var item in this.OverlayObjects)
-            {
-                try
-                {
+            foreach (var item in this.OverlayObjects) {
+                try {
                     var typeName = item["$type"].ToString();
                     var type = GetType(typeName.Split(',')[0]);
-                    if (type == null)
-                    {
+                    if (type == null) {
                         throw new Exception($"Type {typeName} not found!");
                     }
 
-                    this.Overlays.Add((IOverlayConfig) JsonConvert.DeserializeObject(
+                    this.Overlays.Add((IOverlayConfig)JsonConvert.DeserializeObject(
                         item.ToString(Formatting.None),
                         type,
                         new ConfigCreationConverter(_container)
                     ));
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     this.logger.Log(LogLevel.Error, $"Failed to load an overlay config: ${e}");
                     overlayLeftOvers.Add(item);
                 }
@@ -366,23 +309,18 @@ namespace RainbowMage.OverlayPlugin
             this.OverlayObjects = overlayLeftOvers;
         }
 
-        public static PluginConfig LoadJson(string path, TinyIoCContainer container)
-        {
-            if (!File.Exists(path))
-            {
+        public static PluginConfig LoadJson(string path, TinyIoCContainer container) {
+            if (!File.Exists(path)) {
                 return null;
             }
 
             return new PluginConfig(path, container);
         }
 
-        private static Type GetType(string fullName)
-        {
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
+        private static Type GetType(string fullName) {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies()) {
                 var type = asm.GetType(fullName, false);
-                if (type != null)
-                {
+                if (type != null) {
                     return type;
                 }
             }

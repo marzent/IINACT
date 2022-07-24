@@ -246,7 +246,7 @@ namespace IINACT {
             this.darkLabel11.Size = new System.Drawing.Size(515, 30);
             this.darkLabel11.TabIndex = 14;
             this.darkLabel11.Text = "The username and password are sent over the network to the capture server ***IN C" +
-    "LEAR TEXT***\r\nBecause of this crentials are also stored unenecrypted for now.";
+    "LEAR TEXT***\r\nBecause of this credentials are also stored unenecrypted for now.";
             // 
             // darkLabel10
             // 

@@ -15,5 +15,6 @@ namespace RainbowMage.OverlayPlugin {
         Dictionary<string, JObject> EventSourceConfigs { get; set; }
 
         void MarkDirty();
+        void Save();
     }
 }

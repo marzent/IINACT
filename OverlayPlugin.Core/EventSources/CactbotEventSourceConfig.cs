@@ -8,10 +8,14 @@ namespace RainbowMage.OverlayPlugin.EventSources {
     public class CactbotEventSourceConfig {
         public event EventHandler WatchFileChangesChanged;
 
+        private static IPluginConfig _pluginConfig;
+
         public CactbotEventSourceConfig() {
         }
 
-        public static CactbotEventSourceConfig LoadConfig(IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger) {
+        public static CactbotEventSourceConfig LoadConfig(IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger)
+        {
+            _pluginConfig = pluginConfig;
             var result = new CactbotEventSourceConfig();
 
             if (pluginConfig.EventSourceConfigs.ContainsKey("CactbotESConfig")) {
@@ -40,6 +44,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         }
 
         public void SaveConfig(IPluginConfig pluginConfig) {
+            _pluginConfig = pluginConfig;
             pluginConfig.EventSourceConfigs["CactbotESConfig"] = JObject.FromObject(this);
         }
 
@@ -48,6 +53,8 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             if (watchFileChanges != currentValue)
                 WatchFileChangesChanged?.Invoke(this, EventArgs.Empty);
             watchFileChanges = currentValue;
+            SaveConfig(_pluginConfig);
+            _pluginConfig.Save();
         }
 
         public Dictionary<string, JToken> OverlayData = null;

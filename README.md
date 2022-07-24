@@ -27,7 +27,6 @@ Just place the FFXIV_ACT_Plugin.dll and its SDK files in the external_dependenci
 ## Known Issues
 
 - Doesn't have any sort of auto-update system
-- Cactbot may work *with issues* (the configuration is currently not saved for sure)
 - TTS is not fully implemented yet
 
 

@@ -34,7 +34,7 @@ namespace IINACT {
                 new ToolStripMenuItem("Settings", null, Settings, "Settings"),
                 new ToolStripMenuItem("Exit", null, Exit, "Exit")
             });
-            AppDomain.CurrentDomain.ProcessExit += CleanupTray;
+            Application.ApplicationExit += CleanupTray;
             _settingsForm = new SettingsForm();
         }
 
@@ -44,6 +44,8 @@ namespace IINACT {
 
         private void CleanupTray(object? sender, EventArgs e) {
             _trayIcon.Visible = false;
+            _trayIcon.Icon.Dispose();
+            _trayIcon.Dispose();
         }
 
         private static void Exit(object? sender, EventArgs e) {

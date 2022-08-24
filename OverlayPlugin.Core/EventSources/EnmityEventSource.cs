@@ -64,11 +64,11 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void PickMemoryCandidates(FFXIVRepository repository) {
             if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Chinese) {
-                memoryCandidates = new List<EnmityMemory>() { new EnmityMemory55(container) };
-            } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
-                memoryCandidates = new List<EnmityMemory>() { new EnmityMemory52(container) };
-            } else {
                 memoryCandidates = new List<EnmityMemory>() { new EnmityMemory61(container) };
+            } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
+                memoryCandidates = new List<EnmityMemory>() { new EnmityMemory60(container) };
+            } else {
+                memoryCandidates = new List<EnmityMemory>() { new EnmityMemory62(container) };
             }
         }
 

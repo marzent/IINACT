@@ -166,10 +166,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // dump '\0' string terminators
         var memoryName = System.Text.Encoding.UTF8.GetString(mem.Name, EntityMemory.nameBytes).Split(new[] { '\0' }, 2)[0];
-        var capitalizedName = StringHelper.ToProperCase(memoryName);
 
         var entity = new EntityData() {
-          name = capitalizedName,
+          name = memoryName,
           id = mem.id,
           type = mem.type,
           distance = mem.distance,

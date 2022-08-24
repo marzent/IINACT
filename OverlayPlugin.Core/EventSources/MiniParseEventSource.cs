@@ -412,8 +412,9 @@ namespace RainbowMage.OverlayPlugin.EventSources
                         if (!Config.EndEncounterAfterWipe) break;
                         if (line.Length < 4) break;
 
-                        if (line[3] == "40000010")
-                        {
+                        // 4000000F is the new value for 6.2, 40000010 is the pre-6.2 value.
+                        // When CN/KR is on 6.2, this can be removed.
+                        if (line[3] == "40000010" || line[3] == "4000000F") {
                             ActGlobals.oFormActMain.Invoke((Action)(() =>
                             {
                                 ActGlobals.oFormActMain.EndCombat(true);

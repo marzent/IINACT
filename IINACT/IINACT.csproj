@@ -19,12 +19,12 @@
   <ItemGroup>
     <PackageReference Include="DarkModeUI" Version="3.1.0" />
     <PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="Machina.FFXIV" Version="*" />
     <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
     <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
   </ItemGroup>
 

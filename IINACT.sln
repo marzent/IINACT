@@ -7,9 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IINACT", "IINACT\IINACT.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotACT", "NotACT\NotACT.csproj", "{0DCFADA7-DBF4-476E-9B15-5C5DE32DCBA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OverlayPlugin.Common", "OverlayPlugin.Common\OverlayPlugin.Common.csproj", "{423FCBFC-DD3B-415F-BE29-7A4A46614B79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OverlayPlugin.Common", "OverlayPlugin.Common\OverlayPlugin.Common.csproj", "{423FCBFC-DD3B-415F-BE29-7A4A46614B79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OverlayPlugin.Core", "OverlayPlugin.Core\OverlayPlugin.Core.csproj", "{DD6D2A9A-4AD4-47B8-A1D0-C8608EA37092}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OverlayPlugin.Core", "OverlayPlugin.Core\OverlayPlugin.Core.csproj", "{DD6D2A9A-4AD4-47B8-A1D0-C8608EA37092}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina.FFXIV", "machina\Machina.FFXIV\Machina.FFXIV.csproj", "{6E4B4422-EC1E-46E3-AAE5-8227CB8D76C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina", "machina\Machina\Machina.csproj", "{8EC22270-658B-416C-97FC-8EEA994EF8CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{DD6D2A9A-4AD4-47B8-A1D0-C8608EA37092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD6D2A9A-4AD4-47B8-A1D0-C8608EA37092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD6D2A9A-4AD4-47B8-A1D0-C8608EA37092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E4B4422-EC1E-46E3-AAE5-8227CB8D76C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E4B4422-EC1E-46E3-AAE5-8227CB8D76C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E4B4422-EC1E-46E3-AAE5-8227CB8D76C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E4B4422-EC1E-46E3-AAE5-8227CB8D76C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EC22270-658B-416C-97FC-8EEA994EF8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EC22270-658B-416C-97FC-8EEA994EF8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EC22270-658B-416C-97FC-8EEA994EF8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EC22270-658B-416C-97FC-8EEA994EF8CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

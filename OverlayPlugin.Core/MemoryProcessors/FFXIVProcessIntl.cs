@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors {
     public class FFXIVProcessIntl : FFXIVProcess {
-        // Last updated for FFXIV 6.1
+        // Last updated for FFXIV 6.2
 
         [StructLayout(LayoutKind.Explicit)]
         public unsafe struct EntityMemory {
@@ -42,7 +42,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
             [FieldOffset(0x1C4)]
             public CharacterDetails charDetails;
 
-            [FieldOffset(0x19D9)]
+            [FieldOffset(0x1AEB)]
             public byte shieldPercentage;
         }
 
@@ -83,8 +83,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
         // instead of just being loose variables everywhere.
 
         // A piece of code that reads the pointer to the list of all entities, that we
-        // refer to as the charmap. The pointer is the 4 byte ?????????.
-        private static String kCharmapSignature = "48c1ea0381faa9010000????8bc2488d0d";
+        // refer to as the charmap.
+        private static String kCharmapSignature = "488b5720b8000000e0483Bd00f84????????488d0d";
         private static int kCharmapSignatureOffset = 0;
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kCharmapSignatureRIP = true;

@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
     <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
   </ItemGroup>
 
@@ -52,6 +51,12 @@
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Resource">
       <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
+    </Reference>
+    <Reference Include="Machina">
+      <HintPath>..\external_dependencies\Machina.dll</HintPath>
+    </Reference>
+    <Reference Include="Machina.FFXIV">
+      <HintPath>..\external_dependencies\Machina.FFXIV.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -23,6 +23,16 @@ This will **not** render overlays by itself, use something like [Browsingway](ht
 
 Just place the FFXIV_ACT_Plugin.dll and its SDK files in the external_dependencies folder and build the IINACT project.
 
+## FAQ
+
+**Where are my logs?**
+
+- In your Documents folder. For Windows users, `C:\Users\[user]\Documents\IINACT`. For Mac/Linux users, same thing, but relative to your wine prefix.
+
+**Are these logs compatible with FFLogs? Can I use the FFLogs Uploader?**
+
+- Yes! 100% compatible.
+
 
 ## Known Issues
 

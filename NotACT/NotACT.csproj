@@ -14,12 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="FFXIV_ACT_Plugin">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Datatypes\" />
   </ItemGroup>
 

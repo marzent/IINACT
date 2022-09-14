@@ -28,7 +28,7 @@ namespace Advanced_Combat_Tracker {
         public ConcurrentQueue<string> LogQueue { get; private set; } = new ConcurrentQueue<string>();
         public ConcurrentQueue<string> LogFileQueue { get; private set; } = new ConcurrentQueue<string>();
         public string CurrentZone { get; set; }
-        public FFXIV_ACT_Plugin.FFXIV_ACT_Plugin FfxivPlugin { get; set; }
+        public object FfxivPlugin { get; set; }
         public object OverlayPluginContainer { get; set; }
         public DateTimeLogParser GetDateTimeFromLog;
 

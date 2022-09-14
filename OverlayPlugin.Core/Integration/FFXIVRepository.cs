@@ -62,7 +62,7 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetPluginData() {
-            return ActGlobals.oFormActMain.FfxivPlugin;
+            return (FFXIV_ACT_Plugin.FFXIV_ACT_Plugin)ActGlobals.oFormActMain.FfxivPlugin;
         }
 
         private IDataRepository GetRepository() {

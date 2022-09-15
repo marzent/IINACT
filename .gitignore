@@ -475,6 +475,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-# FFXIV_ACT_Plugin and SDK
-external_dependencies/

@@ -5,10 +5,16 @@ namespace FetchDependencies {
     internal static class Costura
     {
         public static bool CheckForPlugin(string name) => 
-            name.StartsWith("costura.ffxiv_act_plugin.");
+            name.Contains("ffxiv");
 
-        public static string Fix(string name) =>
-            "FFXIV_ACT_" + name.Substring(18, name.Length - 33).ToTitleCase() + ".dll";
+        public static string Fix(string name)
+        {
+            if (name.Contains("act"))
+                return "FFXIV_ACT_" + name.Substring(18, name.Length - 33).ToTitleCase() + ".dll";
+            if (name.Contains("machina.ffxiv"))
+                return "Machina.FFXIV.dll";
+            return name.Substring(8, name.Length - 23).ToTitleCase() + ".dll";
+        }
 
         public static void Decompress(Stream stream, string destinationFileName) {
             using var destinationFileStream = File.Create(destinationFileName);

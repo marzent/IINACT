@@ -47,7 +47,9 @@ public static class PrivateHelpers {
 
     public static MethodInfo? GetMethod(this object obj, string methodName) {
         Guard.IsNotNull(obj, nameof(obj));
-        return obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        var type = obj.GetType();
+        var method = type.GetMethod(methodName);
+        return method ?? type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
     }
 
     public static object? CallMethod(this object obj, string methodName, object?[]? parameters) {

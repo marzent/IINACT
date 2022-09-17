@@ -38,11 +38,24 @@ namespace FetchDependencies {
 
         public void LogFilePlugin() {
             var logfile = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Logfile.dll"));
+            {
+                var method = logfile.GetMethod(
+                    "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::Run(System.Object)");
+                var ilProcessor = method.Body.GetILProcessor();
+                ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
+            }
 
-            var method = logfile.GetMethod(
-                "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::Run(System.Object)");
-            var ilProcessor = method.Body.GetILProcessor();
-            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
+            {
+                var method = logfile.GetMethod(
+                    "System.String FFXIV_ACT_Plugin.Logfile.LogFormat::FormatVersion()");
+                var ilProcessor = method.Body.GetILProcessor();
+                while (ilProcessor.Body.Instructions.First().OpCode != OpCodes.Ldstr)
+                    ilProcessor.RemoveAt(0);
+                ilProcessor.Replace(0, Instruction.Create(OpCodes.Ldstr, "This is IINACT based on FFXIV_ACT_Plugin {0}"));
+                ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4_1));
+                var stelemIndex = Array.FindIndex(ilProcessor.Body.Instructions.ToArray(), code => code.OpCode == OpCodes.Stelem_Ref);
+                Enumerable.Range(0, 5).ToList().ForEach(_ => ilProcessor.RemoveAt(stelemIndex + 1));
+            }
 
             logfile.WriteOut();
         }

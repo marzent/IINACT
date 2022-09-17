@@ -25,7 +25,7 @@ namespace IINACT {
                 return assembly;
 
             var filename = args.Name.Split(',')[0] + ".dll".ToLower();
-            var asmFile = Path.Combine(@".\", "external_dependencies", filename);
+            var asmFile = Path.Combine(Directory.GetCurrentDirectory(), "external_dependencies", filename);
 
             try {
                 return Assembly.LoadFrom(asmFile);

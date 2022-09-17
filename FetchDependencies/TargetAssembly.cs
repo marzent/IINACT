@@ -3,11 +3,14 @@
 namespace FetchDependencies {
     internal class TargetAssembly {
         public AssemblyDefinition Assembly { get; }
-        private string Path { get; }
+        private string AssemblyPath { get; }
 
         public TargetAssembly(string assemblyPath) {
-            Path = assemblyPath;
-            Assembly = AssemblyDefinition.ReadAssembly(Path);
+            AssemblyPath = assemblyPath;
+
+            var resolver = new DefaultAssemblyResolver();
+            resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
+            Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath,new ReaderParameters { AssemblyResolver = resolver });
         }
 
         public MethodDefinition GetMethod(string name) =>
@@ -72,10 +75,10 @@ namespace FetchDependencies {
         }
 
         public void WriteOut() {
-            var patchedPath = Path + ".patched";
+            var patchedPath = AssemblyPath + ".patched";
             Assembly.Write(patchedPath);
             Assembly.Dispose();
-            File.Move(patchedPath, Path, true);
+            File.Move(patchedPath, AssemblyPath, true);
         }
     }
 }

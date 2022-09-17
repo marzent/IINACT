@@ -271,7 +271,14 @@ namespace Advanced_Combat_Tracker {
                 if (encIdCached) {
                     return cEncId;
                 }
-                cEncId = GetHashCode().ToString("x8");
+
+                try {
+                    cEncId = GetHashCode().ToString("x8");
+                }
+                catch (InvalidOperationException) {
+                    return cEncId ?? "";
+                }
+
                 encIdCached = true;
                 return cEncId;
             }
@@ -525,14 +532,12 @@ namespace Advanced_Combat_Tracker {
             var list = ((!ignoreEnemies) ? GetAllies() : new List<CombatantData>(Items.Values));
             MasterSwing masterSwing = null;
             var arg = string.Empty;
-            foreach (var combatantData in list)
-            {
+            foreach (var combatantData in list) {
                 var attackType = combatantData.GetAttackType(ActGlobals.Trans["attackTypeTerm-all"], CombatantData.DamageTypeDataOutgoingHealing);
                 if (attackType == null) {
                     continue;
                 }
-                foreach (var swing in attackType.Items)
-                {
+                foreach (var swing in attackType.Items) {
                     if ((!CountWards && swing.DamageType == ActGlobals.Trans["specialAttackTerm-wardAbsorb"]) ||
                         (masterSwing != null && (long)swing.Damage <= (long)masterSwing.Damage)) continue;
                     masterSwing = swing;

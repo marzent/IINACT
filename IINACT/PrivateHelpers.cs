@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using Microsoft.Toolkit.Diagnostics;
+﻿using System.Reflection;
+using CommunityToolkit.Diagnostics;
 
 namespace IINACT;
 

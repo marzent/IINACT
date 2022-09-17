@@ -37,8 +37,8 @@ namespace RainbowMage.OverlayPlugin
         public IntPtr ActiveWindowHandle;
         private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            ActiveWindowHandle = hwnd;
-            ActiveWindowChanged?.Invoke(null, hwnd);
+            //ActiveWindowHandle = hwnd;
+            //ActiveWindowChanged?.Invoke(null, hwnd);
         }
 
         // C# compiler can't track assignments in unmanaged code and thus complains about variables that

@@ -667,7 +667,14 @@ namespace Advanced_Combat_Tracker {
             return Type.Equals(value);
         }
 
-        public override int GetHashCode() => Items.Aggregate(0L, (current, masterSwing) => current + masterSwing.GetHashCode()).GetHashCode();
+        public override int GetHashCode() {
+            try {
+                return Items.Aggregate(0L, (current, masterSwing) => current + masterSwing.GetHashCode()).GetHashCode();
+            }
+            catch (InvalidOperationException) {
+                return GetHashCode();
+            }
+        }
 
         public bool Equals(AttackType? other) => Type == other!.Type;
 

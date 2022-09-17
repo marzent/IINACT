@@ -243,10 +243,15 @@ namespace Advanced_Combat_Tracker {
                     flag = Parent != null && Parent.GetAllies(allowLimited: true).Contains(this);
                 }
                 cKills = 0;
-                foreach (var t in value.Items) {
-                    if (t.Damage == Dnum.Death && (flag || !t.Victim.Contains(" "))) {
-                        cKills++;
+                try {
+                    foreach (var t in value.Items) {
+                        if (t.Damage == Dnum.Death && (flag || !t.Victim.Contains(" "))) {
+                            cKills++;
+                        }
                     }
+                }
+                catch (InvalidOperationException) {
+                    return Kills;
                 }
                 killsCached = true;
                 return cKills;
@@ -702,7 +707,14 @@ namespace Advanced_Combat_Tracker {
 
         public override bool Equals(object? obj) => Name.ToLower().Equals(((CombatantData)obj!).Name.ToLower());
 
-        public override int GetHashCode() => Items.Values.Aggregate(0L, (current, value) => current + value.GetHashCode()).GetHashCode();
+        public override int GetHashCode() {
+            try {
+                return Items.Values.Aggregate(0L, (current, value) => current + value.GetHashCode()).GetHashCode();
+            }
+            catch (InvalidOperationException) {
+                return GetHashCode();
+            }
+        }
 
         public override string ToString() {
             return Name;

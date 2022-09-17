@@ -33,10 +33,5 @@
         public static FormActMain oFormActMain = null!;
 
 		internal static object ActionDataLock = new();
-
-        public static void LogLineWritten(string text) {
-            oFormActMain.LogQueue.Enqueue(text);
-            oFormActMain.LogFileQueue.Enqueue(text);
-        }
     }
 }

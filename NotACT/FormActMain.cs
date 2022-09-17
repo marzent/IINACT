@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Advanced_Combat_Tracker {
 
@@ -26,9 +26,8 @@ namespace Advanced_Combat_Tracker {
         public string LogFilePath { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "IINACT");
         public DirectoryInfo AppDataFolder { get; private set; }
         public ConcurrentQueue<string> LogQueue { get; private set; } = new ConcurrentQueue<string>();
-        public ConcurrentQueue<string> LogFileQueue { get; private set; } = new ConcurrentQueue<string>();
         public string CurrentZone { get; set; }
-        public object FfxivPlugin { get; set; }
+        public FFXIV_ACT_Plugin.FFXIV_ACT_Plugin FfxivPlugin { get; set; }
         public object OverlayPluginContainer { get; set; }
         public DateTimeLogParser GetDateTimeFromLog;
 
@@ -60,12 +59,13 @@ namespace Advanced_Combat_Tracker {
         public void OpenLog(bool GetCurrentZone, bool GetCharNameFromFile) {
         }
 
-        public void ParseRawLogLine(string LogLine) {
+        public void ParseRawLogLine(string logLine) {
+            LogQueue.Enqueue(logLine);
             if (BeforeLogLineRead == null || GetDateTimeFromLog == null)
                 return;
-            var parsedLogTime = GetDateTimeFromLog(LogLine);
+            var parsedLogTime = GetDateTimeFromLog(logLine);
             LastKnownTime = parsedLogTime;
-            var logLineEventArgs = new LogLineEventArgs(LogLine, 0, parsedLogTime, CurrentZone, inCombat, "Plugin");
+            var logLineEventArgs = new LogLineEventArgs(logLine, 0, parsedLogTime, CurrentZone, inCombat, "Plugin");
             BeforeLogLineRead(false, logLineEventArgs);
             if (OnLogLineRead == null)
                 return;
@@ -236,7 +236,7 @@ namespace Advanced_Combat_Tracker {
                 using var stream = new FileStream(LogFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 using var outputWriter = new StreamWriter(stream);
                 while (true) {
-                    while (LogFileQueue.TryDequeue(out var line))
+                    while (LogQueue.TryDequeue(out var line))
                         outputWriter.WriteLine(line);
 
                     outputWriter.Flush();
@@ -264,11 +264,17 @@ namespace Advanced_Combat_Tracker {
 
         private void LogReader() {
             try {
+                var logOutput = (FFXIV_ACT_Plugin.Logfile.LogOutput)FfxivPlugin._dataCollection._logOutput;
                 while (true) {
-                    while (LogQueue.TryDequeue(out var line))
-                        ParseRawLogLine(line);
-
-                    Thread.Sleep(1);
+                    string? logLine = null;
+                    lock (logOutput._LogQueueLock) {
+                        if (logOutput._LogQueue.Count > 0)
+                            logLine = logOutput._LogQueue.Dequeue();
+                    }
+                    if (logLine != null) 
+                        ParseRawLogLine(logLine);
+                    else
+                        Thread.Sleep(50);
                 }
             }
             catch (ObjectDisposedException) {

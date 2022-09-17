@@ -48,7 +48,10 @@ namespace FetchDependencies {
 
             foreach (var module in Assembly.Modules) {
                 module.Attributes &= ~ModuleAttributes.StrongNameSigned;
+                var coreLibs = new[] { "netstandard", "mscorlib", "System" };
                 foreach (var reference in module.AssemblyReferences) {
+                    if (coreLibs.Any(coreLib => reference.Name == coreLib))
+                        continue;
                     reference.HasPublicKey = false;
                     reference.PublicKey = Array.Empty<byte>();
                 }

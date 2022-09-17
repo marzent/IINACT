@@ -1,7 +1,5 @@
-
 using System.ComponentModel;
 using Advanced_Combat_Tracker;
-using FFXIV_ACT_PluginPatcher;
 
 namespace IINACT {
     internal static class Program {
@@ -10,7 +8,7 @@ namespace IINACT {
         /// </summary>
         [STAThread]
         private static void Main() {
-            PluginPatcher.DoPatching();
+            FetchDependencies.FetchDependencies.GetFfxivPlugin().ConfigureAwait(false);
             ApplicationConfiguration.Initialize();
             ActGlobals.oFormActMain = new FormActMain();
             Application.Run(new Daemon());

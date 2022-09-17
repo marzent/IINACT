@@ -17,13 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.0.0" />
     <PackageReference Include="DarkModeUI" Version="3.1.0" />
-    <PackageReference Include="Lib.Harmony" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
     <ProjectReference Include="..\machina\Machina\Machina.csproj" />
     <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
   </ItemGroup>

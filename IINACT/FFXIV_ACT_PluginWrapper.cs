@@ -6,7 +6,6 @@ using FFXIV_ACT_Plugin.Config;
 using FFXIV_ACT_Plugin.Logfile;
 using FFXIV_ACT_Plugin.Memory;
 using FFXIV_ACT_Plugin.Memory.MemoryReader;
-using FFXIV_ACT_Plugin.Network;
 using FFXIV_ACT_Plugin.Parse;
 using FFXIV_ACT_Plugin.Resource;
 using IINACT.Properties;
@@ -27,14 +26,13 @@ public class FfxivActPluginWrapper {
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivActPlugin;
     private readonly ParseMediator _parseMediator;
-    private readonly DataCollection _dataCollection;
 
     public FfxivActPluginWrapper() {
         _ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
-        _ffxivActPlugin.CallMethod("ConfigureIOC", null);
+        _ffxivActPlugin.ConfigureIOC();
         OpcodeManager.Instance.SetRegion(GameRegion.Global);
 
-        var iocContainer = _ffxivActPlugin.GetField<Container>("_iocContainer");
+        var iocContainer = _ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();
 
         Subscription = iocContainer.Resolve<DataSubscription>();
@@ -42,10 +40,9 @@ public class FfxivActPluginWrapper {
 
         _parseMediator = iocContainer.Resolve<ParseMediator>();
 
-        _dataCollection = iocContainer.Resolve<DataCollection>();
-        _ffxivActPlugin.SetField("_dataCollection", _dataCollection);
+        _ffxivActPlugin._dataCollection = iocContainer.Resolve<DataCollection>();
 
-        var scanPackets = _dataCollection.GetField<ScanPackets>("_scanPackets");
+        var scanPackets = _ffxivActPlugin._dataCollection._scanPackets;
         ProcessManager = scanPackets.GetField<ProcessManager>("_processManager");
 
         SetupActWrapper();
@@ -64,14 +61,15 @@ public class FfxivActPluginWrapper {
         Monitor.RPCap.username = Settings.Default.RPcapUsername;
         Monitor.RPCap.password = Settings.Default.RPcapPassword;
 
-        _dataCollection.StartMemory();
+        _ffxivActPlugin._dataCollection.StartMemory();
 
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
     }
 
 
-    private void SetupSettingsMediator() {
-        var settingsMediator = _dataCollection.GetField<SettingsMediator>("_settingsMediator");
+    private void SetupSettingsMediator()
+    {
+        var settingsMediator = _ffxivActPlugin._dataCollection._settingsMediator;
 
         DataCollectionSettings = new DataCollectionSettingsEventArgs {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
@@ -99,8 +97,8 @@ public class FfxivActPluginWrapper {
 
         settingsMediator.ProcessException = OnProcessException;
 
-        var logOutput = _dataCollection.GetField<LogOutput>("_logOutput");
-        var logFormat = _dataCollection.GetField<LogFormat>("_logFormat");
+        var logOutput = _ffxivActPlugin._dataCollection._logOutput;
+        var logFormat = _ffxivActPlugin._dataCollection._logFormat;
 
         var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets, ParseSettings.LanguageID, ParseSettings.ParseFilter, ParseSettings.SimulateIndividualDoTCrits, ParseSettings.ShowRealDoTTicks);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line);
@@ -115,7 +113,7 @@ public class FfxivActPluginWrapper {
     }
 
     private void SetupActWrapper() {
-        var logOutput = _dataCollection.GetField<LogOutput>("_logOutput");
+        var logOutput = _ffxivActPlugin._dataCollection._logOutput;
         var actWrapper = logOutput.GetField<ACTWrapper>("_actWrapper");
 
         actWrapper.TimeStampLen = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture).Length + 3;
@@ -140,11 +138,6 @@ public class FfxivActPluginWrapper {
     }
 
     private static void OnProcessException(DateTime timestamp, string text) {
-    }
-
-    public static void LogLineWritten(string text) {
-        ActGlobals.oFormActMain.LogQueue.Enqueue(text);
-        ActGlobals.oFormActMain.LogFileQueue.Enqueue(text);
     }
 
 }

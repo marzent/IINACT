@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NotACT\NotACT.csproj" />
+    <ProjectReference Include="..\machina\Machina\Machina.csproj" />
   </ItemGroup>
 
 </Project>

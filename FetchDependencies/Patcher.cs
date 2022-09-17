@@ -2,14 +2,14 @@
 using Mono.Cecil.Cil;
 
 namespace FetchDependencies {
-    public class Patcher {
+    internal class Patcher {
         private readonly string _workPath;
 
         public Patcher(string workPath) {
             _workPath = workPath;
         }
 
-        public void mainPlugin() {
+        public void MainPlugin() {
             var plugin = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.dll"));
             var resources = plugin.Assembly.MainModule.Resources.ToArray();
 
@@ -18,47 +18,63 @@ namespace FetchDependencies {
                     using var stream = (resource as EmbeddedResource)!.GetResourceStream();
                     var dllPath = Path.Combine(_workPath, Costura.Fix(resource.Name));
                     Costura.Decompress(stream, dllPath);
+                    var resourceAssembly = new TargetAssembly(dllPath);
+                    resourceAssembly.RemoveStrongNaming();
+                    resourceAssembly.MakePublic();
+                    resourceAssembly.WriteOut();
                 }
                 plugin.Assembly.MainModule.Resources.Remove(resource);
             }
 
-            {
-                var method = plugin.GetMethod(
-                    "System.Void FFXIV_ACT_Plugin.ACTWrapper::RunOnACTUIThread(System.Action)");
-                var ilProcessor = method.Body.GetILProcessor();
-                ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
-            }
+            var method = plugin.GetMethod(
+                "System.Void FFXIV_ACT_Plugin.ACTWrapper::RunOnACTUIThread(System.Action)");
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
 
+            plugin.RemoveStrongNaming();
+            plugin.MakePublic();
             plugin.WriteOut();
         }
 
-        public void logFilePlugin() {
+        public void LogFilePlugin() {
             var logfile = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Logfile.dll"));
-            {
-                var method = logfile.GetMethod(
-                    "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::WriteLine(FFXIV_ACT_Plugin.Logfile.LogMessageType,System.DateTime,System.String)");
-                var targetMethod =
-                    typeof(Advanced_Combat_Tracker.ActGlobals).GetMethod("LogLineWritten", new[] { typeof(string) });
-                var importedMethod = logfile.Assembly.MainModule.ImportReference(targetMethod);
-                var enqueueInstructionIndex = Array.FindIndex(method.Body.Instructions.ToArray(),
-                    code => code.OpCode == OpCodes.Callvirt &&
-                            code.Operand.ToString()!.Equals(
-                                "System.Void System.Collections.Generic.Queue`1<System.String>::Enqueue(!0)"));
-                if (enqueueInstructionIndex == -1)
-                    throw new Exception("Could not patch LogOutput.WriteLine");
-                var ilProcessor = method.Body.GetILProcessor();
-                ilProcessor.Replace(enqueueInstructionIndex, Instruction.Create(OpCodes.Call, importedMethod));
-                var enqueueInstructionArgIndex = enqueueInstructionIndex - 3;
-                ilProcessor.RemoveAt(enqueueInstructionArgIndex);
-                ilProcessor.RemoveAt(enqueueInstructionArgIndex);
-            }
-            {
-                var method = logfile.GetMethod(
-                    "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::Run(System.Object)");
-                var ilProcessor = method.Body.GetILProcessor();
-                ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
-            }
+
+            var method = logfile.GetMethod(
+                "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::Run(System.Object)");
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
+
             logfile.WriteOut();
         }
+
+        public void MemoryPlugin() {
+            var memory = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Memory.dll"));
+
+            var dataSubscription = memory.Assembly.MainModule.Types.First(type => type.Name == "DataSubscription");
+            var delegates = dataSubscription.Methods.Where(method => method.Name.StartsWith("On"));
+
+            void BeginInvokeFix(MethodDefinition method) {
+                var originalIl = method.Body.Instructions.ToArray();
+                var invokeIndex = Array.FindIndex(originalIl, code => code.OpCode == OpCodes.Callvirt && code.Operand.ToString()!.Contains("BeginInvoke"));
+                if (invokeIndex == -1)
+                    throw new DllNotFoundException("Could not find BeginInvoke instruction");
+                var invokeInstruction = originalIl[invokeIndex];
+                var ilProcessor = method.Body.GetILProcessor();
+                ilProcessor.RemoveAt(invokeIndex + 1);
+                ilProcessor.InsertBefore(invokeInstruction, Instruction.Create(OpCodes.Pop));
+                ilProcessor.InsertBefore(invokeInstruction, Instruction.Create(OpCodes.Pop));
+                var beginInvokeMethod = invokeInstruction.Operand as MethodReference;
+                var declaringType = beginInvokeMethod!.DeclaringType.Resolve();
+                var invokeMethod = declaringType.Methods.First(methodDefinition => methodDefinition.Name == "Invoke");
+                var invokeMethodReference = memory.Assembly.MainModule.ImportReference(invokeMethod);
+                ilProcessor.Replace(invokeInstruction, Instruction.Create(OpCodes.Callvirt, invokeMethodReference));
+            }
+
+            foreach (var method in delegates)
+                BeginInvokeFix(method);
+
+            memory.WriteOut();
+        }
+
     }
 }

@@ -3,7 +3,8 @@
 namespace FetchDependencies {
     public static class FetchDependencies {
         public static async Task GetFfxivPlugin() {
-            var dependenciesDir = Directory.GetCurrentDirectory();
+            var dependenciesDir = Path.Combine(Directory.GetCurrentDirectory(), "external_dependencies");
+            Directory.CreateDirectory(dependenciesDir);
             var pluginZipPath = Path.Combine(dependenciesDir, "FFXIV_ACT_Plugin.zip");
             var pluginPath = Path.Combine(dependenciesDir, "FFXIV_ACT_Plugin.dll");
 
@@ -23,7 +24,7 @@ namespace FetchDependencies {
         }
 
         private static async Task<bool> NeedsUpdate(string dllPath) {
-            return true;
+            return !File.Exists(dllPath);
         }
 
         private static async Task DownloadPlugin(string path) {

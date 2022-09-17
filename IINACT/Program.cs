@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Reflection;
 using Advanced_Combat_Tracker;
 
 namespace IINACT {
@@ -8,10 +9,30 @@ namespace IINACT {
         /// </summary>
         [STAThread]
         private static void Main() {
-            FetchDependencies.FetchDependencies.GetFfxivPlugin().ConfigureAwait(false);
+            FetchDependencies.FetchDependencies.GetFfxivPlugin().Wait();
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             ApplicationConfiguration.Initialize();
             ActGlobals.oFormActMain = new FormActMain();
             Application.Run(new Daemon());
+        }
+
+        private static Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args) {
+            if (args.Name.Contains(".resources"))
+                return null;
+
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.Name);
+            if (assembly != null)
+                return assembly;
+
+            var filename = args.Name.Split(',')[0] + ".dll".ToLower();
+            var asmFile = Path.Combine(@".\", "external_dependencies", filename);
+
+            try {
+                return Assembly.LoadFrom(asmFile);
+            }
+            catch (Exception) {
+                return null;
+            }
         }
     }
 

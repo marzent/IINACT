@@ -1,1 +1,2 @@
-﻿await FetchDependencies.FetchDependencies.GetFfxivPlugin();
+﻿var fetchDeps = new FetchDependencies.FetchDependencies();
+fetchDeps.GetFfxivPlugin().Wait();

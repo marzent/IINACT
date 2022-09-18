@@ -6,7 +6,7 @@ namespace FetchDependencies {
         public string DependenciesDir { get; }
 
         public FetchDependencies() {
-            var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
             DependenciesDir = Path.Combine(assemblyDir, "external_dependencies");
         }
 

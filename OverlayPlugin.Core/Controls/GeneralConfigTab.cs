@@ -27,12 +27,6 @@ namespace RainbowMage.OverlayPlugin {
             cbUpdateCheck.Checked = config.UpdateCheck;
             cbHideOverlaysWhenNotActive.Checked = config.HideOverlaysWhenNotActive;
             cbHideOverlaysDuringCutscene.Checked = config.HideOverlayDuringCutscene;
-
-            // Attach the event handlers only *after* loading the configuration because we'd otherwise trigger them ourselves.
-            cbErrorReports.CheckedChanged += CbErrorReports_CheckedChanged;
-            cbUpdateCheck.CheckedChanged += CbUpdateCheck_CheckedChanged;
-            cbHideOverlaysWhenNotActive.CheckedChanged += cbHideOverlaysWhenNotActive_CheckedChanged;
-            cbHideOverlaysDuringCutscene.CheckedChanged += cbHideOverlaysDuringCutscene_CheckedChanged;
         }
 
         public void SetReadmeVisible(bool visible) {
@@ -56,36 +50,6 @@ namespace RainbowMage.OverlayPlugin {
 
                 if (lastClick != now) return;
             });
-        }
-
-        private void CbErrorReports_CheckedChanged(object sender, EventArgs e) {
-            try {
-            }
-            catch (Exception ex) {
-                logger.Log(LogLevel.Error, $"Failed to switch error reports: {ex}");
-                cbErrorReports.Checked = !cbErrorReports.Checked;
-
-                MessageBox.Show($"Failed to switch error reports: {ex}", "OverlayPlugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            config.ErrorReports = cbErrorReports.Checked;
-
-            MessageBox.Show("You have to restart ACT to apply this change.", "OverlayPlugin", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void CbUpdateCheck_CheckedChanged(object sender, EventArgs e) {
-            config.UpdateCheck = cbUpdateCheck.Checked;
-        }
-
-        private void cbHideOverlaysWhenNotActive_CheckedChanged(object sender, EventArgs e) {
-            config.HideOverlaysWhenNotActive = cbHideOverlaysWhenNotActive.Checked;
-            container.Resolve<OverlayHider>().UpdateOverlays();
-        }
-
-        private void cbHideOverlaysDuringCutscene_CheckedChanged(object sender, EventArgs e) {
-            config.HideOverlayDuringCutscene = cbHideOverlaysDuringCutscene.Checked;
-            container.Resolve<OverlayHider>().UpdateOverlays();
         }
 
         private void lnkGithubRepo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {

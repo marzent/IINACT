@@ -214,8 +214,6 @@ namespace RainbowMage.OverlayPlugin {
                                     InitializeOverlays();
 
                                     this._label.Text = @"Init Phase 2: Overlay tasks";
-                                    _container.Register(new OverlayHider(_container));
-                                    _container.Register(new OverlayZCorrector(_container));
 
                                     // WSServer has to start after the LoadAddons() call because clients can connect immediately
                                     // after it's initialized and that requires the event sources to be initialized.
@@ -302,10 +300,6 @@ namespace RainbowMage.OverlayPlugin {
         /// </summary>
         public void DeInitPlugin() {
             SaveConfig(true);
-
-            if (_container.TryResolve(out OverlayZCorrector corrector)) {
-                corrector.DeInit();
-            }
 
             if (Overlays != null) {
                 foreach (var overlay in this.Overlays) {

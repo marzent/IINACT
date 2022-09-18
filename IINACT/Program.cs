@@ -3,13 +3,18 @@ using System.Reflection;
 using Advanced_Combat_Tracker;
 
 namespace IINACT {
-    internal static class Program {
+    internal static class Program
+    {
+        private static string _dependenciesDir = null!;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main() {
-            FetchDependencies.FetchDependencies.GetFfxivPlugin().Wait();
+        private static void Main()
+        {
+            var fetchDeps = new FetchDependencies.FetchDependencies();
+            fetchDeps.GetFfxivPlugin().Wait();
+            _dependenciesDir = fetchDeps.DependenciesDir;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             ApplicationConfiguration.Initialize();
             ActGlobals.oFormActMain = new FormActMain();
@@ -25,7 +30,7 @@ namespace IINACT {
                 return assembly;
 
             var filename = args.Name.Split(',')[0] + ".dll".ToLower();
-            var asmFile = Path.Combine(Directory.GetCurrentDirectory(), "external_dependencies", filename);
+            var asmFile = Path.Combine(_dependenciesDir, filename);
 
             try {
                 return Assembly.LoadFrom(asmFile);

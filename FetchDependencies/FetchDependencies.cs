@@ -1,12 +1,19 @@
 ﻿using System.IO.Compression;
+using System.Reflection;
 
 namespace FetchDependencies {
-    public static class FetchDependencies {
-        public static async Task GetFfxivPlugin() {
-            var dependenciesDir = Path.Combine(Directory.GetCurrentDirectory(), "external_dependencies");
-            Directory.CreateDirectory(dependenciesDir);
-            var pluginZipPath = Path.Combine(dependenciesDir, "FFXIV_ACT_Plugin.zip");
-            var pluginPath = Path.Combine(dependenciesDir, "FFXIV_ACT_Plugin.dll");
+    public class FetchDependencies {
+        public string DependenciesDir { get; }
+
+        public FetchDependencies() {
+            var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
+            DependenciesDir = Path.Combine(assemblyDir, "external_dependencies");
+        }
+
+        public async Task GetFfxivPlugin() {
+            Directory.CreateDirectory(DependenciesDir);
+            var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
+            var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
 
             if (!await NeedsUpdate(pluginPath))
                 return;
@@ -14,10 +21,10 @@ namespace FetchDependencies {
             if (!File.Exists(pluginZipPath))
                 await DownloadPlugin(pluginZipPath);
 
-            ZipFile.ExtractToDirectory(pluginZipPath, dependenciesDir, overwriteFiles: true);
+            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, overwriteFiles: true);
             File.Delete(pluginZipPath);
 
-            var patcher = new Patcher(dependenciesDir);
+            var patcher = new Patcher(DependenciesDir);
             patcher.MainPlugin();
             patcher.LogFilePlugin();
             patcher.MemoryPlugin();

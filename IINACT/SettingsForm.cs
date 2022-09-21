@@ -27,6 +27,7 @@ namespace IINACT {
             textBoxUsername.Text = Settings.Default.RPcapUsername;
             textBoxPassword.Text = Settings.Default.RPcapPassword;
             rpcapSectionPanel.Height = Settings.Default.RPcap ? 200 : 0;
+            logFileButton.Click += logFileButton_Clicked;
 
 
             //create window handle
@@ -130,6 +131,17 @@ namespace IINACT {
         private void TextBoxPassword_TextChanged(object sender, EventArgs e) {
             Settings.Default.RPcapPassword = textBoxPassword.Text;
             Settings.Default.Save();
+        }
+
+        private void logFileButton_Clicked(object? sender, EventArgs e)
+        {
+            // Show the FolderBrowserDialog.
+            DialogResult result = logFolderBrowserDialog.ShowDialog();
+            if(result == DialogResult.OK)
+            {
+                Settings.Default.LogFilePath = logFolderBrowserDialog.SelectedPath;
+                Settings.Default.Save();
+            }
         }
 
     }

@@ -13,6 +13,7 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <PgoMode>full</PgoMode>
     <Version>0.3.1</Version>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
 

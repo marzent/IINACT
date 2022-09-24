@@ -348,7 +348,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public Single PosZ;
 
             [FieldOffset(0xB0)]
-            public Single Rotation;
+            public Single Heading;
 
             [FieldOffset(0x17F8)]
             public uint TargetID;
@@ -408,7 +408,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     PosX = mem.PosX,
                     PosY = mem.PosY,
                     PosZ = mem.PosZ,
-                    Rotation = mem.Rotation,
+                    Heading = mem.Heading,
                     TargetID = mem.TargetID,
                     CurrentHP = mem.CurrentHP,
                     MaxHP = mem.MaxHP,

@@ -114,7 +114,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public Single PosX;
         public Single PosY;
         public Single PosZ;
-        public Single Rotation;
+        public Single Heading;
         public Single Radius;
 
         public string Distance;
@@ -123,6 +123,28 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public byte RawEffectiveDistance;
 
         public List<EffectEntry> Effects;
+
+        public uint BNpcID;
+        public int CurrentMP;
+        public int MaxMP;
+        public byte Level;
+
+        public uint BNpcNameID;
+
+        public ushort WorldID;
+        public ushort CurrentWorldID;
+        public uint NPCTargetID;
+        public ushort CurrentGP;
+        public ushort MaxGP;
+        public ushort CurrentCP;
+        public ushort MaxCP;
+        public uint PCTargetID;
+        public byte IsCasting1;
+        public byte IsCasting2;
+        public uint CastBuffID;
+        public uint CastTargetID;
+        public float CastDurationCurrent;
+        public float CastDurationMax;
 
         private Single GetDistance(Combatant target)
         {

@@ -168,6 +168,8 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
                 var combatants = memory.GetCombatantList();
 
+                combatants.RemoveAll((c) => c.Type != ObjectType.PC && c.Type != ObjectType.Monster);
+
                 if (targetData) {
                     // See CreateTargetData() below
                     this.DispatchEvent(CreateTargetData(combatants));

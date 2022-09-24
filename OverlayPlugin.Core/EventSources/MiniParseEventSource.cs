@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Advanced_Combat_Tracker;
 using System.Diagnostics;
+using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Common.Models;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
 using System.IO;
@@ -32,30 +33,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
             { 21, "LookingToMeld" },
             { 22, "RP" },
             { 23, "LookingForParty" },
-        };
-
-        private readonly List<string> DefaultCombatantFields = new List<string>
-        {
-            "CurrentWorldID",
-            "WorldID",
-            "WorldName",
-            "BNpcID",
-            "BNpcNameID",
-            "PartyType",
-            "ID",
-            "OwnerID",
-            "type",
-            "Job",
-            "Level",
-            "Name",
-            "CurrentHP",
-            "MaxHP",
-            "CurrentMP",
-            "MaxMP",
-            "PosX",
-            "PosY",
-            "PosZ",
-            "Heading"
         };
 
         private Dictionary<string, System.Reflection.PropertyInfo> CachedCombatantPropertyInfos
@@ -266,82 +243,86 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void InitFFXIVIntegration()
         {
-            foreach (var propName in DefaultCombatantFields)
-            {
-                CachedCombatantPropertyInfos.Add(propName, typeof(Combatant).GetProperty(propName));
-            }
-
             repository.RegisterPartyChangeDelegate((partyList, partySize) => DispatchPartyChangeEvent(partyList, partySize));
+            repository.RegisterProcessChangedHandler((p) => CheckMemory());
+            CheckMemory();
             ffxivPluginPresent = true;
+        }
+
+        MemoryProcessors.EnmityMemory memory = null;
+        private void CheckMemory() {
+            if (memory == null || (memory != null && !memory.IsValid())) {
+                List<MemoryProcessors.EnmityMemory> memoryCandidates;
+                if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Chinese) {
+                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory61(container) };
+                } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
+                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory60(container) };
+                } else {
+                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory62(container) };
+                }
+
+                foreach (var candidate in memoryCandidates) {
+                    if (candidate.IsValid()) {
+                        memory = candidate;
+                        memoryCandidates = null;
+                        break;
+                    }
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private List<Dictionary<string, object>> GetCombatants(List<uint> ids, List<string> names, List<string> props)
         {
-            var filteredCombatants = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> filteredCombatants = new List<Dictionary<string, object>>();
+            var pluginCombatants = repository.GetCombatants();
 
-            var combatants = repository.GetCombatants();
+            CheckMemory();
 
-            foreach (var combatant in combatants)
-            {
-                if (combatant.ID == 0)
-                {
-                    continue;
-                }
-
-                var include = false;
-
-                var combatantName = CachedCombatantPropertyInfos["Name"].GetValue(combatant).ToString();
-
-                if (ids.Count == 0 && names.Count == 0)
-                {
-                    include = true;
-                }
-                else
-                {
-                    foreach (var id in ids)
-                    {
-                        if (combatant.ID == id)
-                        {
-                            include = true;
-                            break;
-                        }
+            if (memory != null && memory.IsValid()) {
+                var memCombatants = memory.GetCombatantList();
+                foreach (var combatant in memCombatants) {
+                    if (combatant.ID == 0) {
+                        continue;
                     }
 
-                    if (!include)
-                    {
-                        foreach (var name in names)
-                        {
-                            if (String.Equals(combatantName, name, StringComparison.InvariantCultureIgnoreCase))
-                            {
+                    bool include = false;
+
+                    var combatantName = combatant.Name;
+
+                    if (ids.Count == 0 && names.Count == 0) {
+                        include = true;
+                    } else {
+                        foreach (var id in ids) {
+                            if (combatant.ID == id) {
                                 include = true;
                                 break;
                             }
                         }
-                    }
-                }
 
-                if (include)
-                {
-                    var filteredCombatant = new Dictionary<string, object>();
-                    if (props.Count > 0)
-                    {
-                        foreach (var prop in props)
-                        {
-                            if (CachedCombatantPropertyInfos.ContainsKey(prop))
-                            {
-                                filteredCombatant.Add(prop, CachedCombatantPropertyInfos[prop].GetValue(combatant));
+                        if (!include) {
+                            foreach (var name in names) {
+                                if (String.Equals(combatantName, name, StringComparison.InvariantCultureIgnoreCase)) {
+                                    include = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                    else
-                    {
-                        foreach (var prop in CachedCombatantPropertyInfos.Keys)
-                        {
-                            filteredCombatant.Add(prop, CachedCombatantPropertyInfos[prop].GetValue(combatant));
+
+                    if (include) {
+                        var jObjCombatant = JObject.FromObject(combatant).ToObject<Dictionary<string, object>>();
+                        var ID = Convert.ToUInt32(jObjCombatant["ID"]);
+
+                        var pluginCombatant = pluginCombatants.FirstOrDefault((Combatant c) => c.ID == ID);
+                        if (pluginCombatant != null) {
+                            jObjCombatant["PartyType"] = GetPartyType(pluginCombatant);
                         }
+                        var WorldID = Convert.ToUInt32(jObjCombatant["WorldID"]);
+                        jObjCombatant["WorldName"] = GetWorldName(WorldID);
+
+                        filteredCombatants.Add(jObjCombatant);
                     }
-                    filteredCombatants.Add(filteredCombatant);
                 }
             }
 
@@ -453,6 +434,15 @@ namespace RainbowMage.OverlayPlugin.EventSources
         {
             // The PartyTypeEnum was renamed in 2.6.0.0 to work around that, we use reflection and cast the result to int.
             return (int) combatant.GetType().GetMethod("get_PartyType").Invoke(combatant, new object[] {});
+        }
+
+        private string GetWorldName(uint WorldID) {
+            var dict = repository.GetResourceDictionary(ResourceType.WorldList_EN);
+            if (dict == null)
+                return null;
+            if (dict.TryGetValue(WorldID, out string WorldName))
+                return WorldName;
+            return null;
         }
 
         private void DispatchPartyChangeEvent(ReadOnlyCollection<uint> partyList, int partySize)

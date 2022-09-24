@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Common;
+using FFXIV_ACT_Plugin.Logfile;
 using System.Collections.Generic;
 
 namespace RainbowMage.OverlayPlugin {
@@ -63,7 +64,7 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetPluginData() {
-            return (FFXIV_ACT_Plugin.FFXIV_ACT_Plugin)ActGlobals.oFormActMain.FfxivPlugin;
+            return ActGlobals.oFormActMain.FfxivPlugin;
         }
 
         private IDataRepository GetRepository() {
@@ -250,6 +251,15 @@ namespace RainbowMage.OverlayPlugin {
                 default:
                     return null;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal bool WriteLogLineImpl(uint ID, string line)
+        {
+            var plugin = GetPluginData();
+            var logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
+            logOutput.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, DateTime.Now, line);
+            return true;
         }
 
         // LogLineDelegate(uint EventType, uint Seconds, string logline);

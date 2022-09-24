@@ -501,12 +501,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
         [StructLayout(LayoutKind.Explicit)]
         public struct NinjaJobMemory {
             [FieldOffset(0x00)]
-            public uint hutonMilliseconds;
+            public ushort hutonMilliseconds;
 
-            [FieldOffset(0x04)]
+            [FieldOffset(0x02)]
             public byte ninkiAmount;
 
-            [FieldOffset(0x05)]
+            [FieldOffset(0x03)]
             private byte hutonCount; // Why though?
         };
 

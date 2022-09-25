@@ -13,7 +13,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         {
             container.Register(new OverlayPluginLogLineConfig(container));
             container.Register(new LineMapEffect(container));
-            //container.Register(new LineFateControl(container));
+            container.Register(new LineFateControl(container));
             //container.Register(new LineCEDirector(container));
         }
     }

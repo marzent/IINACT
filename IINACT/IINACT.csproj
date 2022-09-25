@@ -11,6 +11,7 @@
     <ApplicationIcon>Icon-IINACT-512x512@2x.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
     <PgoMode>full</PgoMode>
     <Version>0.4</Version>
     <LangVersion>11</LangVersion>

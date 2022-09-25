@@ -12,13 +12,22 @@ namespace IINACT {
         [STAThread]
         private static void Main()
         {
-            var fetchDeps = new FetchDependencies.FetchDependencies();
-            fetchDeps.GetFfxivPlugin().Wait();
-            _dependenciesDir = fetchDeps.DependenciesDir;
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-            ApplicationConfiguration.Initialize();
-            ActGlobals.oFormActMain = new FormActMain();
-            Application.Run(new Daemon());
+            using var singletoneMutex = new Mutex(true, @"Global\IINACT", out bool createdNew);
+
+            if (createdNew)
+            {
+                var fetchDeps = new FetchDependencies.FetchDependencies();
+                fetchDeps.GetFfxivPlugin().Wait();
+                _dependenciesDir = fetchDeps.DependenciesDir;
+                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+                ApplicationConfiguration.Initialize();
+                ActGlobals.oFormActMain = new FormActMain();
+                Application.Run(new Daemon());
+            }
+            else
+            {
+                MessageBox.Show("IINACT is already running.");
+            }
         }
 
         private static Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args) {

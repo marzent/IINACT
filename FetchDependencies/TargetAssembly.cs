@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil;
 
 namespace FetchDependencies {
-    internal class TargetAssembly {
+    internal class TargetAssembly: IDisposable {
         public AssemblyDefinition Assembly { get; }
         private string AssemblyPath { get; }
 
@@ -13,6 +13,10 @@ namespace FetchDependencies {
             Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath, new ReaderParameters { AssemblyResolver = resolver });
         }
 
+        public void Dispose() => Assembly.Dispose();
+
+        public Version Version => Assembly.MainModule.Assembly.Name.Version;
+
         public MethodDefinition GetMethod(string name) =>
             GetAllTypes()
                 .Where(o => o.IsClass == true)
@@ -20,10 +24,9 @@ namespace FetchDependencies {
                 .First(o => o.FullName.Contains(name));
 
         public void MakePublic() {
-            bool CheckCompilerGeneratedAttribute(IMemberDefinition member) {
-                return member.CustomAttributes.Any(x =>
+            static bool CheckCompilerGeneratedAttribute(ICustomAttributeProvider member) =>
+                member.CustomAttributes.Any(x =>
                     x.AttributeType.FullName == "System.Runtime.CompilerServices.CompilerGeneratedAttribute");
-            }
 
             foreach (var type in GetAllTypes()) {
                 if (CheckCompilerGeneratedAttribute(type))
@@ -66,9 +69,7 @@ namespace FetchDependencies {
 
             while (types.Count > 0) {
                 var type = types.Dequeue();
-
                 yield return type;
-
                 foreach (var nestedType in type.NestedTypes)
                     types.Enqueue(nestedType);
             }

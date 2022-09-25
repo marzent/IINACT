@@ -45,6 +45,7 @@ namespace RainbowMage.OverlayPlugin {
         NetworkEffectResult,
         NetworkStatusList,
         NetworkUpdateHp,
+        ChangeMap,
         Settings = 249,
         Process,
         Debug,

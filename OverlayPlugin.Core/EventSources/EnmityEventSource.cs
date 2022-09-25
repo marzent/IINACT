@@ -1,14 +1,14 @@
 using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
+using RainbowMage.OverlayPlugin.MemoryProcessors;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using RainbowMage.OverlayPlugin.MemoryProcessors;
-using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace RainbowMage.OverlayPlugin.EventSources {
     public class EnmityEventSource : EventSourceBase {

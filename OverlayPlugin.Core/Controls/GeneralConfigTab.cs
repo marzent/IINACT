@@ -1,9 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
-using System.Reflection;
-using System.IO;
 
 namespace RainbowMage.OverlayPlugin {
     public partial class GeneralConfigTab : UserControl {

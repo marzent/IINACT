@@ -2,20 +2,16 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace RainbowMage.OverlayPlugin
-{
-    public class TabControlExt : TabControl
-    {
-        protected override void OnPaint(PaintEventArgs e)
-        {
+namespace RainbowMage.OverlayPlugin {
+    public class TabControlExt : TabControl {
+        protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);
             e.Graphics.Clear(SystemColors.ControlLightLight);
             e.Graphics.FillRectangle(SystemBrushes.ControlLight, 4, 4, (ItemSize.Height * RowCount) - 4, Height - 8);
 
             var inc = 0;
 
-            foreach (TabPage tp in TabPages)
-            {
+            foreach (TabPage tp in TabPages) {
                 var fore = Color.Black;
                 var fontF = Font;
                 var fontFSmall = new Font(Font.FontFamily, (float)(Font.Size * 0.85));
@@ -28,14 +24,11 @@ namespace RainbowMage.OverlayPlugin
                 sf.LineAlignment = StringAlignment.Center;
                 sf.Alignment = StringAlignment.Center;
 
-                if (inc == SelectedIndex)
-                {
+                if (inc == SelectedIndex) {
                     e.Graphics.FillRectangle(new SolidBrush(SystemColors.Highlight), rect);
                     fore = SystemColors.HighlightText;
                     fontF = new Font(Font, FontStyle.Bold);
-                }
-                else
-                {
+                } else {
                     e.Graphics.FillRectangle(Brushes.White, rect);
                 }
 
@@ -45,14 +38,12 @@ namespace RainbowMage.OverlayPlugin
             }
         }
 
-        protected override void OnTabIndexChanged(EventArgs e)
-        {
+        protected override void OnTabIndexChanged(EventArgs e) {
             base.OnTabIndexChanged(e);
             Invalidate();
         }
 
-        public TabControlExt() : base()
-        {
+        public TabControlExt() : base() {
             Alignment = TabAlignment.Left;
 
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);

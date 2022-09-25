@@ -2,12 +2,10 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace RainbowMage.OverlayPlugin.NetworkProcessors
-{
+namespace RainbowMage.OverlayPlugin.NetworkProcessors {
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]
-    internal struct CEDirector_v62
-    {
+    internal struct CEDirector_v62 {
         [FieldOffset(0x0)]
         public uint popTime;
         [FieldOffset(0x4)]
@@ -31,9 +29,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         [FieldOffset(0xF)]
         public byte unk13;
 
-        public override string ToString()
-        {
-            return 
+        public override string ToString() {
+            return
                 $"{popTime:X8}|" +
                 $"{timeRemaining:X4}|" +
                 $"{unk9:X4}|" +
@@ -48,8 +45,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         }
     }
 
-    public class LineCEDirector
-    {
+    public class LineCEDirector {
         public const uint LogFileLineID = 259;
         private ILogger logger;
         private OverlayPluginLogLineConfig opcodeConfig;
@@ -59,56 +55,47 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
 
         private Func<string, bool> logWriter;
 
-        public LineCEDirector(TinyIoCContainer container)
-        {
+        public LineCEDirector(TinyIoCContainer container) {
             logger = container.Resolve<ILogger>();
             var ffxiv = container.Resolve<FFXIVRepository>();
             var netHelper = container.Resolve<NetworkParser>();
             if (!ffxiv.IsFFXIVPluginPresent())
                 return;
             opcodeConfig = container.Resolve<OverlayPluginLogLineConfig>();
-            try
-            {
+            try {
                 var mach = Assembly.Load("Machina.FFXIV");
                 var msgHeaderType = mach.GetType("Machina.FFXIV.Headers.Server_MessageHeader");
                 offsetMessageType = netHelper.GetOffset(msgHeaderType, "MessageType");
                 offsetPacketData = Marshal.SizeOf(msgHeaderType);
                 ffxiv.RegisterNetworkParser(MessageReceived);
             }
-            catch (System.IO.FileNotFoundException)
-            {
+            catch (System.IO.FileNotFoundException) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserNoFfxiv);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserInitException, e);
             }
             var customLogLines = container.Resolve<FFXIVCustomLogLines>();
-            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
-            {
+            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry() {
                 Source = "OverlayPlugin",
                 ID = LogFileLineID,
                 Version = 1,
             });
         }
 
-        private unsafe void MessageReceived(string id, long epoch, byte[] message)
-        {
+        private unsafe void MessageReceived(string id, long epoch, byte[] message) {
             // Wait for network data to actually fetch opcode info from file and register log line
             // This is because the FFXIV_ACT_Plugin's `GetGameVersion` method only returns valid data
             // if the player is currently logged in/a network connection is active
-            if (opcode == null)
-            {
+            if (opcode == null) {
                 opcode = opcodeConfig["CEDirector"];
             }
 
             if (message.Length < opcode.size + offsetPacketData)
                 return;
 
-            fixed (byte* buffer = message)
-            {
-                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode)
-                {
+            fixed (byte* buffer = message) {
+                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode) {
                     CEDirector_v62 CEDirectorPacket = *(CEDirector_v62*)&buffer[offsetPacketData];
                     logWriter(CEDirectorPacket.ToString());
 

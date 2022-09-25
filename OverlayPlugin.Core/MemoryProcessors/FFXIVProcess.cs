@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors {
 
@@ -227,8 +227,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
 
             // Only support the DirectX 11 binary. The DirectX 9 one has different addresses.
             var found_process = (from x in Process.GetProcessesByName("ffxiv_dx11")
-                                     where !x.HasExited && x.MainModule != null && x.MainModule.ModuleName == "ffxiv_dx11.exe"
-                                     select x).FirstOrDefault<Process>();
+                                 where !x.HasExited && x.MainModule != null && x.MainModule.ModuleName == "ffxiv_dx11.exe"
+                                 select x).FirstOrDefault<Process>();
             if (found_process != null && found_process.HasExited)
                 found_process = null;
             var changed_existance = (process_ == null) != (found_process == null);

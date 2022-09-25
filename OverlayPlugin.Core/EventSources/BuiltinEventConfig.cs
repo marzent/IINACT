@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using RainbowMage.OverlayPlugin.Overlays;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json.Linq;
-using RainbowMage.OverlayPlugin.Overlays;
 
 namespace RainbowMage.OverlayPlugin.EventSources {
     [Serializable]
@@ -19,8 +19,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private int _updateInterval;
         public int UpdateInterval {
             get => this._updateInterval;
-            set
-            {
+            set {
                 if (this._updateInterval == value) return;
                 this._updateInterval = value;
                 UpdateIntervalChanged?.Invoke(this, EventArgs.Empty);
@@ -30,8 +29,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private int _enmityIntervalMs;
         public int EnmityIntervalMs {
             get => this._enmityIntervalMs;
-            set
-            {
+            set {
                 if (this._enmityIntervalMs == value) return;
                 this._enmityIntervalMs = value;
                 EnmityIntervalChanged?.Invoke(this, EventArgs.Empty);
@@ -41,8 +39,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private string _sortKey;
         public string SortKey {
             get => this._sortKey;
-            set
-            {
+            set {
                 if (this._sortKey == value) return;
                 this._sortKey = value;
                 SortKeyChanged?.Invoke(this, EventArgs.Empty);
@@ -52,8 +49,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private bool _sortDesc;
         public bool SortDesc {
             get => this._sortDesc;
-            set
-            {
+            set {
                 if (this._sortDesc == value) return;
                 this._sortDesc = value;
                 SortDescChanged?.Invoke(this, EventArgs.Empty);
@@ -63,8 +59,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private bool _updateDpsDuringImport;
         public bool UpdateDpsDuringImport {
             get => this._updateDpsDuringImport;
-            set
-            {
+            set {
                 if (this._updateDpsDuringImport == value) return;
                 this._updateDpsDuringImport = value;
                 UpdateDpsDuringImportChanged?.Invoke(this, EventArgs.Empty);
@@ -74,8 +69,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private bool _endEncounterAfterWipe;
         public bool EndEncounterAfterWipe {
             get => this._endEncounterAfterWipe;
-            set
-            {
+            set {
                 if (this._endEncounterAfterWipe == value) return;
                 this._endEncounterAfterWipe = value;
                 EndEncounterAfterWipeChanged?.Invoke(this, EventArgs.Empty);
@@ -85,8 +79,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private bool _endEncounterOutOfCombat;
         public bool EndEncounterOutOfCombat {
             get => this._endEncounterOutOfCombat;
-            set
-            {
+            set {
                 if (this._endEncounterOutOfCombat == value) return;
                 this._endEncounterOutOfCombat = value;
                 EndEncounterOutOfCombatChanged?.Invoke(this, EventArgs.Empty);
@@ -96,8 +89,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private bool _logLines;
         public bool LogLines {
             get => _logLines;
-            set
-            {
+            set {
                 if (this._logLines == value) return;
                 this._logLines = value;
                 LogLinesChanged?.Invoke(this, EventArgs.Empty);

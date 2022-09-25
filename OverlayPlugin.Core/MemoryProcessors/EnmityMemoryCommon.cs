@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RainbowMage.OverlayPlugin.MemoryProcessors
-{
-    public enum ObjectType : byte
-    {
+namespace RainbowMage.OverlayPlugin.MemoryProcessors {
+    public enum ObjectType : byte {
         Unknown = 0x00,
         PC = 0x01,
         Monster = 0x02,
@@ -16,15 +14,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
     /// <summary>A byte offset by 0x1980 from the combatant's address that further describes the combatant if their ObjectType is a Monster.</summary>
     // Basically, pets, combat NPCs (ones that attack), and monsters all share ObjectType 2 (Monster), this field distinguishes the monsters from those two.
-    public enum MonsterType : byte
-    {
+    public enum MonsterType : byte {
         Friendly = 0,
         Hostile = 4
     }
 
     /// <summary>An unsigned byte offset by 0x94 from the combatant's address that describes its status.</summary>
-    public enum ObjectStatus : byte
-    {
+    public enum ObjectStatus : byte {
         /// <summary>Indicates that a targetable PC, NPC, monster, minion, or object is at an effective distance of 97 or less from the player.</summary>
         // A dead PC keeps status 191.
         NormalActorStatus = 191,
@@ -63,8 +59,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     // And when Titan's Heart spawns, Titan's ModelStatus remains at 0 (while his ObjectStatus remains at 189).
     // In TEA, all bosses load from the start with ModelStatus 16384 (except for Living Liquid of course), manually changing the values to 0 makes the bosses
     // appear on the map in an immune state, although it's finicky to make that happen consistently.
-    public enum ModelStatus : int
-    {
+    public enum ModelStatus : int {
         Visible = 0,
         /// <summary>Indicates that the combatant's model has unloaded from the game's memory, be it from a death or a wipe.</summary>
         Unloaded = 2048,
@@ -80,8 +75,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     // It's not exactly only about the aggression status, it's that and other things embedded into it:
     // Sheathing the weapon adds 4 to the status.
     // Being mid-cast adds 128 to the status.
-    public enum AggressionStatus : byte
-    {
+    public enum AggressionStatus : byte {
         /// <summary>Indicates a combatant that doesn't aggro on sight and is out of combat.</summary>
         Passive = 0,
         /// <summary>Indicates a combatant that aggros on sight and is out of combat.</summary>
@@ -93,8 +87,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class Combatant
-    {
+    public class Combatant {
         public uint ID;
         public uint OwnerID;
         public ObjectType Type;
@@ -146,21 +139,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public float CastDurationCurrent;
         public float CastDurationMax;
 
-        private Single GetDistance(Combatant target)
-        {
+        private Single GetDistance(Combatant target) {
             var distanceX = (float)Math.Abs(PosX - target.PosX);
             var distanceY = (float)Math.Abs(PosY - target.PosY);
             var distanceZ = (float)Math.Abs(PosZ - target.PosZ);
             return (Single)Math.Sqrt((distanceX * distanceX) + (distanceY * distanceY) + (distanceZ * distanceZ));
         }
 
-        public string DistanceString(Combatant target)
-        {
+        public string DistanceString(Combatant target) {
             return GetDistance(target).ToString("0.00");
         }
 
-        public string EffectiveDistanceString(Combatant target)
-        {
+        public string EffectiveDistanceString(Combatant target) {
             // Mild hack for backwards compat for pre-6.x with no Radius memory location.
             if (target.Radius == 0)
                 return this.RawEffectiveDistance.ToString("0.00");
@@ -169,8 +159,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class EnmityEntry
-    {
+    public class EnmityEntry {
         public uint ID;
         public uint OwnerID;
         public string Name;
@@ -181,8 +170,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class AggroEntry
-    {
+    public class AggroEntry {
         public uint ID;
         public string Name;
         public int HateRate;
@@ -201,8 +189,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class EffectEntry
-    {
+    public class EffectEntry {
         public ushort BuffID;
         public ushort Stack;
         public float Timer;
@@ -211,8 +198,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class TargetableEnemyEntry
-    {
+    public class TargetableEnemyEntry {
         public uint ID;
         public string Name;
         public int CurrentHP;
@@ -222,8 +208,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     }
 
     [Serializable]
-    public class EnmityHudEntry
-    {
+    public class EnmityHudEntry {
         public int Order;
         public uint ID;
         public uint HPPercent;
@@ -231,8 +216,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public uint CastPercent;
     }
 
-    public abstract class EnmityMemory
-    {
+    public abstract class EnmityMemory {
         abstract public bool IsValid();
         abstract public Combatant GetTargetCombatant();
         abstract public Combatant GetSelfCombatant();

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Advanced_Combat_Tracker;
+using System;
 using System.Collections.Generic;
-using Advanced_Combat_Tracker;
 
 namespace RainbowMage.OverlayPlugin {
     public class Registry {
@@ -67,7 +67,7 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         public void StartEventSources() {
-            if (EventSourcesStarted == null) 
+            if (EventSourcesStarted == null)
                 return;
             EventSourcesStarted(null, null);
         }

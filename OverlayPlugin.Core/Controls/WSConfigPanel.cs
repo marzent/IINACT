@@ -1,7 +1,6 @@
-using System;
-using System.Diagnostics;
-using System.Web;
 using DarkUI.Docking;
+using System;
+using System.Web;
 
 namespace RainbowMage.OverlayPlugin {
     public partial class WSConfigPanel : DarkDockContent {

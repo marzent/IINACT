@@ -210,13 +210,11 @@ namespace Advanced_Combat_Tracker {
                     return cDamage;
                 }
                 long _damage = 0;
-                try
-                {
+                try {
                     _damage = Items.Where(masterSwing => (long)masterSwing.Damage > 0).Aggregate(0L,
                         (current, masterSwing) => (long)(current + masterSwing.Damage));
                 }
-                catch (InvalidOperationException)
-                {
+                catch (InvalidOperationException) {
                     return Damage;
                 }
 

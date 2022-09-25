@@ -1,6 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace RainbowMage.OverlayPlugin.Overlays {
     public partial class MiniParseOverlay : OverlayBase<MiniParseOverlayConfig> {

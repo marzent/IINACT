@@ -10,7 +10,7 @@ namespace FetchDependencies {
 
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
-            Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath,new ReaderParameters { AssemblyResolver = resolver });
+            Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath, new ReaderParameters { AssemblyResolver = resolver });
         }
 
         public MethodDefinition GetMethod(string name) =>

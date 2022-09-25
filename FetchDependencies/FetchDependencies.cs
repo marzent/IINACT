@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Reflection;
 
 namespace FetchDependencies {
     public class FetchDependencies {

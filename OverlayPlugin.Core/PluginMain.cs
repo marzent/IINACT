@@ -1,17 +1,17 @@
 ﻿using Advanced_Combat_Tracker;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using System;
-using System.IO;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RainbowMage.OverlayPlugin.Overlays;
 using RainbowMage.OverlayPlugin.EventSources;
-using RainbowMage.OverlayPlugin.NetworkProcessors;
 using RainbowMage.OverlayPlugin.Integration;
+using RainbowMage.OverlayPlugin.NetworkProcessors;
+using RainbowMage.OverlayPlugin.Overlays;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RainbowMage.OverlayPlugin {
     public class PluginMain {

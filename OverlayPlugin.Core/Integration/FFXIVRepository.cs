@@ -1,13 +1,13 @@
-using System;
-using System.Diagnostics;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Linq;
-using System.IO;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Logfile;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace RainbowMage.OverlayPlugin {
     /* Taken from FFIXV_ACT_Plugin.Logfile. Copy&pasted to avoid issues if the FFXIV plugin ever changes this enum. */
@@ -257,10 +257,8 @@ namespace RainbowMage.OverlayPlugin {
         private ILogOutput _logOutput;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal bool WriteLogLineImpl(uint ID, string line)
-        {
-            if (_logOutput == null)
-            {
+        internal bool WriteLogLineImpl(uint ID, string line) {
+            if (_logOutput == null) {
                 var plugin = GetPluginData();
                 _logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
             }

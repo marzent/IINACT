@@ -38,9 +38,9 @@ namespace RainbowMage.OverlayPlugin {
         /// <returns>スクリーン上にある場合は true、そうでない場合は false。</returns>
         public static bool IsOnScreen(Form form) =>
             (Screen.AllScreens
-                .Select(screen => new
-                {
-                    screen, formRectangle = new Rectangle(form.Left, form.Top, form.Width, form.Height)
+                .Select(screen => new {
+                    screen,
+                    formRectangle = new Rectangle(form.Left, form.Top, form.Width, form.Height)
                 })
                 .Where(@t => @t.screen.WorkingArea.IntersectsWith(@t.formRectangle))
                 .Select(@t => @t.screen)).Any();

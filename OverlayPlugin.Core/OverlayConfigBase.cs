@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 
 namespace RainbowMage.OverlayPlugin {
     public abstract class OverlayConfigBase : IOverlayConfig {

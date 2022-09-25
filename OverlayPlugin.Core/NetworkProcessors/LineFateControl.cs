@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace RainbowMage.OverlayPlugin.NetworkProcessors
-{
-    public class LineFateControl
-    {
+namespace RainbowMage.OverlayPlugin.NetworkProcessors {
+    public class LineFateControl {
         public const uint LogFileLineID = 258;
         private ILogger logger;
         private IOpcodeConfigEntry opcode = null;
@@ -21,8 +19,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         private Func<string, bool> logWriter;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct ActorControlSelf_v62
-        {
+        public struct ActorControlSelf_v62 {
             public ushort category;
             public ushort padding;
             public uint param1;
@@ -33,65 +30,53 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             public uint param6;
             public uint padding1;
 
-            public override string ToString()
-            {
+            public override string ToString() {
                 return $"{category:X4}|{padding:X4}|{param1:X8}|{param2:X8}|{param3:X8}|{param4:X8}|{param5:X8}|{param6:X8}|{padding1:X8}";
             }
         }
 
-        public LineFateControl(TinyIoCContainer container)
-        {
+        public LineFateControl(TinyIoCContainer container) {
             logger = container.Resolve<ILogger>();
             var ffxiv = container.Resolve<FFXIVRepository>();
             var netHelper = container.Resolve<NetworkParser>();
             if (!ffxiv.IsFFXIVPluginPresent())
                 return;
             var customLogLines = container.Resolve<FFXIVCustomLogLines>();
-            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
-            {
+            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry() {
                 Source = "OverlayPlugin",
                 ID = LogFileLineID,
                 Version = 1,
             });
-            try
-            {
+            try {
                 var mach = Assembly.Load("Machina.FFXIV");
                 var msgHeaderType = mach.GetType("Machina.FFXIV.Headers.Server_MessageHeader");
                 offsetMessageType = netHelper.GetOffset(msgHeaderType, "MessageType");
                 offsetPacketData = Marshal.SizeOf(msgHeaderType);
                 var packetType = mach.GetType("Machina.FFXIV.Headers.Server_ActorControlSelf");
-                opcode = new OpcodeConfigEntry()
-                {
+                opcode = new OpcodeConfigEntry() {
                     opcode = netHelper.GetOpcode("ActorControlSelf"),
-                    size = (uint) Marshal.SizeOf(typeof(ActorControlSelf_v62)),
+                    size = (uint)Marshal.SizeOf(typeof(ActorControlSelf_v62)),
                 };
                 ffxiv.RegisterNetworkParser(MessageReceived);
             }
-            catch (System.IO.FileNotFoundException)
-            {
+            catch (System.IO.FileNotFoundException) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserNoFfxiv);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserInitException, e);
             }
         }
 
-        private unsafe void MessageReceived(string id, long epoch, byte[] message)
-        {
+        private unsafe void MessageReceived(string id, long epoch, byte[] message) {
             if (message.Length < opcode.size + offsetPacketData)
                 return;
 
-            fixed (byte* buffer = message)
-            {
-                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode)
-                {
+            fixed (byte* buffer = message) {
+                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode) {
                     ActorControlSelf_v62 mapEffectPacket = *(ActorControlSelf_v62*)&buffer[offsetPacketData];
-                    if (FateCategories.Contains(mapEffectPacket.category))
-                    {
+                    if (FateCategories.Contains(mapEffectPacket.category)) {
                         string category = "";
-                        switch (mapEffectPacket.category)
-                        {
+                        switch (mapEffectPacket.category) {
                             case FateAddCategory:
                                 category = "Add";
                                 break;

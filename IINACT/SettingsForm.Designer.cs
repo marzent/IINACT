@@ -37,6 +37,8 @@ namespace IINACT {
             this.checkBoxPets = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxRpcap = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxShield = new DarkUI.Controls.DarkCheckBox();
+            this.logFileLabel = new DarkUI.Controls.DarkLabel();
+            this.logFileButton = new DarkUI.Controls.DarkButton();
             this.darkLabel2 = new DarkUI.Controls.DarkLabel();
             this.comboBoxFilter = new DarkUI.Controls.DarkComboBox();
             this.comboBoxLang = new DarkUI.Controls.DarkComboBox();
@@ -60,9 +62,7 @@ namespace IINACT {
             this.debugBox = new DarkUI.Controls.DarkTextBox();
             this.opPanel = new System.Windows.Forms.Panel();
             this.opLabel = new DarkUI.Controls.DarkLabel();
-            this.logFileButton = new DarkUI.Controls.DarkButton();
-            this.logFileLabel = new DarkUI.Controls.DarkLabel();
-            this.logFolderBrowserDialog = new FolderBrowserDialog();
+            this.logFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.darkSectionPanel1.SuspendLayout();
             this.rpcapSectionPanel.SuspendLayout();
             this.darkSectionPanel4.SuspendLayout();
@@ -170,6 +170,25 @@ namespace IINACT {
             this.checkBoxShield.TabIndex = 4;
             this.checkBoxShield.Text = "Disable Damage Shield Estimates";
             this.checkBoxShield.CheckedChanged += new System.EventHandler(this.checkBoxShield_CheckedChanged);
+            // 
+            // logFileLabel
+            // 
+            this.logFileLabel.AutoSize = true;
+            this.logFileLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.logFileLabel.Location = new System.Drawing.Point(12, 98);
+            this.logFileLabel.Name = "logFileLabel";
+            this.logFileLabel.Size = new System.Drawing.Size(95, 15);
+            this.logFileLabel.TabIndex = 0;
+            this.logFileLabel.Text = "Logfile Location:";
+            // 
+            // logFileButton
+            // 
+            this.logFileButton.Location = new System.Drawing.Point(172, 95);
+            this.logFileButton.Name = "logFileButton";
+            this.logFileButton.Padding = new System.Windows.Forms.Padding(5);
+            this.logFileButton.Size = new System.Drawing.Size(454, 24);
+            this.logFileButton.TabIndex = 1;
+            this.logFileButton.Text = "Log Directory";
             // 
             // darkLabel2
             // 
@@ -387,7 +406,7 @@ namespace IINACT {
             this.darkSectionPanel4.Location = new System.Drawing.Point(0, 528);
             this.darkSectionPanel4.Name = "darkSectionPanel4";
             this.darkSectionPanel4.SectionHeader = "Debug Log";
-            this.darkSectionPanel4.Size = new System.Drawing.Size(803, 178);
+            this.darkSectionPanel4.Size = new System.Drawing.Size(803, 148);
             this.darkSectionPanel4.TabIndex = 5;
             // 
             // debugBox
@@ -401,14 +420,14 @@ namespace IINACT {
             this.debugBox.Name = "debugBox";
             this.debugBox.ReadOnly = true;
             this.debugBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.debugBox.Size = new System.Drawing.Size(801, 152);
+            this.debugBox.Size = new System.Drawing.Size(801, 122);
             this.debugBox.TabIndex = 0;
             // 
             // opPanel
             // 
             this.opPanel.Controls.Add(this.opLabel);
             this.opPanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.opPanel.Location = new System.Drawing.Point(0, 450);
+            this.opPanel.Location = new System.Drawing.Point(0, 420);
             this.opPanel.Name = "opPanel";
             this.opPanel.Size = new System.Drawing.Size(803, 108);
             this.opPanel.TabIndex = 6;
@@ -424,24 +443,6 @@ namespace IINACT {
             this.opLabel.TabIndex = 0;
             this.opLabel.Text = "...Searching for game";
             this.opLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
-            // logFileButton
-            //
-            this.logFileButton.Name = "logFileButton";
-            this.logFileButton.Text = "Log Directory";
-            this.logFileButton.Size = new System.Drawing.Size(227, 24);
-            this.logFileButton.Location = new System.Drawing.Point(172, 95);
-            this.logFileButton.TabIndex = 1;
-            // 
-            // logFileLabel
-            // 
-            this.logFileLabel.AutoSize = true;
-            this.logFileLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.logFileLabel.Location = new System.Drawing.Point(12, 98);
-            this.logFileLabel.Name = "logFileLabel";
-            this.logFileLabel.Size = new System.Drawing.Size(96, 15);
-            this.logFileLabel.TabIndex = 0;
-            this.logFileLabel.Text = "Logfile Location:";
             // 
             // SettingsForm
             // 

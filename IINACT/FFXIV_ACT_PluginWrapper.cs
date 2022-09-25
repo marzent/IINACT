@@ -72,7 +72,7 @@ public class FfxivActPluginWrapper {
         var settingsMediator = _ffxivActPlugin._dataCollection._settingsMediator;
 
         DataCollectionSettings = new DataCollectionSettingsEventArgs {
-            LogFileFolder = ResolvedLogFilePath(),
+            LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
             UseWinPCap = true
         };
@@ -138,16 +138,6 @@ public class FfxivActPluginWrapper {
     }
 
     private static void OnProcessException(DateTime timestamp, string text) {
-    }
-
-    private string ResolvedLogFilePath()
-    {
-        if (Settings.Default.LogFilePath.Length > 1 && Directory.Exists(Settings.Default.LogFilePath))
-        {
-            return Settings.Default.LogFilePath;
-        }
-
-        return ActGlobals.oFormActMain.LogFilePath;
     }
 
 }

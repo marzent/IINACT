@@ -28,7 +28,9 @@ namespace IINACT {
             textBoxPassword.Text = Settings.Default.RPcapPassword;
             rpcapSectionPanel.Height = Settings.Default.RPcap ? 200 : 0;
             logFileButton.Click += logFileButton_Clicked;
-
+            if (Directory.Exists(Settings.Default.LogFilePath))
+                ActGlobals.oFormActMain.LogFilePath = Settings.Default.LogFilePath;
+            logFileButton.Text = ActGlobals.oFormActMain.LogFilePath;
 
             //create window handle
             Opacity = 0;
@@ -116,8 +118,7 @@ namespace IINACT {
             Settings.Default.Save();
         }
 
-        private void TextBoxPort_TextChanged(object sender, EventArgs e)
-        {
+        private void TextBoxPort_TextChanged(object sender, EventArgs e) {
             if (!int.TryParse(textBoxPort.Text, out var port)) return;
             Settings.Default.RPcapPort = port;
             Settings.Default.Save();
@@ -133,15 +134,17 @@ namespace IINACT {
             Settings.Default.Save();
         }
 
-        private void logFileButton_Clicked(object? sender, EventArgs e)
-        {
+        private void logFileButton_Clicked(object? sender, EventArgs e) {
             // Show the FolderBrowserDialog.
-            DialogResult result = logFolderBrowserDialog.ShowDialog();
-            if(result == DialogResult.OK)
-            {
-                Settings.Default.LogFilePath = logFolderBrowserDialog.SelectedPath;
-                Settings.Default.Save();
-            }
+            var result = logFolderBrowserDialog.ShowDialog();
+            if (result != DialogResult.OK)
+                return;
+            var newPath = logFolderBrowserDialog.SelectedPath ?? "";
+            if (!Directory.Exists(newPath))
+                return;
+            ActGlobals.oFormActMain.LogFilePath = newPath;
+            Settings.Default.LogFilePath = newPath;
+            Settings.Default.Save();
         }
 
     }

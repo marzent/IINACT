@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace RainbowMage.OverlayPlugin.EventSources {
     [Serializable]
@@ -13,8 +13,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         public CactbotEventSourceConfig() {
         }
 
-        public static CactbotEventSourceConfig LoadConfig(IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger)
-        {
+        public static CactbotEventSourceConfig LoadConfig(IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger) {
             _pluginConfig = pluginConfig;
             var result = new CactbotEventSourceConfig();
 

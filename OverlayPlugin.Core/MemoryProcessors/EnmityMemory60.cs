@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace RainbowMage.OverlayPlugin.MemoryProcessors
-{
-    public class EnmityMemory60 : EnmityMemory
-    {
+namespace RainbowMage.OverlayPlugin.MemoryProcessors {
+    public class EnmityMemory60 : EnmityMemory {
         private FFXIVMemory memory;
         private ILogger logger;
         private DateTime lastSigScan = DateTime.MinValue;
@@ -50,16 +48,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         private const uint emptyID = 0xE0000000;
         private const int numMemoryCombatants = 421;
 
-        public EnmityMemory60(TinyIoCContainer container)
-        {
+        public EnmityMemory60(TinyIoCContainer container) {
             this.memory = new FFXIVMemory(container);
             this.memory.OnProcessChange += ResetPointers;
             this.logger = container.Resolve<ILogger>();
             GetPointerAddress();
         }
 
-        private void ResetPointers(object sender, EventArgs _)
-        {
+        private void ResetPointers(object sender, EventArgs _) {
             charmapAddress = IntPtr.Zero;
             targetAddress = IntPtr.Zero;
             enmityAddress = IntPtr.Zero;
@@ -67,8 +63,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             inCombatAddress = IntPtr.Zero;
         }
 
-        private bool HasValidPointers()
-        {
+        private bool HasValidPointers() {
             if (charmapAddress == IntPtr.Zero)
                 return false;
             if (targetAddress == IntPtr.Zero)
@@ -82,8 +77,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return true;
         }
 
-        public override bool IsValid()
-        {
+        public override bool IsValid() {
             if (!memory.IsValid())
                 return false;
 
@@ -96,8 +90,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return true;
         }
 
-        private bool GetPointerAddress()
-        {
+        private bool GetPointerAddress() {
             if (!memory.IsValid())
                 return false;
 
@@ -113,12 +106,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             /// CHARMAP
             var list = memory.SigScan(charmapSignature, 0, bRIP);
-            if (list != null && list.Count > 0)
-            {
+            if (list != null && list.Count > 0) {
                 charmapAddress = list[0] + charmapSignatureOffset;
-            }
-            else
-            {
+            } else {
                 charmapAddress = IntPtr.Zero;
                 fail.Add(nameof(charmapAddress));
                 success = false;
@@ -126,13 +116,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             // ENMITY
             list = memory.SigScan(enmitySignature, 0, bRIP);
-            if (list != null && list.Count > 0)
-            {
+            if (list != null && list.Count > 0) {
                 enmityAddress = IntPtr.Add(list[0], enmitySignatureOffset);
                 aggroAddress = IntPtr.Add(list[0], aggroEnmityOffset);
-            }
-            else
-            {
+            } else {
                 enmityAddress = IntPtr.Zero;
                 aggroAddress = IntPtr.Zero;
                 fail.Add(nameof(enmityAddress));
@@ -143,12 +130,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             /// TARGET
             list = memory.SigScan(targetSignature, 0, bRIP);
 
-            if (list != null && list.Count > 0)
-            {
+            if (list != null && list.Count > 0) {
                 targetAddress = list[0] + targetSignatureOffset;
-            }
-            else
-            {
+            } else {
                 targetAddress = IntPtr.Zero;
                 fail.Add(nameof(targetAddress));
                 success = false;
@@ -160,14 +144,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var baseList = memory.SigScan(inCombatSignature, inCombatSignatureBaseOffset, bRIP);
             // SigScan returns pointers, but the offset is a 32-bit immediate value.  Do not use RIP.
             var offsetList = memory.SigScan(inCombatSignature, inCombatSignatureOffsetOffset, false);
-            if (baseList != null && baseList.Count > 0 && offsetList != null && offsetList.Count > 0)
-            {
+            if (baseList != null && baseList.Count > 0 && offsetList != null && offsetList.Count > 0) {
                 var baseAddress = baseList[0];
                 var offset = (int)(((UInt64)offsetList[0]) & 0xFFFFFFFF);
                 inCombatAddress = IntPtr.Add(baseAddress, offset);
-            }
-            else
-            {
+            } else {
                 inCombatAddress = IntPtr.Zero;
                 fail.Add(nameof(inCombatAddress));
                 success = false;
@@ -175,18 +156,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             // EnmityList
             list = memory.SigScan(enmityHudSignature, 0, bRIP);
-            if (list != null && list.Count == 1)
-            {
+            if (list != null && list.Count == 1) {
                 enmityHudAddress = list[0] + enmityHudSignatureOffset;
 
-                if (enmityHudAddress == IntPtr.Zero)
-                {
+                if (enmityHudAddress == IntPtr.Zero) {
                     fail.Add(nameof(enmityHudAddress));
                     success = false;
                 }
-            }
-            else
-            {
+            } else {
                 enmityHudAddress = IntPtr.Zero;
                 fail.Add(nameof(enmityHudAddress));
                 success = false;
@@ -200,26 +177,20 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             logger.Log(LogLevel.Debug, "enmityListAddress: 0x{0:X}", enmityHudAddress.ToInt64());
 
             var c = GetSelfCombatant();
-            if (c != null)
-            {
+            if (c != null) {
                 logger.Log(LogLevel.Debug, "MyCharacter: '{0}' (0x{1:X})", c.Name, c.ID);
             }
 
-            if (!success)
-            {
-                if (loggedScanErrors < 10)
-                {
+            if (!success) {
+                if (loggedScanErrors < 10) {
                     logger.Log(LogLevel.Error, "Failed to find enmity memory for 6.0: {0}.", String.Join(",", fail));
                     loggedScanErrors++;
 
-                    if (loggedScanErrors == 10)
-                    {
+                    if (loggedScanErrors == 10) {
                         logger.Log(LogLevel.Error, "Further enmity errors won't be logged.");
                     }
                 }
-            }
-            else
-            {
+            } else {
                 logger.Log(LogLevel.Info, "Found enmity memory for 6.0.");
                 loggedScanErrors = 0;
             }
@@ -227,8 +198,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return success;
         }
 
-        private Combatant GetTargetRelativeCombatant(int offset)
-        {
+        private Combatant GetTargetRelativeCombatant(int offset) {
             var address = memory.ReadIntPtr(IntPtr.Add(targetAddress, offset));
             if (address == IntPtr.Zero)
                 return null;
@@ -236,13 +206,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return GetCombatantFromByteArray(source, 0, false);
         }
 
-        public override Combatant GetTargetCombatant()
-        {
+        public override Combatant GetTargetCombatant() {
             return GetTargetRelativeCombatant(targetTargetOffset);
         }
 
-        public override Combatant GetSelfCombatant()
-        {
+        public override Combatant GetSelfCombatant() {
             var address = memory.ReadIntPtr(charmapAddress);
             if (address == IntPtr.Zero)
                 return null;
@@ -250,18 +218,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return GetCombatantFromByteArray(source, 0, true, true);
         }
 
-        public override Combatant GetFocusCombatant()
-        {
+        public override Combatant GetFocusCombatant() {
             return GetTargetRelativeCombatant(focusTargetOffset);
         }
 
-        public override Combatant GetHoverCombatant()
-        {
+        public override Combatant GetHoverCombatant() {
             return GetTargetRelativeCombatant(hoverTargetOffset);
         }
 
-        public override unsafe List<Combatant> GetCombatantList()
-        {
+        public override unsafe List<Combatant> GetCombatantList() {
             var result = new List<Combatant>();
             var seen = new HashSet<uint>();
             var mychar = GetSelfCombatant();
@@ -271,8 +236,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             if (source == null || source.Length == 0)
                 return result;
 
-            for (var i = 0; i < numMemoryCombatants; i++)
-            {
+            for (var i = 0; i < numMemoryCombatants; i++) {
                 IntPtr p;
                 fixed (byte* bp = source) p = new IntPtr(*(Int64*)&bp[i * sz]);
 
@@ -295,10 +259,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         // Returns a combatant if the combatant is a mob or a PC.
-        public unsafe Combatant GetMobFromByteArray(byte[] source, uint mycharID)
-        {
-            fixed (byte* p = source)
-            {
+        public unsafe Combatant GetMobFromByteArray(byte[] source, uint mycharID) {
+            fixed (byte* p = source) {
                 var mem = *(CombatantMemory*)&p[0];
                 var type = (ObjectType)mem.Type;
                 if (type != ObjectType.PC && type != ObjectType.Monster)
@@ -310,8 +272,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        public unsafe struct CombatantMemory
-        {
+        public unsafe struct CombatantMemory {
             public static int Size => Marshal.SizeOf(typeof(CombatantMemory));
 
             // Unknown size, but this is the bytes up to the next field.
@@ -326,26 +287,20 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x74)]
             public uint ID;
 
+            [FieldOffset(0x80)]
+            public uint BNpcID;
+
             [FieldOffset(0x84)]
             public uint OwnerID;
 
             [FieldOffset(0x8C)]
             public byte Type;
 
-            [FieldOffset(0x19C3)]
-            public byte MonsterType;
+            [FieldOffset(0x92)]
+            public byte EffectiveDistance;
 
             [FieldOffset(0x94)]
             public byte Status;
-
-            [FieldOffset(0x104)]
-            public int ModelStatus;
-
-            [FieldOffset(0x19DF)]
-            public byte AggressionStatus;
-
-            [FieldOffset(0x92)]
-            public byte EffectiveDistance;
 
             [FieldOffset(0xA0)]
             public Single PosX;
@@ -357,13 +312,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public Single PosZ;
 
             [FieldOffset(0xB0)]
-            public Single Rotation;
+            public Single Heading;
 
             [FieldOffset(0XC0)]
             public Single Radius;
 
-            [FieldOffset(0x1940)]
-            public uint TargetID;
+            [FieldOffset(0x104)]
+            public int ModelStatus;
 
             [FieldOffset(0x1C4)]
             public int CurrentHP;
@@ -371,16 +326,42 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x1C8)]
             public int MaxHP;
 
+            [FieldOffset(0x1CC)]
+            public int CurrentMP;
+
+            [FieldOffset(0x1D0)]
+            public int MaxMP;
+
             [FieldOffset(0x1E0)]
             public byte Job;
+
+            [FieldOffset(0x1E1)]
+            public byte Level;
+
+            [FieldOffset(0x19C3)]
+            public byte MonsterType;
+
+            [FieldOffset(0x19DF)]
+            public byte AggressionStatus;
+
+            [FieldOffset(0x1940)]
+            public uint TargetID;
+
+            [FieldOffset(0x1984)]
+            public uint BNpcNameID;
+
+            [FieldOffset(0x19A0)]
+            public ushort CurrentWorldID;
+
+            [FieldOffset(0x19A2)]
+            public ushort WorldID;
 
             [FieldOffset(0x1A38)]
             public fixed byte Effects[effectBytes];
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 12)]
-        public struct EffectMemory
-        {
+        public struct EffectMemory {
             public static int Size => Marshal.SizeOf(typeof(EffectMemory));
 
             [FieldOffset(0)]
@@ -398,19 +379,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // Will return any kind of combatant, even if not a mob.
         // This function always returns a combatant object, even if empty.
-        public unsafe Combatant GetCombatantFromByteArray(byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false)
-        {
-            fixed (byte* p = source)
-            {
+        public unsafe Combatant GetCombatantFromByteArray(byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false) {
+            fixed (byte* p = source) {
                 var mem = *(CombatantMemory*)&p[0];
 
-                if (isPlayer)
-                {
+                if (isPlayer) {
                     mycharID = mem.ID;
                 }
 
-                var combatant = new Combatant()
-                {
+                var combatant = new Combatant() {
                     Name = FFXIVMemory.GetStringFromBytes(mem.Name, CombatantMemory.nameBytes),
                     Job = mem.Job,
                     ID = mem.ID,
@@ -423,20 +400,29 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     AggressionStatus = (AggressionStatus)(mem.AggressionStatus - (mem.AggressionStatus / 4) * 4),
                     RawEffectiveDistance = mem.EffectiveDistance,
                     PosX = mem.PosX,
-                    PosY = mem.PosY,
-                    PosZ = mem.PosZ,
-                    Rotation = mem.Rotation,
+                    PosY = mem.PosZ,
+                    PosZ = mem.PosY,
+                    Heading = mem.Heading,
                     Radius = mem.Radius,
                     TargetID = mem.TargetID,
                     CurrentHP = mem.CurrentHP,
                     MaxHP = mem.MaxHP,
                     Effects = exceptEffects ? new List<EffectEntry>() : GetEffectEntries(mem.Effects, (ObjectType)mem.Type, mycharID),
+
+                    BNpcID = mem.BNpcID,
+                    CurrentMP = mem.CurrentMP,
+                    MaxMP = mem.MaxMP,
+                    Level = mem.Level,
+
+                    BNpcNameID = mem.BNpcNameID,
+
+                    WorldID = mem.WorldID,
+                    CurrentWorldID = mem.CurrentWorldID,
                 };
-                combatant.IsTargetable = 
-                    (combatant.ModelStatus == ModelStatus.Visible) 
+                combatant.IsTargetable =
+                    (combatant.ModelStatus == ModelStatus.Visible)
                     && ((combatant.Status == ObjectStatus.NormalActorStatus) || (combatant.Status == ObjectStatus.NormalSubActorStatus));
-                if (combatant.Type != ObjectType.PC && combatant.Type != ObjectType.Monster)
-                {
+                if (combatant.Type != ObjectType.PC && combatant.Type != ObjectType.Monster) {
                     // Other types have garbage memory for hp.
                     combatant.CurrentHP = 0;
                     combatant.MaxHP = 0;
@@ -446,8 +432,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 8)]
-        private struct EnmityListEntry
-        {
+        private struct EnmityListEntry {
             public static int Size => Marshal.SizeOf(typeof(EnmityListEntry));
 
             [FieldOffset(0x00)]
@@ -459,8 +444,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // A byte[] -> EnmityListEntry[] converter.
         // Owns the memory and returns out EnmityListEntry objects from it.
-        private class EnmityList
-        {
+        private class EnmityList {
             public int numEntries = 0;
             private byte[] buffer;
 
@@ -469,16 +453,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             // The number of entries is a short at the end of the array of entries.  Hence, +2.
             public const int totalBytesSize = numEntryOffset + 2;
 
-            public unsafe EnmityListEntry GetEntry(int i)
-            {
-                fixed (byte* p = buffer)
-                {
+            public unsafe EnmityListEntry GetEntry(int i) {
+                fixed (byte* p = buffer) {
                     return *(EnmityListEntry*)&p[i * EnmityListEntry.Size];
                 }
             }
 
-            public unsafe EnmityList(byte[] buffer)
-            {
+            public unsafe EnmityList(byte[] buffer) {
                 Debug.Assert(maxEntries * EnmityListEntry.Size <= totalBytesSize);
                 Debug.Assert(buffer.Length >= totalBytesSize);
 
@@ -487,32 +468,27 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             }
         }
 
-        private EnmityList ReadEnmityList(IntPtr address)
-        {
+        private EnmityList ReadEnmityList(IntPtr address) {
             return new EnmityList(memory.GetByteArray(address, EnmityList.totalBytesSize));
         }
 
         // Converts an EnmityList into a List<EnmityEntry>.
-        public override List<EnmityEntry> GetEnmityEntryList(List<Combatant> combatantList)
-        {
+        public override List<EnmityEntry> GetEnmityEntryList(List<Combatant> combatantList) {
             uint topEnmity = 0;
             var mychar = GetSelfCombatant();
             var result = new List<EnmityEntry>();
 
             var list = ReadEnmityList(enmityAddress);
-            for (var i = 0; i < list.numEntries; i++)
-            {
+            for (var i = 0; i < list.numEntries; i++) {
                 var e = list.GetEntry(i);
                 topEnmity = Math.Max(topEnmity, e.Enmity);
 
                 Combatant c = null;
-                if (e.ID > 0)
-                {
+                if (e.ID > 0) {
                     c = combatantList.Find(x => x.ID == e.ID);
                 }
 
-                var entry = new EnmityEntry()
-                {
+                var entry = new EnmityEntry() {
                     ID = e.ID,
                     Enmity = e.Enmity,
                     isMe = e.ID == mychar.ID,
@@ -528,8 +504,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 72)]
-        private struct AggroListEntry
-        {
+        private struct AggroListEntry {
             public static int Size => Marshal.SizeOf(typeof(AggroListEntry));
 
             [FieldOffset(0x38)]
@@ -541,8 +516,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // A byte[] -> AggroListEntry[] converter.
         // Owns the memory and returns out AggroListEntry objects from it.
-        private class AggroList
-        {
+        private class AggroList {
             public int numEntries = 0;
             private byte[] buffer;
 
@@ -551,16 +525,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             // The number of entries is a short at the end of the array of entries.  Hence, +2.
             public const int totalBytesSize = numEntryOffset + 2;
 
-            public unsafe AggroListEntry GetEntry(int i)
-            {
-                fixed (byte* p = buffer)
-                {
+            public unsafe AggroListEntry GetEntry(int i) {
+                fixed (byte* p = buffer) {
                     return *(AggroListEntry*)&p[i * AggroListEntry.Size];
                 }
             }
 
-            public unsafe AggroList(byte[] buffer)
-            {
+            public unsafe AggroList(byte[] buffer) {
                 Debug.Assert(maxEntries * AggroListEntry.Size <= totalBytesSize);
                 Debug.Assert(buffer.Length >= totalBytesSize);
 
@@ -569,28 +540,24 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             }
         }
 
-        private AggroList ReadAggroList(IntPtr address)
-        {
+        private AggroList ReadAggroList(IntPtr address) {
             return new AggroList(memory.GetByteArray(address, AggroList.totalBytesSize));
         }
 
         // Converts an EnmityList into a List<AggroEntry>.
-        public override unsafe List<AggroEntry> GetAggroList(List<Combatant> combatantList)
-        {
+        public override unsafe List<AggroEntry> GetAggroList(List<Combatant> combatantList) {
             var mychar = GetSelfCombatant();
 
             uint currentTargetID = 0;
             var targetCombatant = GetTargetCombatant();
-            if (targetCombatant != null)
-            {
+            if (targetCombatant != null) {
                 currentTargetID = targetCombatant.ID;
             }
 
             var result = new List<AggroEntry>();
 
             var list = ReadAggroList(aggroAddress);
-            for (var i = 0; i < list.numEntries; i++)
-            {
+            for (var i = 0; i < list.numEntries; i++) {
                 var e = list.GetEntry(i);
                 if (e.ID <= 0)
                     continue;
@@ -598,8 +565,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 if (c == null)
                     continue;
 
-                var entry = new AggroEntry()
-                {
+                var entry = new AggroEntry() {
                     ID = e.ID,
                     // Rather than storing enmity, this is hate rate for the aggro list.
                     // This is likely because we're reading the memory for the aggro sidebar.
@@ -615,13 +581,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 // TODO: it seems like when your chocobo has aggro, this entry
                 // is you, and not your chocobo.  It's not clear if there's
                 // anything that can be done about it.
-                if (c.TargetID > 0)
-                {
+                if (c.TargetID > 0) {
                     var t = combatantList.Find(x => x.ID == c.TargetID);
-                    if (t != null)
-                    {
-                        entry.Target = new EnmityEntry()
-                        {
+                    if (t != null) {
+                        entry.Target = new EnmityEntry() {
                             ID = t.ID,
                             Name = t.Name,
                             OwnerID = t.OwnerID,
@@ -637,16 +600,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return result;
         }
 
-        public override List<TargetableEnemyEntry> GetTargetableEnemyList(List<Combatant> combatantList)
-        {
+        public override List<TargetableEnemyEntry> GetTargetableEnemyList(List<Combatant> combatantList) {
             var enemyList = new List<TargetableEnemyEntry>();
-            for (var i = 0; i != combatantList.Count; ++i)
-            {
+            for (var i = 0; i != combatantList.Count; ++i) {
                 var combatant = combatantList[i];
                 var isHostile = (combatant.Type == ObjectType.Monster) && (combatant.MonsterType == MonsterType.Hostile);
                 if (!isHostile || !combatant.IsTargetable) continue;
-                var entry = new TargetableEnemyEntry
-                {
+                var entry = new TargetableEnemyEntry {
                     ID = combatant.ID,
                     Name = combatant.Name,
                     CurrentHP = combatant.CurrentHP,
@@ -659,8 +619,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return enemyList;
         }
 
-        public unsafe List<EffectEntry> GetEffectEntries(byte* source, ObjectType type, uint mycharID)
-        {
+        public unsafe List<EffectEntry> GetEffectEntries(byte* source, ObjectType type, uint mycharID) {
             var result = new List<EffectEntry>();
             var maxEffects = (type == ObjectType.PC) ? 30 : 60;
             var size = EffectMemory.Size * maxEffects;
@@ -668,15 +627,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var bytes = new byte[size];
             Marshal.Copy((IntPtr)source, bytes, 0, size);
 
-            for (var i = 0; i < maxEffects; i++)
-            {
+            for (var i = 0; i < maxEffects; i++) {
                 var effect = GetEffectEntryFromBytes(bytes, i);
 
                 if (effect.BuffID > 0 &&
                     effect.Stack >= 0 &&
                     effect.Timer >= 0.0f &&
-                    effect.ActorID > 0)
-                {
+                    effect.ActorID > 0) {
                     effect.isOwner = effect.ActorID == mycharID;
 
                     result.Add(effect);
@@ -686,14 +643,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return result;
         }
 
-        public unsafe EffectEntry GetEffectEntryFromBytes(byte[] source, int num = 0)
-        {
-            fixed (byte* p = source)
-            {
+        public unsafe EffectEntry GetEffectEntryFromBytes(byte[] source, int num = 0) {
+            fixed (byte* p = source) {
                 var mem = *(EffectMemory*)&p[num * EffectMemory.Size];
 
-                var effectEntry = new EffectEntry()
-                {
+                var effectEntry = new EffectEntry() {
                     BuffID = mem.BuffID,
                     Stack = mem.Stack,
                     Timer = mem.Timer,
@@ -705,8 +659,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             }
         }
 
-        public override bool GetInCombat()
-        {
+        public override bool GetInCombat() {
             if (inCombatAddress == IntPtr.Zero)
                 return false;
             var bytes = memory.Read8(inCombatAddress, 1);
@@ -714,8 +667,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 24)]
-        private struct EnmityHudEntryMemory
-        {
+        private struct EnmityHudEntryMemory {
             public static int Size => Marshal.SizeOf(typeof(EnmityHudEntryMemory));
 
             [FieldOffset(0x00)]
@@ -737,23 +689,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public uint Unknown02;
         }
 
-        public override List<EnmityHudEntry> GetEnmityHudEntries()
-        {
+        public override List<EnmityHudEntry> GetEnmityHudEntries() {
             var entries = new List<EnmityHudEntry>();
             if (enmityHudAddress == IntPtr.Zero) return entries;
 
             // Resolve Dynamic Pointers
-            if (DateTimeOffset.UtcNow - lastDateTimeDynamicAddressChecked > TimeSpan.FromSeconds(30))
-            {
+            if (DateTimeOffset.UtcNow - lastDateTimeDynamicAddressChecked > TimeSpan.FromSeconds(30)) {
                 lastDateTimeDynamicAddressChecked = DateTimeOffset.UtcNow;
                 var tmpEnmityHudDynamicAddress = memory.ReadIntPtr(enmityHudAddress);
-                for (var i = 0; i < enmityHudPointerPath.Length; i++)
-                {
+                for (var i = 0; i < enmityHudPointerPath.Length; i++) {
                     var p = enmityHudPointerPath[i];
                     tmpEnmityHudDynamicAddress = tmpEnmityHudDynamicAddress + p;
                     tmpEnmityHudDynamicAddress = memory.ReadIntPtr(tmpEnmityHudDynamicAddress);
-                    if (tmpEnmityHudDynamicAddress == IntPtr.Zero)
-                    {
+                    if (tmpEnmityHudDynamicAddress == IntPtr.Zero) {
                         enmityHudDynamicAddress = IntPtr.Zero;
                         return entries;
                     }
@@ -770,25 +718,21 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var buffer = memory.GetByteArray(enmityHudDynamicAddress + enmityHudEntryOffset, 8 * EnmityHudEntryMemory.Size);
 
             // Parse data
-            for (var i = 0; i < count; i++)
-            {
+            for (var i = 0; i < count; i++) {
                 entries.Add(GetEnmityHudEntryFromBytes(buffer, i));
             }
 
             return entries;
         }
 
-        public unsafe EnmityHudEntry GetEnmityHudEntryFromBytes(byte[] source, int num = 0)
-        {
+        public unsafe EnmityHudEntry GetEnmityHudEntryFromBytes(byte[] source, int num = 0) {
             if (num < 0) throw new ArgumentException();
             if (num > 8) throw new ArgumentException();
 
-            fixed (byte* p = source)
-            {
+            fixed (byte* p = source) {
                 var mem = *(EnmityHudEntryMemory*)&p[num * EnmityHudEntryMemory.Size];
 
-                var enmityHudEntry = new EnmityHudEntry()
-                {
+                var enmityHudEntry = new EnmityHudEntry() {
                     Order = num,
                     ID = mem.ID,
                     HPPercent = mem.HPPercent > 100 ? 0 : mem.HPPercent,

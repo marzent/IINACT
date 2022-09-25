@@ -49,7 +49,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
 
         private static readonly CEDirectorOPCodes cedirector_intl = new CEDirectorOPCodes(
           0x30,
-          0x108
+          0x2ee
         );
 
         private struct ActorControlSelf {
@@ -201,100 +201,100 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
             finally {
                 fateSemaphore.Release();
             }
-}
+        }
 
-public unsafe void ProcessCEDirector(byte* buffer, byte[] message) {
-    var data = *(CEDirectorData*)&buffer[0];
+        public unsafe void ProcessCEDirector(byte* buffer, byte[] message) {
+            var data = *(CEDirectorData*)&buffer[0];
 
-    ceSemaphore.WaitAsync();
-    try {
-        if (data.status != 0 && !ces.ContainsKey(data.ceKey)) {
-            AddCE(data);
-            return;
-        } else {
+            ceSemaphore.WaitAsync();
+            try {
+                if (data.status != 0 && !ces.ContainsKey(data.ceKey)) {
+                    AddCE(data);
+                    return;
+                } else {
 
-            // Don't update if key is about to be removed
-            if (!ces[data.ceKey].Equals(data) &&
-              data.status != 0) {
-                UpdateCE(data.ceKey, data);
-                return;
+                    // Don't update if key is about to be removed
+                    if (!ces[data.ceKey].Equals(data) &&
+                      data.status != 0) {
+                        UpdateCE(data.ceKey, data);
+                        return;
+                    }
+
+                    // Needs removing
+                    if (data.status == 0) {
+                        RemoveCE(data);
+                        return;
+                    }
+                }
             }
-
-            // Needs removing
-            if (data.status == 0) {
-                RemoveCE(data);
-                return;
+            finally {
+                ceSemaphore.Release();
             }
         }
-    }
-    finally {
-        ceSemaphore.Release();
-    }
-}
 
-private void AddCE(CEDirectorData data) {
-    ces.Add(data.ceKey, data);
-    // TODO
-    // client_.DoCEEvent(new JSEvents.CEEvent("add", JObject.FromObject(data)));
-}
+        private void AddCE(CEDirectorData data) {
+            ces.Add(data.ceKey, data);
+            // TODO
+            // client_.DoCEEvent(new JSEvents.CEEvent("add", JObject.FromObject(data)));
+        }
 
-private void RemoveCE(CEDirectorData data) {
-    if (ces.ContainsKey(data.ceKey)) {
-        // TODO
-        // client_.DoCEEvent(new JSEvents.CEEvent("remove", JObject.FromObject(data)));
-        ces.Remove(data.ceKey);
-    }
-}
-private void UpdateCE(byte ceKey, CEDirectorData data) {
-    ces[data.ceKey] = data;
-    // TODO
-    // client_.DoCEEvent(new JSEvents.CEEvent("update", JObject.FromObject(data)));
-}
+        private void RemoveCE(CEDirectorData data) {
+            if (ces.ContainsKey(data.ceKey)) {
+                // TODO
+                // client_.DoCEEvent(new JSEvents.CEEvent("remove", JObject.FromObject(data)));
+                ces.Remove(data.ceKey);
+            }
+        }
+        private void UpdateCE(byte ceKey, CEDirectorData data) {
+            ces[data.ceKey] = data;
+            // TODO
+            // client_.DoCEEvent(new JSEvents.CEEvent("update", JObject.FromObject(data)));
+        }
 
-public void RemoveAndClearCEs() {
-    foreach (var ceKey in ces.Keys) {
-        // TODO
-        // client_.DoCEEvent(new JSEvents.CEEvent("remove", JObject.FromObject(ces[ceKey])));
-    }
-    ces.Clear();
-}
+        public void RemoveAndClearCEs() {
+            foreach (var ceKey in ces.Keys) {
+                // TODO
+                // client_.DoCEEvent(new JSEvents.CEEvent("remove", JObject.FromObject(ces[ceKey])));
+            }
+            ces.Clear();
+        }
 
-private void AddFate(int fateID) {
-    if (!fates.ContainsKey(fateID)) {
-        fates[fateID] = 0;
-        OnFateChanged(null, new FateChangedArgs("add", fateID, 0));
-    }
-}
+        private void AddFate(int fateID) {
+            if (!fates.ContainsKey(fateID)) {
+                fates[fateID] = 0;
+                OnFateChanged(null, new FateChangedArgs("add", fateID, 0));
+            }
+        }
 
-private void RemoveFate(int fateID) {
-    if (fates.ContainsKey(fateID)) {
-        OnFateChanged(null, new FateChangedArgs("remove", fateID, fates[fateID]));
-        fates.Remove(fateID);
-    }
-}
+        private void RemoveFate(int fateID) {
+            if (fates.ContainsKey(fateID)) {
+                OnFateChanged(null, new FateChangedArgs("remove", fateID, fates[fateID]));
+                fates.Remove(fateID);
+            }
+        }
 
-private void UpdateFate(int fateID, int progress) {
-    fates[fateID] = progress;
-    OnFateChanged(null, new FateChangedArgs("update", fateID, progress));
-}
+        private void UpdateFate(int fateID, int progress) {
+            fates[fateID] = progress;
+            OnFateChanged(null, new FateChangedArgs("update", fateID, progress));
+        }
 
-public void RemoveAndClearFates() {
-    foreach (var fateID in fates.Keys) {
-        OnFateChanged(null, new FateChangedArgs("remove", fateID, fates[fateID]));
-    }
-    fates.Clear();
-}
+        public void RemoveAndClearFates() {
+            foreach (var fateID in fates.Keys) {
+                OnFateChanged(null, new FateChangedArgs("remove", fateID, fates[fateID]));
+            }
+            fates.Clear();
+        }
 
-public class FateChangedArgs : EventArgs {
-    public string eventType { get; private set; }
-    public int fateID { get; private set; }
-    public int progress { get; private set; }
+        public class FateChangedArgs : EventArgs {
+            public string eventType { get; private set; }
+            public int fateID { get; private set; }
+            public int progress { get; private set; }
 
-    public FateChangedArgs(string eventType, int fateID, int progress) : base() {
-        this.eventType = eventType;
-        this.fateID = fateID;
-        this.progress = progress;
-    }
-}
+            public FateChangedArgs(string eventType, int fateID, int progress) : base() {
+                this.eventType = eventType;
+                this.fateID = fateID;
+                this.progress = progress;
+            }
+        }
     }
 }

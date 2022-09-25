@@ -11,6 +11,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Version>6.9</Version>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

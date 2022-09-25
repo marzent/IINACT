@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin {
     public abstract class OverlayBase<TConfig> : IOverlay, IEventReceiver, IApiBase
@@ -23,8 +23,7 @@ namespace RainbowMage.OverlayPlugin {
         /// <summary>
         /// オーバーレイがログを出力したときに発生します。
         /// </summary>
-        event EventHandler<LogEventArgs> IOverlay.OnLog
-        {
+        event EventHandler<LogEventArgs> IOverlay.OnLog {
             add => this.OnLog += value;
             remove => this.OnLog -= value;
         }
@@ -32,7 +31,7 @@ namespace RainbowMage.OverlayPlugin {
         /// <summary>
         /// ユーザーが設定したオーバーレイの名前を取得します。
         /// </summary>
-        public string Name { get; private set;  }
+        public string Name { get; private set; }
 
         /// <summary>
         /// ユーザーが設定したオーバーレイの名前を取得します。

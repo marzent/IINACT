@@ -134,8 +134,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             return dialog.SelectedPath;
         }
 
-        public override void LoadConfig(IPluginConfig config)
-        {
+        public override void LoadConfig(IPluginConfig config) {
             Config = CactbotEventSourceConfig.LoadConfig(config, logger);
             Config.OverlayData ??= new Dictionary<string, JToken>();
         }

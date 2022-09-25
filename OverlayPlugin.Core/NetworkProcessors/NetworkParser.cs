@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
-namespace RainbowMage.OverlayPlugin.NetworkProcessors
-{
-    internal class NetworkParser
-    {
+namespace RainbowMage.OverlayPlugin.NetworkProcessors {
+    internal class NetworkParser {
         public event EventHandler<OnlineStatusChangedArgs> OnOnlineStatusChanged;
 
         private Type MessageType = null;
@@ -21,19 +19,16 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
          * against. I want to avoid copying the relevant structures so reflection is the last option left.
         */
 
-        public NetworkParser(TinyIoCContainer container)
-        {
+        public NetworkParser(TinyIoCContainer container) {
             var logger = container.Resolve<ILogger>();
 
-            try
-            {
+            try {
                 var mach = Assembly.Load("Machina.FFXIV");
                 MessageType = mach.GetType("Machina.FFXIV.Headers.Server_MessageType");
 
                 var ActorControl142 = mach.GetType("Machina.FFXIV.Headers.Server_ActorControl");
                 var oldStructNames = false;
-                if (ActorControl142 == null)
-                {
+                if (ActorControl142 == null) {
                     oldStructNames = true;
                     ActorControl142 = mach.GetType("Machina.FFXIV.Headers.Server_ActorControl142");
                 }
@@ -56,37 +51,31 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
 #endif
 
                 container.Resolve<FFXIVRepository>().RegisterNetworkParser(Parse);
-            } catch (System.IO.FileNotFoundException)
-            {
+            }
+            catch (System.IO.FileNotFoundException) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserNoFfxiv);
-            } catch (Exception e)
-            {
+            }
+            catch (Exception e) {
                 logger.Log(LogLevel.Error, Resources.NetworkParserInitException, e);
             }
         }
 
-        public int GetOffset(Type type, string property)
-        {
+        public int GetOffset(Type type, string property) {
             var offset = 0;
 
-            foreach (var prop in type.GetFields())
-            {
+            foreach (var prop in type.GetFields()) {
                 var customOffset = prop.GetCustomAttribute<FieldOffsetAttribute>();
-                if (customOffset != null)
-                {
+                if (customOffset != null) {
                     offset = customOffset.Value;
                 }
 
-                if (prop.Name == property)
-                {
+                if (prop.Name == property) {
                     break;
                 }
 
-                if (prop.FieldType.IsEnum)
-                {
+                if (prop.FieldType.IsEnum) {
                     offset += Marshal.SizeOf(Enum.GetUnderlyingType(prop.FieldType));
-                } else
-                {
+                } else {
                     offset += Marshal.SizeOf(prop.FieldType);
                 }
             }
@@ -94,10 +83,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             return offset;
         }
 
-        public object GetEnumValue(Type type, string name)
-        {
-            foreach (var value in type.GetEnumValues())
-            {
+        public object GetEnumValue(Type type, string name) {
+            foreach (var value in type.GetEnumValues()) {
                 if (value.ToString() == name)
                     return Convert.ChangeType(value, Enum.GetUnderlyingType(type));
             }
@@ -105,25 +92,19 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             throw new Exception($"Enum value {name} not found in {type}!");
         }
 
-        public ushort GetOpcode(string name)
-        {
+        public ushort GetOpcode(string name) {
             // FFXIV_ACT_Plugin 2.0.4.14 converted Server_MessageType from enum to struct. Deal with each type appropriately.
-            if (MessageType.IsEnum)
-            {
+            if (MessageType.IsEnum) {
                 return (ushort)GetEnumValue(MessageType, name);
-            } else
-            {
+            } else {
                 var value = MessageType.GetField(name).GetValue(null);
                 return (ushort)value.GetType().GetProperty("InternalValue").GetValue(value);
             }
         }
 
-        public unsafe void Parse(string id, long epoch, byte[] message)
-        {
-            if (message.Length >= ActorControl142_Size)
-            {
-                fixed (byte* buffer = message)
-                {
+        public unsafe void Parse(string id, long epoch, byte[] message) {
+            if (message.Length >= ActorControl142_Size) {
+                fixed (byte* buffer = message) {
                     /*
                     Server_ActorControl142* packet = (Server_ActorControl142*)buffer;
 
@@ -142,13 +123,11 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         }
     }
 
-    public class OnlineStatusChangedArgs : EventArgs
-    {
+    public class OnlineStatusChangedArgs : EventArgs {
         public uint Target { get; private set; }
         public uint Status { get; private set; }
 
-        public OnlineStatusChangedArgs(uint target, uint status)
-        {
+        public OnlineStatusChangedArgs(uint target, uint status) {
             this.Target = target;
             this.Status = status;
         }

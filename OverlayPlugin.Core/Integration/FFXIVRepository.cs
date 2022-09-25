@@ -1,11 +1,13 @@
-using System;
-using System.Diagnostics;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Linq;
-using System.IO;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Common;
+using FFXIV_ACT_Plugin.Logfile;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace RainbowMage.OverlayPlugin {
     /* Taken from FFIXV_ACT_Plugin.Logfile. Copy&pasted to avoid issues if the FFXIV plugin ever changes this enum. */
@@ -43,6 +45,7 @@ namespace RainbowMage.OverlayPlugin {
         NetworkEffectResult,
         NetworkStatusList,
         NetworkUpdateHp,
+        ChangeMap,
         Settings = 249,
         Process,
         Debug,
@@ -62,7 +65,7 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetPluginData() {
-            return (FFXIV_ACT_Plugin.FFXIV_ACT_Plugin)ActGlobals.oFormActMain.FfxivPlugin;
+            return ActGlobals.oFormActMain.FfxivPlugin;
         }
 
         private IDataRepository GetRepository() {
@@ -189,6 +192,24 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public IDictionary<uint, string> GetResourceDictionary(ResourceType resourceType) {
+            try {
+                return GetResourceDictionaryImpl(resourceType);
+            }
+            catch (FileNotFoundException) {
+                // The FFXIV plugin isn't loaded
+                return null;
+            }
+        }
+
+        public IDictionary<uint, string> GetResourceDictionaryImpl(ResourceType resourceType) {
+            var repo = GetRepository();
+            if (repo == null) return null;
+
+            return repo.GetResourceDictionary(resourceType);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public string GetPlayerName() {
             try {
                 return GetPlayerNameImpl();
@@ -233,6 +254,18 @@ namespace RainbowMage.OverlayPlugin {
             }
         }
 
+        private ILogOutput _logOutput;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal bool WriteLogLineImpl(uint ID, string line) {
+            if (_logOutput == null) {
+                var plugin = GetPluginData();
+                _logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
+            }
+            _logOutput?.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, DateTime.Now, line);
+            return true;
+        }
+
         // LogLineDelegate(uint EventType, uint Seconds, string logline);
         public void RegisterLogLineHandler(Action<uint, uint, string> handler) {
             var sub = GetSubscription();
@@ -265,13 +298,11 @@ namespace RainbowMage.OverlayPlugin {
             var sub = GetSubscription();
             if (sub != null) {
                 sub.ProcessChanged += new ProcessChangedDelegate(handler);
-                /*
                 var repo = GetRepository();
-                if (repo != null)
-                {
+                if (repo != null) {
                     var process = repo.GetCurrentFFXIVProcess();
                     if (process != null) handler(process);
-                }*/
+                }
             }
         }
     }

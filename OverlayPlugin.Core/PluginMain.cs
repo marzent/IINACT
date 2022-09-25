@@ -1,17 +1,17 @@
 ﻿using Advanced_Combat_Tracker;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using System;
-using System.IO;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RainbowMage.OverlayPlugin.Overlays;
 using RainbowMage.OverlayPlugin.EventSources;
-using RainbowMage.OverlayPlugin.NetworkProcessors;
 using RainbowMage.OverlayPlugin.Integration;
+using RainbowMage.OverlayPlugin.NetworkProcessors;
+using RainbowMage.OverlayPlugin.Overlays;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RainbowMage.OverlayPlugin {
     public class PluginMain {
@@ -191,6 +191,8 @@ namespace RainbowMage.OverlayPlugin {
                             _container.Register(new FFXIVRepository(_container));
                             _container.Register(new NetworkParser(_container));
                             _container.Register(new TriggIntegration(_container));
+                            _container.Register(new FFXIVCustomLogLines(_container));
+                            _container.Register(new OverlayPluginLogLines(_container));
 
                             // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
                             // can block for some time. We run it on the background thread to avoid blocking the UI.

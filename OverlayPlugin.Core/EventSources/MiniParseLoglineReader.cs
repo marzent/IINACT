@@ -1,6 +1,6 @@
 ﻿using Advanced_Combat_Tracker;
-using System;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace RainbowMage.OverlayPlugin.EventSources {
     internal partial class MiniParseEventSource : EventSourceBase {

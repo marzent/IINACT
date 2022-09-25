@@ -37,6 +37,8 @@ namespace IINACT {
             this.checkBoxPets = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxRpcap = new DarkUI.Controls.DarkCheckBox();
             this.checkBoxShield = new DarkUI.Controls.DarkCheckBox();
+            this.logFileLabel = new DarkUI.Controls.DarkLabel();
+            this.logFileButton = new DarkUI.Controls.DarkButton();
             this.darkLabel2 = new DarkUI.Controls.DarkLabel();
             this.comboBoxFilter = new DarkUI.Controls.DarkComboBox();
             this.comboBoxLang = new DarkUI.Controls.DarkComboBox();
@@ -60,6 +62,7 @@ namespace IINACT {
             this.debugBox = new DarkUI.Controls.DarkTextBox();
             this.opPanel = new System.Windows.Forms.Panel();
             this.opLabel = new DarkUI.Controls.DarkLabel();
+            this.logFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.darkSectionPanel1.SuspendLayout();
             this.rpcapSectionPanel.SuspendLayout();
             this.darkSectionPanel4.SuspendLayout();
@@ -84,6 +87,8 @@ namespace IINACT {
             this.darkSectionPanel1.Controls.Add(this.checkBoxPets);
             this.darkSectionPanel1.Controls.Add(this.checkBoxRpcap);
             this.darkSectionPanel1.Controls.Add(this.checkBoxShield);
+            this.darkSectionPanel1.Controls.Add(this.logFileLabel);
+            this.darkSectionPanel1.Controls.Add(this.logFileButton);
             this.darkSectionPanel1.Controls.Add(this.darkLabel2);
             this.darkSectionPanel1.Controls.Add(this.comboBoxFilter);
             this.darkSectionPanel1.Controls.Add(this.comboBoxLang);
@@ -92,7 +97,7 @@ namespace IINACT {
             this.darkSectionPanel1.Location = new System.Drawing.Point(0, 0);
             this.darkSectionPanel1.Name = "darkSectionPanel1";
             this.darkSectionPanel1.SectionHeader = "Parse Settings";
-            this.darkSectionPanel1.Size = new System.Drawing.Size(803, 190);
+            this.darkSectionPanel1.Size = new System.Drawing.Size(803, 220);
             this.darkSectionPanel1.TabIndex = 2;
             // 
             // darkLabel14
@@ -109,7 +114,7 @@ namespace IINACT {
             // checkBoxDebug
             // 
             this.checkBoxDebug.AutoSize = true;
-            this.checkBoxDebug.Location = new System.Drawing.Point(12, 152);
+            this.checkBoxDebug.Location = new System.Drawing.Point(12, 182);
             this.checkBoxDebug.Name = "checkBoxDebug";
             this.checkBoxDebug.Size = new System.Drawing.Size(250, 19);
             this.checkBoxDebug.TabIndex = 8;
@@ -119,7 +124,7 @@ namespace IINACT {
             // checkBoxDotTick
             // 
             this.checkBoxDotTick.AutoSize = true;
-            this.checkBoxDotTick.Location = new System.Drawing.Point(416, 127);
+            this.checkBoxDotTick.Location = new System.Drawing.Point(416, 157);
             this.checkBoxDotTick.Name = "checkBoxDotTick";
             this.checkBoxDotTick.Size = new System.Drawing.Size(213, 19);
             this.checkBoxDotTick.TabIndex = 7;
@@ -129,7 +134,7 @@ namespace IINACT {
             // checkBoxDotCrit
             // 
             this.checkBoxDotCrit.AutoSize = true;
-            this.checkBoxDotCrit.Location = new System.Drawing.Point(12, 127);
+            this.checkBoxDotCrit.Location = new System.Drawing.Point(12, 157);
             this.checkBoxDotCrit.Name = "checkBoxDotCrit";
             this.checkBoxDotCrit.Size = new System.Drawing.Size(226, 19);
             this.checkBoxDotCrit.TabIndex = 6;
@@ -139,7 +144,7 @@ namespace IINACT {
             // checkBoxPets
             // 
             this.checkBoxPets.AutoSize = true;
-            this.checkBoxPets.Location = new System.Drawing.Point(416, 102);
+            this.checkBoxPets.Location = new System.Drawing.Point(416, 132);
             this.checkBoxPets.Name = "checkBoxPets";
             this.checkBoxPets.Size = new System.Drawing.Size(205, 19);
             this.checkBoxPets.TabIndex = 5;
@@ -149,7 +154,7 @@ namespace IINACT {
             // checkBoxRpcap
             // 
             this.checkBoxRpcap.AutoSize = true;
-            this.checkBoxRpcap.Location = new System.Drawing.Point(416, 152);
+            this.checkBoxRpcap.Location = new System.Drawing.Point(416, 182);
             this.checkBoxRpcap.Name = "checkBoxRpcap";
             this.checkBoxRpcap.Size = new System.Drawing.Size(150, 19);
             this.checkBoxRpcap.TabIndex = 11;
@@ -159,12 +164,31 @@ namespace IINACT {
             // checkBoxShield
             // 
             this.checkBoxShield.AutoSize = true;
-            this.checkBoxShield.Location = new System.Drawing.Point(12, 102);
+            this.checkBoxShield.Location = new System.Drawing.Point(12, 132);
             this.checkBoxShield.Name = "checkBoxShield";
             this.checkBoxShield.Size = new System.Drawing.Size(199, 19);
             this.checkBoxShield.TabIndex = 4;
             this.checkBoxShield.Text = "Disable Damage Shield Estimates";
             this.checkBoxShield.CheckedChanged += new System.EventHandler(this.checkBoxShield_CheckedChanged);
+            // 
+            // logFileLabel
+            // 
+            this.logFileLabel.AutoSize = true;
+            this.logFileLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.logFileLabel.Location = new System.Drawing.Point(12, 98);
+            this.logFileLabel.Name = "logFileLabel";
+            this.logFileLabel.Size = new System.Drawing.Size(95, 15);
+            this.logFileLabel.TabIndex = 0;
+            this.logFileLabel.Text = "Logfile Location:";
+            // 
+            // logFileButton
+            // 
+            this.logFileButton.Location = new System.Drawing.Point(172, 95);
+            this.logFileButton.Name = "logFileButton";
+            this.logFileButton.Padding = new System.Windows.Forms.Padding(5);
+            this.logFileButton.Size = new System.Drawing.Size(454, 24);
+            this.logFileButton.TabIndex = 1;
+            this.logFileButton.Text = "Log Directory";
             // 
             // darkLabel2
             // 
@@ -221,7 +245,7 @@ namespace IINACT {
             this.rpcapSectionPanel.Controls.Add(this.textBoxHost);
             this.rpcapSectionPanel.Controls.Add(this.darkLabel3);
             this.rpcapSectionPanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.rpcapSectionPanel.Location = new System.Drawing.Point(0, 190);
+            this.rpcapSectionPanel.Location = new System.Drawing.Point(0, 220);
             this.rpcapSectionPanel.Name = "rpcapSectionPanel";
             this.rpcapSectionPanel.SectionHeader = "RPCAP";
             this.rpcapSectionPanel.Size = new System.Drawing.Size(803, 200);
@@ -231,7 +255,7 @@ namespace IINACT {
             // 
             this.darkLabel12.AutoSize = true;
             this.darkLabel12.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkLabel12.Location = new System.Drawing.Point(12, 157);
+            this.darkLabel12.Location = new System.Drawing.Point(12, 187);
             this.darkLabel12.Name = "darkLabel12";
             this.darkLabel12.Size = new System.Drawing.Size(55, 15);
             this.darkLabel12.TabIndex = 15;
@@ -241,7 +265,7 @@ namespace IINACT {
             // 
             this.darkLabel11.AutoSize = true;
             this.darkLabel11.ForeColor = System.Drawing.Color.LightCoral;
-            this.darkLabel11.Location = new System.Drawing.Point(79, 157);
+            this.darkLabel11.Location = new System.Drawing.Point(79, 187);
             this.darkLabel11.Name = "darkLabel11";
             this.darkLabel11.Size = new System.Drawing.Size(515, 30);
             this.darkLabel11.TabIndex = 14;
@@ -252,7 +276,7 @@ namespace IINACT {
             // 
             this.darkLabel10.AutoSize = true;
             this.darkLabel10.ForeColor = System.Drawing.Color.Gray;
-            this.darkLabel10.Location = new System.Drawing.Point(315, 125);
+            this.darkLabel10.Location = new System.Drawing.Point(315, 155);
             this.darkLabel10.Name = "darkLabel10";
             this.darkLabel10.Size = new System.Drawing.Size(457, 15);
             this.darkLabel10.TabIndex = 13;
@@ -263,7 +287,7 @@ namespace IINACT {
             // 
             this.darkLabel9.AutoSize = true;
             this.darkLabel9.ForeColor = System.Drawing.Color.Gray;
-            this.darkLabel9.Location = new System.Drawing.Point(315, 96);
+            this.darkLabel9.Location = new System.Drawing.Point(315, 126);
             this.darkLabel9.Name = "darkLabel9";
             this.darkLabel9.Size = new System.Drawing.Size(459, 15);
             this.darkLabel9.TabIndex = 12;
@@ -274,7 +298,7 @@ namespace IINACT {
             // 
             this.darkLabel8.AutoSize = true;
             this.darkLabel8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkLabel8.Location = new System.Drawing.Point(12, 125);
+            this.darkLabel8.Location = new System.Drawing.Point(12, 155);
             this.darkLabel8.Name = "darkLabel8";
             this.darkLabel8.Size = new System.Drawing.Size(60, 15);
             this.darkLabel8.TabIndex = 10;
@@ -284,7 +308,7 @@ namespace IINACT {
             // 
             this.darkLabel7.AutoSize = true;
             this.darkLabel7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkLabel7.Location = new System.Drawing.Point(12, 96);
+            this.darkLabel7.Location = new System.Drawing.Point(12, 126);
             this.darkLabel7.Name = "darkLabel7";
             this.darkLabel7.Size = new System.Drawing.Size(63, 15);
             this.darkLabel7.TabIndex = 9;
@@ -295,7 +319,7 @@ namespace IINACT {
             this.textBoxPassword.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
             this.textBoxPassword.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.textBoxPassword.Location = new System.Drawing.Point(82, 123);
+            this.textBoxPassword.Location = new System.Drawing.Point(82, 153);
             this.textBoxPassword.Name = "textBoxPassword";
             this.textBoxPassword.Size = new System.Drawing.Size(227, 23);
             this.textBoxPassword.TabIndex = 8;
@@ -307,7 +331,7 @@ namespace IINACT {
             this.textBoxUsername.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
             this.textBoxUsername.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxUsername.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.textBoxUsername.Location = new System.Drawing.Point(82, 94);
+            this.textBoxUsername.Location = new System.Drawing.Point(82, 124);
             this.textBoxUsername.Name = "textBoxUsername";
             this.textBoxUsername.Size = new System.Drawing.Size(227, 23);
             this.textBoxUsername.TabIndex = 7;
@@ -317,7 +341,7 @@ namespace IINACT {
             // 
             this.darkLabel6.AutoSize = true;
             this.darkLabel6.ForeColor = System.Drawing.Color.Gray;
-            this.darkLabel6.Location = new System.Drawing.Point(315, 67);
+            this.darkLabel6.Location = new System.Drawing.Point(315, 97);
             this.darkLabel6.Name = "darkLabel6";
             this.darkLabel6.Size = new System.Drawing.Size(422, 15);
             this.darkLabel6.TabIndex = 6;
@@ -327,7 +351,7 @@ namespace IINACT {
             // 
             this.darkLabel5.AutoSize = true;
             this.darkLabel5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkLabel5.Location = new System.Drawing.Point(12, 67);
+            this.darkLabel5.Location = new System.Drawing.Point(12, 97);
             this.darkLabel5.Name = "darkLabel5";
             this.darkLabel5.Size = new System.Drawing.Size(32, 15);
             this.darkLabel5.TabIndex = 5;
@@ -338,7 +362,7 @@ namespace IINACT {
             this.textBoxPort.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
             this.textBoxPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxPort.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.textBoxPort.Location = new System.Drawing.Point(82, 65);
+            this.textBoxPort.Location = new System.Drawing.Point(82, 95);
             this.textBoxPort.Name = "textBoxPort";
             this.textBoxPort.Size = new System.Drawing.Size(227, 23);
             this.textBoxPort.TabIndex = 4;
@@ -348,7 +372,7 @@ namespace IINACT {
             // 
             this.darkLabel4.AutoSize = true;
             this.darkLabel4.ForeColor = System.Drawing.Color.Gray;
-            this.darkLabel4.Location = new System.Drawing.Point(315, 38);
+            this.darkLabel4.Location = new System.Drawing.Point(315, 68);
             this.darkLabel4.Name = "darkLabel4";
             this.darkLabel4.Size = new System.Drawing.Size(334, 15);
             this.darkLabel4.TabIndex = 3;
@@ -359,7 +383,7 @@ namespace IINACT {
             this.textBoxHost.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
             this.textBoxHost.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxHost.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.textBoxHost.Location = new System.Drawing.Point(82, 36);
+            this.textBoxHost.Location = new System.Drawing.Point(82, 66);
             this.textBoxHost.Name = "textBoxHost";
             this.textBoxHost.Size = new System.Drawing.Size(227, 23);
             this.textBoxHost.TabIndex = 2;
@@ -369,7 +393,7 @@ namespace IINACT {
             // 
             this.darkLabel3.AutoSize = true;
             this.darkLabel3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.darkLabel3.Location = new System.Drawing.Point(12, 38);
+            this.darkLabel3.Location = new System.Drawing.Point(12, 68);
             this.darkLabel3.Name = "darkLabel3";
             this.darkLabel3.Size = new System.Drawing.Size(35, 15);
             this.darkLabel3.TabIndex = 1;
@@ -379,10 +403,10 @@ namespace IINACT {
             // 
             this.darkSectionPanel4.Controls.Add(this.debugBox);
             this.darkSectionPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.darkSectionPanel4.Location = new System.Drawing.Point(0, 498);
+            this.darkSectionPanel4.Location = new System.Drawing.Point(0, 528);
             this.darkSectionPanel4.Name = "darkSectionPanel4";
             this.darkSectionPanel4.SectionHeader = "Debug Log";
-            this.darkSectionPanel4.Size = new System.Drawing.Size(803, 178);
+            this.darkSectionPanel4.Size = new System.Drawing.Size(803, 148);
             this.darkSectionPanel4.TabIndex = 5;
             // 
             // debugBox
@@ -396,14 +420,14 @@ namespace IINACT {
             this.debugBox.Name = "debugBox";
             this.debugBox.ReadOnly = true;
             this.debugBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.debugBox.Size = new System.Drawing.Size(801, 152);
+            this.debugBox.Size = new System.Drawing.Size(801, 122);
             this.debugBox.TabIndex = 0;
             // 
             // opPanel
             // 
             this.opPanel.Controls.Add(this.opLabel);
             this.opPanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.opPanel.Location = new System.Drawing.Point(0, 390);
+            this.opPanel.Location = new System.Drawing.Point(0, 420);
             this.opPanel.Name = "opPanel";
             this.opPanel.Size = new System.Drawing.Size(803, 108);
             this.opPanel.TabIndex = 6;
@@ -480,5 +504,8 @@ namespace IINACT {
         private DarkLabel darkLabel14;
         private Panel opPanel;
         private DarkLabel opLabel;
+        private DarkLabel logFileLabel;
+        private DarkButton logFileButton;
+        private FolderBrowserDialog logFolderBrowserDialog;
     }
 }

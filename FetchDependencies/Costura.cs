@@ -2,13 +2,11 @@
 using System.IO.Compression;
 
 namespace FetchDependencies {
-    internal static class Costura
-    {
-        public static bool CheckForPlugin(string name) => 
+    internal static class Costura {
+        public static bool CheckForPlugin(string name) =>
             name.Contains("ffxiv");
 
-        public static string Fix(string name)
-        {
+        public static string Fix(string name) {
             if (name.Contains("act"))
                 return "FFXIV_ACT_" + name.Substring(18, name.Length - 33).ToTitleCase() + ".dll";
             if (name.Contains("machina.ffxiv"))

@@ -1,0 +1,40 @@
+[
+    {
+        "StartID": 0,
+        "EndID": 255,
+        "Source": "FFXIV_ACT_Plugin",
+        "Version": 0,
+        "Comment": "Reserved for base FFXIV_ACT_Plugin use"
+    },
+    {
+        "ID": 256,
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Line to be emitted when a new log line is registered"
+    },
+    {
+        "ID": 257,
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "MapEffect data"
+    },
+    {
+        "ID": 258,
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "ActorControlSelf Fate data"
+    },
+    {
+        "ID": 259,
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Critical Engagement data"
+    },
+    {
+        "StartID": 260,
+        "EndID": 512,
+        "Source": "OverlayPlugin",
+        "Version": 0,
+        "Comment": "Reserved for future OverlayPlugin use"
+    }
+]

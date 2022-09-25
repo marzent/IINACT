@@ -1,22 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
-using WebSocketSharp;
-using WebSocketSharp.Server;
+﻿using Advanced_Combat_Tracker;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Advanced_Combat_Tracker;
 using RainbowMage.OverlayPlugin.Overlays;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using WebSocketSharp;
+using WebSocketSharp.Server;
 
-namespace RainbowMage.OverlayPlugin
-{
-    public class WSServer
-    {
+namespace RainbowMage.OverlayPlugin {
+    public class WSServer {
         private TinyIoCContainer _container;
         private ILogger _logger;
         private HttpServer _server;
@@ -26,17 +24,13 @@ namespace RainbowMage.OverlayPlugin
 
         public EventHandler<StateChangedArgs> OnStateChanged;
 
-        public void Stop()
-        {
-            try
-            {
-                if (_server != null)
-                {
+        public void Stop() {
+            try {
+                if (_server != null) {
                     _server.Stop();
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Log(LogLevel.Error, Resources.WSShutdownError, e);
             }
             _failed = false;
@@ -44,43 +38,35 @@ namespace RainbowMage.OverlayPlugin
             OnStateChanged?.Invoke(null, new StateChangedArgs(false, false));
         }
 
-        public bool IsRunning()
-        {
+        public bool IsRunning() {
             return _server != null && _server.IsListening;
         }
 
-        public bool IsFailed()
-        {
+        public bool IsFailed() {
             return _failed;
         }
 
-        public bool IsSSLPossible()
-        {
+        public bool IsSSLPossible() {
             return File.Exists(GetCertPath());
         }
 
-        public WSServer(TinyIoCContainer container)
-        {
+        public WSServer(TinyIoCContainer container) {
             _container = container;
             _logger = container.Resolve<ILogger>();
             _cfg = container.Resolve<IPluginConfig>();
             _plugin = container.Resolve<PluginMain>();
         }
 
-        public void Start()
-        {
+        public void Start() {
             _failed = false;
 
-            try
-            {
+            try {
                 var sslPath = GetCertPath();
                 var secure = _cfg.WSServerSSL && File.Exists(sslPath);
 
-                if (_cfg.WSServerIP == "*")
-                {
+                if (_cfg.WSServerIP == "*") {
                     _server = new HttpServer(_cfg.WSServerPort, secure);
-                } else
-                {
+                } else {
                     _server = new HttpServer(IPAddress.Parse(_cfg.WSServerIP), _cfg.WSServerPort, secure);
                 }
 
@@ -90,8 +76,7 @@ namespace RainbowMage.OverlayPlugin
                 };
                 _server.Log.Level = WebSocketSharp.LogLevel.Info;
 
-                if (secure)
-                {
+                if (secure) {
                     Log(LogLevel.Debug, Resources.WSLoadingCert, sslPath);
 
                     // IMPORTANT: Do *not* change the password here. This is the default password that mkcert uses.
@@ -149,29 +134,24 @@ namespace RainbowMage.OverlayPlugin
                 _server.Start();
                 OnStateChanged?.Invoke(this, new StateChangedArgs(true, false));
             }
-            catch(Exception e)
-            {
+            catch (Exception e) {
                 _failed = true;
                 Log(LogLevel.Error, Resources.WSStartFailed, e);
                 OnStateChanged?.Invoke(this, new StateChangedArgs(false, true));
             }
         }
 
-        public (bool, string) GetUrl(MiniParseOverlay overlay)
-        {
+        public (bool, string) GetUrl(MiniParseOverlay overlay) {
             var argName = "HOST_PORT";
 
-            if (overlay.ModernApi)
-            {
+            if (overlay.ModernApi) {
                 argName = "OVERLAY_WS";
             }
 
             var url = Regex.Replace(overlay.Config.Url, @"[?&](?:HOST_PORT|OVERLAY_WS)=[^&]*", "");
-            if (url.Contains("?"))
-            {
+            if (url.Contains("?")) {
                 url += "&";
-            } else
-            {
+            } else {
                 url += "?";
             }
 
@@ -190,13 +170,10 @@ namespace RainbowMage.OverlayPlugin
             return (argName != "HOST_PORT" || overlay.Config.ActwsCompatibility, url);
         }
 
-        public string GetModernUrl(string url)
-        {
-            if (url.Contains("?"))
-            {
+        public string GetModernUrl(string url) {
+            if (url.Contains("?")) {
                 url += "&";
-            } else
-            {
+            } else {
                 url += "?";
             }
 
@@ -212,8 +189,7 @@ namespace RainbowMage.OverlayPlugin
             return url;
         }
 
-        public string GetCertPath()
-        {
+        public string GetCertPath() {
             var path = Path.Combine(
                 ActGlobals.oFormActMain.AppDataFolder.FullName,
                 "Config",
@@ -222,8 +198,7 @@ namespace RainbowMage.OverlayPlugin
             return path;
         }
 
-        private void Log(LogLevel level, string msg, params object[] args)
-        {
+        private void Log(LogLevel level, string msg, params object[] args) {
             _logger.Log(level, msg, args);
         }
 
@@ -357,11 +332,9 @@ namespace RainbowMage.OverlayPlugin
             }
 
 
-            public void HandleEvent(JObject e)
-            {
+            public void HandleEvent(JObject e) {
                 try {
-                    switch (e["type"].ToString())
-                    {
+                    switch (e["type"].ToString()) {
                         case "CombatData":
                             Send("{\"type\":\"broadcast\",\"msgtype\":\"CombatData\",\"msg\":" + e.ToString(Formatting.None) + "}");
                             break;
@@ -375,8 +348,8 @@ namespace RainbowMage.OverlayPlugin
                             Send("{\"type\":\"broadcast\",\"msgtype\":\"SendCharName\",\"msg\":" + e.ToString(Formatting.None) + "}");
                             break;
                     }
-                } catch (InvalidOperationException ex)
-                {
+                }
+                catch (InvalidOperationException ex) {
                     _logger.Log(LogLevel.Error, "Failed to send legacy WS message: {0}", ex);
                     _dispatcher.UnsubscribeAll(this);
                 }
@@ -385,20 +358,17 @@ namespace RainbowMage.OverlayPlugin
             protected override void OnMessage(MessageEventArgs e) {
                 JObject data = null;
 
-                try
-                {
+                try {
                     data = JObject.Parse(e.Data);
                 }
-                catch (JsonException ex)
-                {
+                catch (JsonException ex) {
                     _logger.Log(LogLevel.Error, Resources.WSInvalidDataRecv, ex, e.Data);
                     return;
                 }
 
                 if (!data.ContainsKey("type") || !data.ContainsKey("msgtype")) return;
 
-                switch (data["msgtype"].ToString())
-                {
+                switch (data["msgtype"].ToString()) {
                     case "Capture":
                         _logger.Log(LogLevel.Warning, "ACTWS Capture is not supported outside of overlays.");
                         break;
@@ -409,13 +379,11 @@ namespace RainbowMage.OverlayPlugin
             }
         }
 
-        public class StateChangedArgs : EventArgs
-        {
+        public class StateChangedArgs : EventArgs {
             public bool Running { get; private set; }
             public bool Failed { get; private set; }
 
-            public StateChangedArgs(bool Running, bool Failed)
-            {
+            public StateChangedArgs(bool Running, bool Failed) {
                 this.Running = Running;
                 this.Failed = Failed;
             }

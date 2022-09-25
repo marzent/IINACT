@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace RainbowMage.OverlayPlugin
@@ -17,35 +19,16 @@ namespace RainbowMage.OverlayPlugin
         {
             logger = container.Resolve<ILogger>();
             repository = container.Resolve<FFXIVRepository>();
-            var main = container.Resolve<PluginMain>();
-
-            var pluginDirectory = main.PluginDirectory;
-
-            const string reservedLogLinesJson = @"[
-            {
-                ""StartID"": 0,
-                ""EndID"": 255,
-                ""Source"": ""FFXIV_ACT_Plugin"",
-                ""Version"": 0,
-                ""Comment"": ""Reserved for base FFXIV_ACT_Plugin use""
-            },
-            {
-                ""ID"": 256,
-                ""Source"": ""OverlayPlugin"",
-                ""Version"": 1,
-                ""Comment"": ""Line to be emitted when a new log line is registered""
-            },
-            {
-                ""StartID"": 257,
-                ""EndID"": 512,
-                ""Source"": ""OverlayPlugin"",
-                ""Version"": 0,
-                ""Comment"": ""Reserved for future OverlayPlugin use""
-            }
-            ]";
 
             try
             {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("reserved_log_lines.json"));
+                string reservedLogLinesJson;
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                using (var reader = new StreamReader(stream)) {
+                    reservedLogLinesJson = reader.ReadToEnd();
+                }
                 var reservedData = JsonConvert.DeserializeObject<List<ConfigReservedLogLine>>(reservedLogLinesJson);
                 logger.Log(LogLevel.Warning, $"Parsing {reservedData.Count} reserved log line entries.");   
                 foreach (var reservedDataEntry in reservedData)

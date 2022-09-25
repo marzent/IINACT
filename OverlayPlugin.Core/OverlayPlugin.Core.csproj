@@ -21,10 +21,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="resources\opcodes.jsonc" />
     <None Remove="resources\presets.json" />
+    <None Remove="resources\reserved_log_lines.json" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="resources\opcodes.jsonc" />
     <EmbeddedResource Include="resources\presets.json" />
+    <EmbeddedResource Include="resources\reserved_log_lines.json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Controls\GeneralConfigTab.cs">

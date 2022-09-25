@@ -192,6 +192,7 @@ namespace RainbowMage.OverlayPlugin {
                             _container.Register(new NetworkParser(_container));
                             _container.Register(new TriggIntegration(_container));
                             _container.Register(new FFXIVCustomLogLines(_container));
+                            _container.Register(new OverlayPluginLogLines(_container));
 
                             // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
                             // can block for some time. We run it on the background thread to avoid blocking the UI.

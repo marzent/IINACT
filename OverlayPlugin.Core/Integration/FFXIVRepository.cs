@@ -254,12 +254,17 @@ namespace RainbowMage.OverlayPlugin {
             }
         }
 
+        private ILogOutput _logOutput;
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal bool WriteLogLineImpl(uint ID, string line)
         {
-            var plugin = GetPluginData();
-            var logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
-            logOutput.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, DateTime.Now, line);
+            if (_logOutput == null)
+            {
+                var plugin = GetPluginData();
+                _logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
+            }
+            _logOutput?.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, DateTime.Now, line);
             return true;
         }
 

@@ -12,7 +12,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <PgoMode>full</PgoMode>
-    <Version>0.3.1</Version>
+    <Version>0.4</Version>
     <LangVersion>11</LangVersion>
   </PropertyGroup>
 

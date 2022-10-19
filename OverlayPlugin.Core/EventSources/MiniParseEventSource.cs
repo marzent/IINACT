@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -80,6 +81,13 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 return JObject.FromObject(new {
                     language = lang.ToString("g"),
                     languageId = lang.ToString("d"),
+                });
+            });
+
+            RegisterEventHandler("getVersion", (msg) => {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return JObject.FromObject(new {
+                    version = version.ToString()
                 });
             });
 

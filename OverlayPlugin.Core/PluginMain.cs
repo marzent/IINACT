@@ -2,6 +2,13 @@
 using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
 using RainbowMage.OverlayPlugin.Integration;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Aggro;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Enmity;
+using RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud;
+using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
+using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
 using RainbowMage.OverlayPlugin.Overlays;
 using System;
@@ -193,6 +200,18 @@ namespace RainbowMage.OverlayPlugin {
                             _container.Register(new TriggIntegration(_container));
                             _container.Register(new FFXIVCustomLogLines(_container));
                             _container.Register(new OverlayPluginLogLines(_container));
+
+                            // Register FFXIV memory reading subcomponents.
+                            // Must be done before loading addons.
+                            _container.Register(new FFXIVMemory(_container));
+
+                            // These are registered to be lazy-loaded. Use interface to force TinyIoC to use singleton pattern.
+                            _container.Register<ICombatantMemory, CombatantMemoryManager>();
+                            _container.Register<ITargetMemory, TargetMemoryManager>();
+                            _container.Register<IAggroMemory, AggroMemoryManager>();
+                            _container.Register<IEnmityMemory, EnmityMemoryManager>();
+                            _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
+                            _container.Register<IInCombatMemory, InCombatMemoryManager>();
 
                             // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
                             // can block for some time. We run it on the background thread to avoid blocking the UI.

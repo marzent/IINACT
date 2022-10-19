@@ -29,12 +29,13 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
         private IOpcodeConfigEntry opcode = null;
         private readonly int offsetMessageType;
         private readonly int offsetPacketData;
+        private readonly FFXIVRepository ffxiv;
 
-        private Func<string, bool> logWriter;
+        private Func<string, DateTime, bool> logWriter;
 
         public LineMapEffect(TinyIoCContainer container) {
             logger = container.Resolve<ILogger>();
-            var ffxiv = container.Resolve<FFXIVRepository>();
+            ffxiv = container.Resolve<FFXIVRepository>();
             var netHelper = container.Resolve<NetworkParser>();
             if (!ffxiv.IsFFXIVPluginPresent())
                 return;
@@ -54,6 +55,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
             }
             var customLogLines = container.Resolve<FFXIVCustomLogLines>();
             this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry() {
+                Name = "MapEffect",
                 Source = "OverlayPlugin",
                 ID = LogFileLineID,
                 Version = 1,
@@ -66,6 +68,9 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
             // if the player is currently logged in/a network connection is active
             if (opcode == null) {
                 opcode = opcodeConfig["MapEffect"];
+                if (opcode == null) {
+                    return;
+                }
             }
 
             if (message.Length < opcode.size + offsetPacketData)
@@ -73,8 +78,9 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
 
             fixed (byte* buffer = message) {
                 if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode) {
+                    DateTime serverTime = ffxiv.EpochToDateTime(epoch);
                     MapEffect_v62 mapEffectPacket = *(MapEffect_v62*)&buffer[offsetPacketData];
-                    logWriter(mapEffectPacket.ToString());
+                    logWriter(mapEffectPacket.ToString(), serverTime);
 
                     return;
                 }

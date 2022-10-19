@@ -643,13 +643,13 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             RegisterPreset("Raidboss", width: 1100, height: 300, "Raidboss (Combined Alerts & Timeline)", "raidboss");
             RegisterPreset("Raidboss", width: 1100, height: 300, "Raidboss Alerts Only", "raidboss_alerts_only");
             RegisterPreset("Raidboss", width: 320, height: 220, "Raidboss Timeline Only", "raidboss_timeline_only");
-            RegisterPreset("Jobs", width: 600, height: 300);
-            RegisterPreset("Eureka", width: 400, height: 400);
-            RegisterPreset("Fisher", width: 500, height: 500);
-            RegisterPreset("OopsyRaidsy", width: 400, height: 400);
-            RegisterPreset("PullCounter", width: 200, height: 200);
-            RegisterPreset("Radar", width: 300, height: 400);
-            RegisterPreset("Test", width: 300, height: 300);
+            RegisterPreset("Jobs", width: 600, height: 300, fileOverride: "jobs");
+            RegisterPreset("Eureka", width: 400, height: 400, fileOverride: "eureka");
+            RegisterPreset("Fisher", width: 500, height: 500, fileOverride: "fisher");
+            RegisterPreset("OopsyRaidsy", width: 400, height: 400, fileOverride: "oopsyraidsy");
+            RegisterPreset("PullCounter", width: 200, height: 200, fileOverride: "pullcounter");
+            RegisterPreset("Radar", width: 300, height: 400, fileOverride: "radar");
+            RegisterPreset("Test", width: 300, height: 300, fileOverride: "test");
             // FIXME: these should be consistently named.
             RegisterDpsPreset("Xephero", "xephero-cactbot", width: 600, height: 400);
             RegisterDpsPreset("Rdmty", "dps", width: 600, height: 400);

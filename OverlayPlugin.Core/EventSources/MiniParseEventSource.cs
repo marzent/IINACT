@@ -1,19 +1,23 @@
-using Advanced_Combat_Tracker;
-using FFXIV_ACT_Plugin.Common;
-using FFXIV_ACT_Plugin.Common.Models;
-using Newtonsoft.Json.Linq;
-using RainbowMage.OverlayPlugin.NetworkProcessors;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+// For some reason this using is required by the github build?
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using Advanced_Combat_Tracker;
+using FFXIV_ACT_Plugin.Common;
+using Newtonsoft.Json.Linq;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.NetworkProcessors;
+using PluginCombatant = FFXIV_ACT_Plugin.Common.Models.Combatant;
 
 namespace RainbowMage.OverlayPlugin.EventSources {
-    internal partial class MiniParseEventSource : EventSourceBase {
+    partial class MiniParseEventSource : EventSourceBase {
         private string prevEncounterId { get; set; }
         private DateTime prevEndDateTime { get; set; }
         private bool prevEncounterActive { get; set; }
@@ -48,14 +52,16 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private const string BroadcastMessageEvent = "BroadcastMessage";
 
         private FFXIVRepository repository;
+        private ICombatantMemory combatantMemory;
 
         // Event Source
 
         public BuiltinEventConfig Config { get; set; }
 
         public MiniParseEventSource(TinyIoCContainer container) : base(container) {
-            this.Name = "MiniParse";
-            this.repository = container.Resolve<FFXIVRepository>();
+            Name = "MiniParse";
+            repository = container.Resolve<FFXIVRepository>();
+            combatantMemory = container.Resolve<ICombatantMemory>();
 
             // FileChanged isn't actually raised by this event source. That event is generated in MiniParseOverlay directly.
             RegisterEventTypes(new List<string> {
@@ -77,14 +83,24 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
             RegisterEventHandler("getLanguage", (msg) => {
                 var lang = repository.GetLanguage();
+                var region = repository.GetMachinaRegion();
                 return JObject.FromObject(new {
                     language = lang.ToString("g"),
                     languageId = lang.ToString("d"),
+                    region = region.ToString("g"),
+                    regionId = region.ToString("d"),
+                });
+            });
+
+            RegisterEventHandler("getVersion", (msg) => {
+                var version = repository.GetOverlayPluginVersion();
+                return JObject.FromObject(new {
+                    version = version.ToString()
                 });
             });
 
             RegisterEventHandler("getCombatants", (msg) => {
-                var ids = new List<uint>();
+                List<uint> ids = new List<uint>();
 
                 if (msg["ids"] != null) {
                     foreach (var id in ((JArray)msg["ids"])) {
@@ -92,7 +108,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                     }
                 }
 
-                var names = new List<string>();
+                List<string> names = new List<string>();
 
                 if (msg["names"] != null) {
                     foreach (var name in ((JArray)msg["names"])) {
@@ -100,7 +116,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                     }
                 }
 
-                var props = new List<string>();
+                List<string> props = new List<string>();
 
                 if (msg["props"] != null) {
                     foreach (var prop in ((JArray)msg["props"])) {
@@ -220,31 +236,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
         private void InitFFXIVIntegration() {
             repository.RegisterPartyChangeDelegate((partyList, partySize) => DispatchPartyChangeEvent(partyList, partySize));
-            repository.RegisterProcessChangedHandler((p) => CheckMemory());
-            CheckMemory();
             ffxivPluginPresent = true;
-        }
-
-        MemoryProcessors.EnmityMemory memory = null;
-        private void CheckMemory() {
-            if (memory == null || (memory != null && !memory.IsValid())) {
-                List<MemoryProcessors.EnmityMemory> memoryCandidates;
-                if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Chinese) {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory61(container) };
-                } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory60(container) };
-                } else {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory62(container) };
-                }
-
-                foreach (var candidate in memoryCandidates) {
-                    if (candidate.IsValid()) {
-                        memory = candidate;
-                        memoryCandidates = null;
-                        break;
-                    }
-                }
-            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -252,64 +244,65 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             List<Dictionary<string, object>> filteredCombatants = new List<Dictionary<string, object>>();
             var pluginCombatants = repository.GetCombatants();
 
-            CheckMemory();
+            if (!combatantMemory.IsValid())
+                return filteredCombatants;
 
-            if (memory != null && memory.IsValid()) {
-                var memCombatants = memory.GetCombatantList();
-                foreach (var combatant in memCombatants) {
-                    if (combatant.ID == 0) {
-                        continue;
+            var memCombatants = combatantMemory.GetCombatantList();
+            foreach (var combatant in memCombatants) {
+                if (combatant.ID == 0) {
+                    continue;
+                }
+
+                bool include = false;
+
+                var combatantName = combatant.Name;
+
+                if (ids.Count == 0 && names.Count == 0) {
+                    include = true;
+                } else {
+                    foreach (var id in ids) {
+                        if (combatant.ID == id) {
+                            include = true;
+                            break;
+                        }
                     }
 
-                    bool include = false;
-
-                    var combatantName = combatant.Name;
-
-                    if (ids.Count == 0 && names.Count == 0) {
-                        include = true;
-                    } else {
-                        foreach (var id in ids) {
-                            if (combatant.ID == id) {
+                    if (!include) {
+                        foreach (var name in names) {
+                            if (String.Equals(combatantName, name, StringComparison.InvariantCultureIgnoreCase)) {
                                 include = true;
                                 break;
                             }
                         }
+                    }
+                }
 
-                        if (!include) {
-                            foreach (var name in names) {
-                                if (String.Equals(combatantName, name, StringComparison.InvariantCultureIgnoreCase)) {
-                                    include = true;
-                                    break;
-                                }
-                            }
-                        }
+                if (include) {
+                    var jObjCombatant = JObject.FromObject(combatant).ToObject<Dictionary<string, object>>();
+                    var ID = Convert.ToUInt32(jObjCombatant["ID"]);
+
+                    var pluginCombatant = pluginCombatants.FirstOrDefault((PluginCombatant c) => c.ID == ID);
+                    if (pluginCombatant != null) {
+                        jObjCombatant["PartyType"] = GetPartyType(pluginCombatant);
                     }
 
-                    if (include) {
-                        var jObjCombatant = JObject.FromObject(combatant).ToObject<Dictionary<string, object>>();
-                        var ID = Convert.ToUInt32(jObjCombatant["ID"]);
-
-                        var pluginCombatant = pluginCombatants.FirstOrDefault((Combatant c) => c.ID == ID);
-                        if (pluginCombatant != null) {
-                            jObjCombatant["PartyType"] = GetPartyType(pluginCombatant);
-                        }
-                        var WorldID = Convert.ToUInt32(jObjCombatant["WorldID"]);
-                        string WorldName = null;
-                        if (WorldID < 0xFFFE) {
-                            WorldName = GetWorldName(WorldID);
-                        }
-                        jObjCombatant["WorldName"] = WorldName;
-
-                        // If the request is filtering properties, remove them here
-                        if (props.Count > 0) {
-                            jObjCombatant.Keys
-                                .Where(k => !props.Contains(k))
-                                .ToList()
-                                .ForEach(k => jObjCombatant.Remove(k));
-                        }
-
-                        filteredCombatants.Add(jObjCombatant);
+                    // Handle 0xFFFE (outofrange1) and 0xFFFF (outofrange2) values for WorldID
+                    var WorldID = Convert.ToUInt32(jObjCombatant["WorldID"]);
+                    string WorldName = null;
+                    if (WorldID < 0xFFFE) {
+                        WorldName = GetWorldName(WorldID);
                     }
+                    jObjCombatant["WorldName"] = WorldName;
+
+                    // If the request is filtering properties, remove them here
+                    if (props.Count > 0) {
+                        jObjCombatant.Keys
+                            .Where(k => !props.Contains(k))
+                            .ToList()
+                            .ForEach(k => jObjCombatant.Remove(k));
+                    }
+
+                    filteredCombatants.Add(jObjCombatant);
                 }
             }
 
@@ -328,7 +321,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 LogMessageType lineType;
                 var line = args.originalLogLine.Split('|');
 
-                if (!int.TryParse(line[0], out var lineTypeInt)) {
+                if (!int.TryParse(line[0], out int lineTypeInt)) {
                     return;
                 }
 
@@ -408,7 +401,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             }
         }
 
-        private struct PartyMember {
+        struct PartyMember {
             // Player id in hex (for ease in matching logs).
             public string id;
             public string name;
@@ -420,7 +413,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             public bool inParty;
         }
 
-        private int GetPartyType(Combatant combatant) {
+        private int GetPartyType(PluginCombatant combatant) {
             // The PartyTypeEnum was renamed in 2.6.0.0 to work around that, we use reflection and cast the result to int.
             return (int)combatant.GetType().GetMethod("get_PartyType").Invoke(combatant, new object[] { });
         }
@@ -465,7 +458,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             // * make callers handle this via calling GetCombatants explicitly
 
             // Build a lookup table of currently known combatants
-            var lookupTable = new Dictionary<uint, Combatant>();
+            var lookupTable = new Dictionary<uint, PluginCombatant>();
             foreach (var c in combatants) {
                 if (GetPartyType(c) != 0 /* None */) {
                     lookupTable[c.ID] = c;
@@ -474,18 +467,19 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
             // Accumulate party members from cached info.  If they don't exist,
             // still send *something*, since it's better than nothing.
-            var result = new List<PartyMember>(24);
+            List<PartyMember> result = new List<PartyMember>(24);
             lock (missingPartyMembers) lock (partyList) {
                     missingPartyMembers.Clear();
 
                     foreach (var id in partyList) {
-                        Combatant c;
+                        PluginCombatant c;
                         if (lookupTable.TryGetValue(id, out c)) {
                             result.Add(new PartyMember {
                                 id = $"{id:X}",
                                 name = c.Name,
                                 worldId = c.WorldID,
                                 job = c.Job,
+                                level = c.Level,
                                 inParty = GetPartyType(c) == 1 /* Party */,
                             });
                         } else {
@@ -524,7 +518,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         }
 
         protected override void Update() {
-            var importing = false; // ActGlobals.oFormImportProgress?.Visible == true;
+            var importing = false;
 
             if (CheckIsActReady() && (!importing || this.Config.UpdateDpsDuringImport)) {
                 if (!HasSubscriber(CombatDataEvent)) {
@@ -609,14 +603,14 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
             if (encounter == null || combatant == null) return new JObject();
 
-            var obj = new JObject();
+            JObject obj = new JObject();
 
             obj["type"] = "CombatData";
             obj["Encounter"] = JObject.FromObject(encounter);
             obj["Combatant"] = new JObject();
 
             if (this.Config.SortKey != null && this.Config.SortKey != "") {
-                var factor = this.Config.SortDesc ? -1 : 1;
+                int factor = this.Config.SortDesc ? -1 : 1;
                 var key = this.Config.SortKey;
 
                 try {
@@ -641,10 +635,11 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             }
 
             foreach (var pair in combatant) {
-                var value = new JObject();
+                JObject value = new JObject();
                 foreach (var pair2 in pair.Value) {
                     value.Add(pair2.Key, Util.ReplaceNaNString(pair2.Value, "---"));
                 }
+
                 obj["Combatant"][pair.Key.Name] = value;
             }
 
@@ -658,7 +653,12 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         }
 
         private List<KeyValuePair<CombatantData, Dictionary<string, string>>> GetCombatantList(List<CombatantData> allies) {
+#if TRACE 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+#endif
 
+            //var varStopwatch = new Stopwatch();
 
             var combatantList = new List<KeyValuePair<CombatantData, Dictionary<string, string>>>();
             Parallel.ForEach(allies, (ally) =>
@@ -705,6 +705,11 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 }
             }
             );
+
+#if TRACE
+            stopwatch.Stop();
+            Log(LogLevel.Trace, "GetCombatantList: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             return combatantList;
         }

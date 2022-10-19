@@ -26,7 +26,7 @@ namespace RainbowMage.OverlayPlugin {
                     reservedLogLinesJson = reader.ReadToEnd();
                 }
                 var reservedData = JsonConvert.DeserializeObject<List<ConfigReservedLogLine>>(reservedLogLinesJson);
-                logger.Log(LogLevel.Warning, $"Parsing {reservedData.Count} reserved log line entries.");
+                logger.Log(LogLevel.Debug, $"Parsing {reservedData.Count} reserved log line entries.");
                 foreach (var reservedDataEntry in reservedData) {
                     if (reservedDataEntry.Source == null || reservedDataEntry.Version == null) {
                         logger.Log(LogLevel.Warning, $"Reserved log line entry missing Source or Version.");
@@ -37,6 +37,7 @@ namespace RainbowMage.OverlayPlugin {
                             logger.Log(LogLevel.Warning, $"Reserved log line entry missing StartID ({reservedDataEntry.StartID}) or EndID ({reservedDataEntry.EndID}).");
                             continue;
                         }
+                        var Name = reservedDataEntry.Name ?? "Unknown";
                         var Source = reservedDataEntry.Source;
                         var Version = reservedDataEntry.Version.Value;
                         var StartID = reservedDataEntry.StartID.Value;
@@ -49,14 +50,20 @@ namespace RainbowMage.OverlayPlugin {
                             }
                             registry[ID] = new LogLineRegistryEntry() {
                                 ID = ID,
+                                Name = Name,
                                 Source = Source,
                                 Version = Version,
                             };
                         }
                     } else {
                         var ID = reservedDataEntry.ID.Value;
+                        var Name = reservedDataEntry.Name;
                         if (registry.ContainsKey(ID)) {
                             logger.Log(LogLevel.Error, $"Reserved log line entry already registered ({ID}).");
+                            continue;
+                        }
+                        if (Name == null) {
+                            logger.Log(LogLevel.Error, $"Reserved log line entry missing Name property");
                             continue;
                         }
                         var Source = reservedDataEntry.Source;
@@ -69,13 +76,19 @@ namespace RainbowMage.OverlayPlugin {
                         };
                     }
                 }
+                if (registry.ContainsKey(registeredCustomLogLineID)) {
+                    var entry = registry[registeredCustomLogLineID];
+                    var Source = entry.Source.Replace("\r", "\\r").Replace("\n", "\\n");
+                    var Name = entry.Name.Replace("\r", "\\r").Replace("\n", "\\n");
+                    repository.WriteLogLineImpl(registeredCustomLogLineID, DateTime.Now, $"{registeredCustomLogLineID}|{Source}|{Name}|{entry.Version}");
+                }
             }
             catch (Exception ex) {
                 logger.Log(LogLevel.Error, $"FFXIVCustomLogLines: Failed to load reserved log line: {ex}");
             }
         }
 
-        public Func<string, bool> RegisterCustomLogLine(ILogLineRegistryEntry entry) {
+        public Func<string, DateTime, bool> RegisterCustomLogLine(ILogLineRegistryEntry entry) {
             // Don't allow any attempt to write a custom log line with FFXIV_ACT_Plugin as the source.
             // This prevents a downstream plugin from attempting to register e.g. `00` lines by just pretending to be FFXIV_ACT_Plugin.
             if (entry.Source == "FFXIV_ACT_Plugin") {
@@ -93,14 +106,15 @@ namespace RainbowMage.OverlayPlugin {
             }
             // Write out that a new log line has been registered. Prevent newlines in the string input for sanity.
             var Source = entry.Source.Replace("\r", "\\r").Replace("\n", "\\n");
-            repository.WriteLogLineImpl(registeredCustomLogLineID, $"{ID}|{Source}|{entry.Version}");
+            var Name = entry.Name.Replace("\r", "\\r").Replace("\n", "\\n");
+            repository.WriteLogLineImpl(registeredCustomLogLineID, DateTime.Now, $"{ID}|{Source}|{Name}|{entry.Version}");
             registry[ID] = entry;
-            return (line) => {
+            return (line, timestamp) => {
                 if (line.Contains("\r") || line.Contains("\n")) {
                     logger.Log(LogLevel.Warning, $"Attempted to write custom log line with CR or LF with ID of {ID}");
                     return false;
                 }
-                repository.WriteLogLineImpl(ID, line);
+                repository.WriteLogLineImpl(ID, timestamp, line);
                 return true;
             };
         }
@@ -108,12 +122,14 @@ namespace RainbowMage.OverlayPlugin {
 
     interface ILogLineRegistryEntry {
         uint ID { get; }
+        string Name { get; }
         string Source { get; }
         uint Version { get; }
     }
 
     class LogLineRegistryEntry : ILogLineRegistryEntry {
         public uint ID { get; set; }
+        public string Name { get; set; }
         public string Source { get; set; }
         public uint Version { get; set; }
 
@@ -143,6 +159,7 @@ namespace RainbowMage.OverlayPlugin {
         uint? ID { get; }
         uint? StartID { get; }
         uint? EndID { get; }
+        string Name { get; }
         string Source { get; }
         uint? Version { get; }
     }
@@ -152,6 +169,7 @@ namespace RainbowMage.OverlayPlugin {
         public uint? ID { get; set; }
         public uint? StartID { get; set; }
         public uint? EndID { get; set; }
+        public string Name { get; set; }
         public string Source { get; set; }
         public uint? Version { get; set; }
     }

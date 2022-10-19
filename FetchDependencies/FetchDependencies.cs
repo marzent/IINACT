@@ -37,11 +37,10 @@ namespace FetchDependencies {
             try {
                 using var plugin = new TargetAssembly(dllPath);
                 var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(1);
                 httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(ActUserAgent);
-                var source = new CancellationTokenSource();
-                source.CancelAfter(1000);
                 var remoteVersionString =
-                    await httpClient.GetStringAsync("https://advancedcombattracker.com/versioncheck/pluginversion/73", source.Token);
+                    await httpClient.GetStringAsync("https://advancedcombattracker.com/versioncheck/pluginversion/73");
                 var remoteVersion = new Version(remoteVersionString);
                 return remoteVersion > plugin.Version;
             }

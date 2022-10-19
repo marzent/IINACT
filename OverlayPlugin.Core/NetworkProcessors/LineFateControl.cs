@@ -10,13 +10,14 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
         private IOpcodeConfigEntry opcode = null;
         private readonly int offsetMessageType;
         private readonly int offsetPacketData;
+        private readonly FFXIVRepository ffxiv;
 
         private const ushort FateAddCategory = 0x935;
         private const ushort FateRemoveCategory = 0x936;
         private const ushort FateUpdateCategory = 0x93E;
         private static readonly List<ushort> FateCategories = new List<ushort>() { FateAddCategory, FateRemoveCategory, FateUpdateCategory };
 
-        private Func<string, bool> logWriter;
+        private Func<string, DateTime, bool> logWriter;
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct ActorControlSelf_v62 {
@@ -37,12 +38,13 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
 
         public LineFateControl(TinyIoCContainer container) {
             logger = container.Resolve<ILogger>();
-            var ffxiv = container.Resolve<FFXIVRepository>();
+            ffxiv = container.Resolve<FFXIVRepository>();
             var netHelper = container.Resolve<NetworkParser>();
             if (!ffxiv.IsFFXIVPluginPresent())
                 return;
             var customLogLines = container.Resolve<FFXIVCustomLogLines>();
             this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry() {
+                Name = "FateDirector",
                 Source = "OverlayPlugin",
                 ID = LogFileLineID,
                 Version = 1,
@@ -75,6 +77,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
                 if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode) {
                     ActorControlSelf_v62 mapEffectPacket = *(ActorControlSelf_v62*)&buffer[offsetPacketData];
                     if (FateCategories.Contains(mapEffectPacket.category)) {
+                        DateTime serverTime = ffxiv.EpochToDateTime(epoch);
                         string category = "";
                         switch (mapEffectPacket.category) {
                             case FateAddCategory:
@@ -96,7 +99,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
                             $"{mapEffectPacket.param4:X8}|" +
                             $"{mapEffectPacket.param5:X8}|" +
                             $"{mapEffectPacket.param6:X8}|" +
-                            $"{mapEffectPacket.padding1:X8}"
+                            $"{mapEffectPacket.padding1:X8}",
+                            serverTime
                         );
                     }
 

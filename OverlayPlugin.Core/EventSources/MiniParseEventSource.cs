@@ -226,15 +226,18 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         }
 
         MemoryProcessors.EnmityMemory memory = null;
+        List<MemoryProcessors.EnmityMemory> memoryCandidates = null;
         private void CheckMemory() {
             if (memory == null || (memory != null && !memory.IsValid())) {
-                List<MemoryProcessors.EnmityMemory> memoryCandidates;
-                if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Chinese) {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory61(container) };
-                } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory60(container) };
-                } else {
-                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>() { new MemoryProcessors.EnmityMemory62(container) };
+                if (memoryCandidates == null) {
+                    memoryCandidates = new List<MemoryProcessors.EnmityMemory>();
+                    // For CN/KR, try the lang-specific candidate first, then fall back to intl
+                    if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Chinese) {
+                        memoryCandidates.Add(new MemoryProcessors.EnmityMemory61(container));
+                    } else if (repository.GetLanguage() == FFXIV_ACT_Plugin.Common.Language.Korean) {
+                        memoryCandidates.Add(new MemoryProcessors.EnmityMemory60(container));
+                    }
+                    memoryCandidates.Add(new MemoryProcessors.EnmityMemory62(container));
                 }
 
                 foreach (var candidate in memoryCandidates) {

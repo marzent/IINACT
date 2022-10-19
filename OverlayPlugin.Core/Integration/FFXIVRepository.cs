@@ -1,12 +1,15 @@
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Logfile;
+using Machina;
+using Machina.FFXIV;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace RainbowMage.OverlayPlugin {
@@ -136,6 +139,11 @@ namespace RainbowMage.OverlayPlugin {
             }
         }
 
+
+        public Version GetOverlayPluginVersion() {
+            return new Version(4, 2, 0);
+        }
+
         public Version GetPluginVersion() {
             return typeof(IDataRepository).Assembly.GetName().Version;
         }
@@ -254,15 +262,21 @@ namespace RainbowMage.OverlayPlugin {
             }
         }
 
+        public GameRegion GetMachinaRegion() =>
+            Machina.FFXIV.Headers.Opcodes.OpcodeManager.Instance.GameRegion;
+
+        public DateTime EpochToDateTime(long epoch) =>
+            Machina.Infrastructure.ConversionUtility.EpochToDateTime(epoch).ToLocalTime();
+
         private ILogOutput _logOutput;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal bool WriteLogLineImpl(uint ID, string line) {
+        internal bool WriteLogLineImpl(uint ID, DateTime timestamp, string line) {
             if (_logOutput == null) {
                 var plugin = GetPluginData();
                 _logOutput = (ILogOutput)plugin._iocContainer.GetService(typeof(ILogOutput));
             }
-            _logOutput?.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, DateTime.Now, line);
+            _logOutput?.WriteLine((FFXIV_ACT_Plugin.Logfile.LogMessageType)(int)ID, timestamp, line);
             return true;
         }
 

@@ -46,6 +46,7 @@
     <Compile Update="Controls\WSConfigPanel.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\machina\Machina\Machina.csproj" />
     <ProjectReference Include="..\NotACT\NotACT.csproj" />
     <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />
   </ItemGroup>
@@ -70,6 +71,9 @@
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin.Logfile">
       <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+    </Reference>
+    <Reference Include="Machina.FFXIV">
+      <HintPath>..\external_dependencies\Machina.FFXIV.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

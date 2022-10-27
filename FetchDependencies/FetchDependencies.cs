@@ -2,8 +2,8 @@
 
 namespace FetchDependencies {
     public class FetchDependencies {
-        private const string ActUserAgent =
-            "ACT-Parser (v3.6.1     Release: 277 | .NET v4.8+ (533325) | OS Microsoft Windows NT 10.0.22000.0)";
+        private const string UserAgent =
+            "IINACT";
 
         public string DependenciesDir { get; }
 
@@ -37,10 +37,10 @@ namespace FetchDependencies {
             try {
                 using var plugin = new TargetAssembly(dllPath);
                 var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(1);
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(ActUserAgent);
+                httpClient.Timeout = TimeSpan.FromSeconds(2);
+                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
                 var remoteVersionString =
-                    await httpClient.GetStringAsync("https://advancedcombattracker.com/versioncheck/pluginversion/73");
+                    await httpClient.GetStringAsync("https://www.iinact.com/updater/version");
                 var remoteVersion = new Version(remoteVersionString);
                 return remoteVersion > plugin.Version;
             }
@@ -51,8 +51,8 @@ namespace FetchDependencies {
 
         private static async Task DownloadPlugin(string path) {
             var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(ActUserAgent);
-            await using var downloadStream = await httpClient.GetStreamAsync("https://advancedcombattracker.com/download.php?id=73");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            await using var downloadStream = await httpClient.GetStreamAsync("https://www.iinact.com/updater/download");
             await using var zipFileStream = new FileStream(path, FileMode.Create);
             await downloadStream.CopyToAsync(zipFileStream);
             zipFileStream.Close();

@@ -49,7 +49,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors {
 
         private static readonly CEDirectorOPCodes cedirector_intl = new CEDirectorOPCodes(
           0x30,
-          0x1fb
+          0x18C
         );
 
         private struct ActorControlSelf {

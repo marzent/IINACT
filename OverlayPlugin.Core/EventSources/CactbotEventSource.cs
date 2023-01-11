@@ -31,7 +31,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private System.Timers.Timer fast_update_timer_;
         // Held while the |fast_update_timer_| is running.
         private FFXIVProcess ffxiv_;
-        private FateWatcher fate_watcher_;
 
         private string language_ = null;
         private string pc_locale_ = null;
@@ -46,7 +45,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         public const string ZoneChangedEvent = "onZoneChangedEvent";
         public const string PlayerDiedEvent = "onPlayerDied";
         public const string PartyWipeEvent = "onPartyWipe";
-        public const string FateEvent = "onFateEvent";
         public const string PlayerChangedEvent = "onPlayerChangedEvent";
         public const string SendSaveDataEvent = "onSendSaveData";
         public const string DataFilesReadEvent = "onDataFilesRead";
@@ -69,7 +67,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 "onImportLogEvent",
                 "onInCombatChangedEvent",
                 "onZoneChangedEvent",
-                "onFateEvent",
                 "onPlayerDied",
                 "onPartyWipe",
                 "onPlayerChangedEvent",
@@ -206,9 +203,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 LogInfo("Version: intl");
             }
 
-            fate_watcher_ = new FateWatcher(container);
-            fate_watcher_.OnFateChanged += (o, e) => DispatchToJS(new JSEvents.FateEvent(e.eventType, e.fateID, e.progress));
-
             // Incoming events.
             ActGlobals.oFormActMain.OnLogLineRead += OnLogLineRead;
 
@@ -317,10 +311,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             if (player != null) {
                 var send = false;
                 if (!player.Equals(notify_state_.player)) {
-                    // Clear the FATE dictionary if we switched characters
-                    if (notify_state_.player != null && !player.name.Equals(notify_state_.player.name)) {
-                        fate_watcher_.RemoveAndClearFates();
-                    }
                     notify_state_.player = player;
                     send = true;
                 }

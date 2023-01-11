@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors {
     public class FFXIVProcessIntl : FFXIVProcess {
-        // Last updated for FFXIV 6.2
+        // Last updated for FFXIV 6.3
 
         [StructLayout(LayoutKind.Explicit)]
         public unsafe struct EntityMemory {
@@ -27,16 +27,16 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
             [FieldOffset(0x92)]
             public ushort distance;
 
-            [FieldOffset(0xA0)]
+            [FieldOffset(0xB0)]
             public Single pos_x;
 
-            [FieldOffset(0xA4)]
+            [FieldOffset(0xB4)]
             public Single pos_z;
 
-            [FieldOffset(0xA8)]
+            [FieldOffset(0xB8)]
             public Single pos_y;
 
-            [FieldOffset(0xB0)]
+            [FieldOffset(0xC0)]
             public Single rotation;
 
             [FieldOffset(0x1C4)]

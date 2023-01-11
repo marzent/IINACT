@@ -169,7 +169,6 @@ namespace RainbowMage.OverlayPlugin {
                     var presets = JsonConvert.DeserializeObject<Dictionary<string, OverlayPreset>>(presetData);
                     var registry = _container.Resolve<Registry>();
                     foreach (var pair in presets) {
-                        pair.Value.Name = pair.Key;
                         registry.RegisterOverlayPreset2(pair.Value);
                     }
 

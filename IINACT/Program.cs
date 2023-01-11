@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using Advanced_Combat_Tracker;
+using IINACT.Properties;
 
 namespace IINACT {
     internal static class Program
@@ -55,6 +56,7 @@ namespace IINACT {
         private readonly SettingsForm _settingsForm;
 
         public Daemon() {
+            UpgradeSettings();
             var resources = new ComponentResourceManager(typeof(SettingsForm));
             _trayIcon = new NotifyIcon
             {
@@ -64,14 +66,22 @@ namespace IINACT {
             };
 
             _trayIcon.ContextMenuStrip.Items.AddRange(new ToolStripItem[] {
-                new ToolStripMenuItem("Settings", null, Settings, "Settings"),
+                new ToolStripMenuItem("Settings", null, ShowSettings, "Settings"),
                 new ToolStripMenuItem("Exit", null, Exit, "Exit")
             });
             Application.ApplicationExit += CleanupTray;
             _settingsForm = new SettingsForm();
         }
 
-        private void Settings(object? sender, EventArgs e) {
+        private static void UpgradeSettings() {
+            if (!Settings.Default.IsSettingsUpgradeRequired) return;
+            Settings.Default.Upgrade();
+            Settings.Default.Reload();
+            Settings.Default.IsSettingsUpgradeRequired = false;
+            Settings.Default.Save();
+        }
+
+        private void ShowSettings(object? sender, EventArgs e) {
             _settingsForm.Show();
         }
 

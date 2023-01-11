@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
@@ -27,7 +28,7 @@ public class FfxivActPluginWrapper {
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivActPlugin;
     private readonly ParseMediator _parseMediator;
 
-    public FfxivActPluginWrapper() {
+    public FfxivActPluginWrapper(int targetPid) {
         _ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         _ffxivActPlugin.ConfigureIOC();
         OpcodeManager.Instance.SetRegion(GameRegion.Global);
@@ -49,7 +50,7 @@ public class FfxivActPluginWrapper {
 
         SetupDataSubscription();
 
-        SetupSettingsMediator();
+        SetupSettingsMediator(targetPid);
 
         Repository = iocContainer.Resolve<IDataRepository>();
         _ffxivActPlugin.SetProperty("DataRepository", Repository);
@@ -67,20 +68,21 @@ public class FfxivActPluginWrapper {
     }
 
 
-    private void SetupSettingsMediator()
+    private void SetupSettingsMediator(int targetPid)
     {
         var settingsMediator = _ffxivActPlugin._dataCollection._settingsMediator;
 
         DataCollectionSettings = new DataCollectionSettingsEventArgs {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
-            UseWinPCap = true
+            UseWinPCap = true,
+            ProcessID = targetPid
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
 
         var readProcesses = ProcessManager.GetField<ReadProcesses>("_readProcesses");
         //wait for game
-        while (!readProcesses.Read64(true).Any())
+        while (!readProcesses.Read64(true).Exists(pid => targetPid == 0 || pid == targetPid))
             Thread.Sleep(500);
 
         ParseSettings = new ParseSettings() {

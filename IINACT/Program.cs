@@ -11,8 +11,12 @@ namespace IINACT {
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
+            var targetPid = 0;
+            if (args.Length > 0)
+                int.TryParse(args[0], out targetPid);
+
             using var singletoneMutex = new Mutex(true, @"Global\IINACT", out bool createdNew);
 
             if (createdNew)
@@ -23,7 +27,7 @@ namespace IINACT {
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
                 ApplicationConfiguration.Initialize();
                 ActGlobals.oFormActMain = new FormActMain();
-                Application.Run(new Daemon());
+                Application.Run(new Daemon(targetPid));
             }
             else
             {
@@ -55,7 +59,7 @@ namespace IINACT {
         private readonly NotifyIcon _trayIcon;
         private readonly SettingsForm _settingsForm;
 
-        public Daemon() {
+        public Daemon(int targetPid) {
             UpgradeSettings();
             var resources = new ComponentResourceManager(typeof(SettingsForm));
             _trayIcon = new NotifyIcon
@@ -70,7 +74,7 @@ namespace IINACT {
                 new ToolStripMenuItem("Exit", null, Exit, "Exit")
             });
             Application.ApplicationExit += CleanupTray;
-            _settingsForm = new SettingsForm();
+            _settingsForm = new SettingsForm(targetPid);
         }
 
         private static void UpgradeSettings() {

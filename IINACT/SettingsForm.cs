@@ -8,7 +8,7 @@ using RainbowMage.OverlayPlugin;
 
 namespace IINACT {
     public partial class SettingsForm : DarkForm {
-        public SettingsForm() {
+        public SettingsForm(int targetPid) {
             InitializeComponent();
             comboBoxLang.DataSource = Enum.GetValues(typeof(Language));
             comboBoxLang.SelectedIndex = Settings.Default.Language - 1;
@@ -42,7 +42,7 @@ namespace IINACT {
 #endif
             Task.Run(CheckForUpdate);
             Task.Run(() => {
-                var ffxivActPlugin = new FfxivActPluginWrapper();
+                var ffxivActPlugin = new FfxivActPluginWrapper(targetPid);
                 Invoke(new MethodInvoker(InitOverlayPlugin));
                 while (ffxivActPlugin.ProcessManager.Verify())
                     Thread.Sleep(2000);
@@ -56,7 +56,7 @@ namespace IINACT {
                 var remoteVersionString =
                     new HttpClient().GetStringAsync("https://github.com/marzent/IINACT/raw/main/version").Result;
                 var remoteVersion = new Version(remoteVersionString);
-                if (remoteVersion < currentVersion) return;
+                if (remoteVersion <= currentVersion) return;
                 if (MessageBox.Show("An newer version of IINACT is available. Would you like to download it?",
                         "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.Yes) {
                     Process.Start("explorer", "https://github.com/marzent/IINACT/releases/latest");

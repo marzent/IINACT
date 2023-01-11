@@ -156,7 +156,7 @@ namespace RainbowMage.OverlayPlugin {
 
                     try {
                         var assembly = Assembly.GetExecutingAssembly();
-                        var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("presets.json"));
+                        var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("overlays.json"));
                         using (var stream = assembly.GetManifestResourceStream(resourceName))
                         using (var reader = new StreamReader(stream)) {
                             presetData = reader.ReadToEnd();

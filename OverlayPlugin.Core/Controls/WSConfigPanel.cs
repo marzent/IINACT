@@ -98,16 +98,14 @@ namespace RainbowMage.OverlayPlugin {
             var resourcesPath = "file:///" + _plugin.PluginDirectory.Replace('\\', '/') + "/resources";
 #endif
 
-            var url = preset.Url.Replace("\\", "/").Replace("%%", resourcesPath);
+            var url = preset.HttpUrl.Replace("\\", "/").Replace("%%", resourcesPath);
             var uri = new UriBuilder(url);
             var query_params = HttpUtility.ParseQueryString(uri.Query);
 
-            if (preset.Supports.Contains("modern")) {
+            if (preset.Modern) {
                 query_params.Add("OVERLAY_WS", hostUrl + "/ws");
-            } else if (preset.Supports.Contains("actws")) {
-                query_params.Add("HOST_PORT", hostUrl + "/");
             } else {
-                url = "";
+                query_params.Add("HOST_PORT", hostUrl + "/");
             }
 
             uri.Query = HttpUtility.UrlDecode(query_params.ToString());

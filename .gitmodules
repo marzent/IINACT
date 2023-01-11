@@ -4,3 +4,6 @@
 [submodule "FFXIVClientStructs"]
 	path = FFXIVClientStructs
 	url = https://github.com/aers/FFXIVClientStructs
+[submodule "OverlayPlugin.Core/resources/act-overlays"]
+	path = OverlayPlugin.Core/resources/act-overlays
+	url = https://github.com/cking/act-overlays

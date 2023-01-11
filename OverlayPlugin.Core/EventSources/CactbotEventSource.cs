@@ -60,8 +60,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             : base(container) {
             Name = "Cactbot";
 
-            RegisterPresets();
-
             RegisterEventTypes(new List<string>()
             {
                 "onForceReload",
@@ -605,54 +603,6 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             }
 
             watchers = null;
-        }
-
-        private struct OverlayPreset : IOverlayPreset {
-            public string Name { get; set; }
-            public string Type => "MiniParse";
-            public string Url { get; set; }
-            public int[] Size { get; set; }
-            public bool Locked { get; set; }
-            public List<string> Supports => new List<string> { "modern" };
-        }
-
-        private void RegisterPreset(string dirName, int width, int height, string nameOverride = null, string fileOverride = null) {
-            var lc = dirName.ToLowerInvariant();
-            var name = nameOverride != null ? nameOverride : dirName;
-            var filename = fileOverride != null ? fileOverride : dirName;
-
-            Registry.RegisterOverlayPreset(new OverlayPreset {
-                Name = $"Cactbot {name}",
-                Url = Path.Combine("https://quisquous.github.io/cactbot", "ui", lc, $"{filename}.html"),
-                Size = new int[] { width, height },
-                Locked = false,
-            });
-        }
-
-        private void RegisterDpsPreset(string name, string file, int width, int height) {
-            var lc = name.ToLowerInvariant();
-            Registry.RegisterOverlayPreset(new OverlayPreset {
-                Name = $"Cactbot DPS {name}",
-                Url = Path.Combine("https://quisquous.github.io/cactbot", "ui", "dps", lc, $"{file}.html"),
-                Size = new int[] { width, height },
-                Locked = false,
-            });
-        }
-
-        private void RegisterPresets() {
-            RegisterPreset("Raidboss", width: 1100, height: 300, "Raidboss (Combined Alerts & Timeline)", "raidboss");
-            RegisterPreset("Raidboss", width: 1100, height: 300, "Raidboss Alerts Only", "raidboss_alerts_only");
-            RegisterPreset("Raidboss", width: 320, height: 220, "Raidboss Timeline Only", "raidboss_timeline_only");
-            RegisterPreset("Jobs", width: 600, height: 300, fileOverride: "jobs");
-            RegisterPreset("Eureka", width: 400, height: 400, fileOverride: "eureka");
-            RegisterPreset("Fisher", width: 500, height: 500, fileOverride: "fisher");
-            RegisterPreset("OopsyRaidsy", width: 400, height: 400, fileOverride: "oopsyraidsy");
-            RegisterPreset("PullCounter", width: 200, height: 200, fileOverride: "pullcounter");
-            RegisterPreset("Radar", width: 300, height: 400, fileOverride: "radar");
-            RegisterPreset("Test", width: 300, height: 300, fileOverride: "test");
-            // FIXME: these should be consistently named.
-            RegisterDpsPreset("Xephero", "xephero-cactbot", width: 600, height: 400);
-            RegisterDpsPreset("Rdmty", "dps", width: 600, height: 400);
         }
 
         // State that is tracked and sent to JS when it changes.

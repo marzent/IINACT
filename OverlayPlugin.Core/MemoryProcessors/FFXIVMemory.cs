@@ -79,6 +79,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             OnProcessChange?.Invoke(this, process);
         }
 
+        public IntPtr GetBaseAddress() 
+        {
+            return process.MainModule.BaseAddress;
+        }
+
         private void CloseProcessHandle()
         {
             NativeMethods.CloseHandle(processHandle);
@@ -171,6 +176,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var value = new byte[4];
             Peek(IntPtr.Add(address, offset), value);
             fixed (byte* p = &value[0]) ret = *(int*)p;
+            return ret;
+        }
+
+        public unsafe long GetInt64(IntPtr address, int offset = 0) 
+        {
+            long ret;
+            var value = new byte[8];
+            Peek(IntPtr.Add(address, offset), value);
+            fixed (byte* p = &value[0]) ret = *(long*)p;
             return ret;
         }
 

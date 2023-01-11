@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
 using RainbowMage.OverlayPlugin.Integration;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Aggro;
+using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Enmity;
 using RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud;
@@ -199,6 +200,7 @@ namespace RainbowMage.OverlayPlugin {
                             _container.Register(new NetworkParser(_container));
                             _container.Register(new TriggIntegration(_container));
                             _container.Register(new FFXIVCustomLogLines(_container));
+                            _container.Register(new MemoryProcessors.AtkStage.FFXIVClientStructs.Data(_container));
                             _container.Register(new OverlayPluginLogLines(_container));
 
                             // Register FFXIV memory reading subcomponents.
@@ -212,6 +214,7 @@ namespace RainbowMage.OverlayPlugin {
                             _container.Register<IEnmityMemory, EnmityMemoryManager>();
                             _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
                             _container.Register<IInCombatMemory, InCombatMemoryManager>();
+                            _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
 
                             // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
                             // can block for some time. We run it on the background thread to avoid blocking the UI.
@@ -352,6 +355,7 @@ namespace RainbowMage.OverlayPlugin {
                 // Make sure the event sources are ready before we load any overlays.
                 registry.StartEventSource(new MiniParseEventSource(_container));
                 registry.StartEventSource(new EnmityEventSource(_container));
+                registry.StartEventSource(new FFXIVClientStructsEventSource(_container));
 
                 registry.RegisterOverlay<MiniParseOverlay>();
                 registry.RegisterOverlay<LabelOverlay>();

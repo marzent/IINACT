@@ -1,7 +1,4 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: IINACT build
 
 on:
   push:
@@ -24,8 +21,15 @@ jobs:
         dotnet-version: 7.0.x
     - name: Publish
       run: dotnet publish --self-contained true -c release -maxcpucount:1
-    - name: Upload dotnet test results
+    - name: Upload IINACT
       uses: actions/upload-artifact@v3
       with:
         name: IINACT
+        path: IINACT\bin\Release\net7.0-windows\win-x64\publish\IINACT.exe
+    - name: Publish (not self-contained)
+      run: dotnet publish --self-contained false -c release -maxcpucount:1
+    - name: Upload IINACT (not self-contained)
+      uses: actions/upload-artifact@v3
+      with:
+        name: IINACT (not self-contained)
         path: IINACT\bin\Release\net7.0-windows\win-x64\publish\IINACT.exe

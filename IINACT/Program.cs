@@ -76,7 +76,6 @@ namespace IINACT {
         private static void UpgradeSettings() {
             if (!Settings.Default.IsSettingsUpgradeRequired) return;
             Settings.Default.Upgrade();
-            Settings.Default.Reload();
             Settings.Default.IsSettingsUpgradeRequired = false;
             Settings.Default.Save();
         }

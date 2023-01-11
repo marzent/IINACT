@@ -40,6 +40,7 @@ namespace IINACT {
 #if DEBUG
             Show();
 #endif
+            Task.Run(CheckForUpdate);
             Task.Run(() => {
                 var ffxivActPlugin = new FfxivActPluginWrapper();
                 Invoke(new MethodInvoker(InitOverlayPlugin));
@@ -47,6 +48,23 @@ namespace IINACT {
                     Thread.Sleep(2000);
                 Invoke(new MethodInvoker(Application.Exit));
             });
+        }
+
+        private static void CheckForUpdate() {
+            try {
+                var currentVersion = new Version(Application.ProductVersion);
+                var remoteVersionString =
+                    new HttpClient().GetStringAsync("https://github.com/marzent/IINACT/raw/main/version").Result;
+                var remoteVersion = new Version(remoteVersionString);
+                if (remoteVersion < currentVersion) return;
+                if (MessageBox.Show("An newer version of IINACT is available. Would you like to download it?",
+                        "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.Yes) {
+                    Process.Start("explorer", "https://github.com/marzent/IINACT/releases/latest");
+                }
+            }
+            catch {
+                MessageBox.Show("Failed to check for updates.");
+            }
         }
 
         private void InitOverlayPlugin() {

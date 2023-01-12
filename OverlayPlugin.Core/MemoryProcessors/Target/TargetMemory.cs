@@ -5,7 +5,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
 {
-    public abstract class TargetMemory
+    public abstract class TargetMemory : ITargetMemory
     {
         private FFXIVMemory memory;
         private ILogger logger;
@@ -28,15 +28,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             this.hoverTargetOffset = hoverTargetOffset;
             logger = container.Resolve<ILogger>();
             memory = container.Resolve<FFXIVMemory>();
-            memory.RegisterOnProcessChangeHandler(ResetPointers);
             combatantMemory = container.Resolve<ICombatantMemory>();
         }
 
-        private void ResetPointers(object sender, Process p)
+        private void ResetPointers()
         {
             targetAddress = IntPtr.Zero;
-            if (p != null)
-                GetPointerAddress();
         }
 
         private bool HasValidPointers()
@@ -57,10 +54,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             return true;
         }
 
-        private bool GetPointerAddress()
+        public void ScanPointers()
         {
+            ResetPointers();
             if (!memory.IsValid())
-                return false;
+                return;
 
             List<string> fail = new List<string>();
 
@@ -80,12 +78,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             if (fail.Count == 0)
             {
                 logger.Log(LogLevel.Info, $"Found target memory via {GetType().Name}.");
-                return true;
+                return;
             }
 
             logger.Log(LogLevel.Error, $"Failed to find target memory via {GetType().Name}: {string.Join(", ", fail)}.");
-            return false;
+            return;
         }
+
+        public abstract Version GetVersion();
 
         private Combatant.Combatant GetTargetRelativeCombatant(int offset)
         {

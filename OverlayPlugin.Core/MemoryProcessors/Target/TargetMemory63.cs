@@ -1,4 +1,6 @@
-﻿namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
+﻿using System;
+
+namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
 {
     interface ITargetMemory63 : ITargetMemory { }
 
@@ -14,5 +16,10 @@
         public TargetMemory63(TinyIoCContainer container)
             : base(container, targetSignature, targetTargetOffset, focusTargetOffset, hoverTargetOffset)
         { }
+
+        public override Version GetVersion()
+        {
+            return new Version(6, 3);
+        }
     }
 }

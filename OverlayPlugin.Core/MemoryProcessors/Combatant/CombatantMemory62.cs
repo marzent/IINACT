@@ -96,6 +96,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                     CastDurationMax = mem.CastDurationMax,
 
                     TransformationId = mem.TransformationId,
+                    WeaponId = mem.WeaponId
                 };
                 combatant.IsTargetable =
                     (combatant.ModelStatus == ModelStatus.Visible)
@@ -213,6 +214,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
             [FieldOffset(0x1ACA)]
             public ushort WorldID;
+
+            [FieldOffset(0x1ADE)]
+            public byte WeaponId;
 
             [FieldOffset(0x1B48)]
             public fixed byte Effects[EffectBytes];

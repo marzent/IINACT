@@ -45,6 +45,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private const string ImportedLogLinesEvent = "ImportedLogLines";
         private const string ChangeZoneEvent = "ChangeZone";
         private const string ChangeMapEvent = "ChangeMap";
+        private const string GameVersionEvent = "GameVersion";
         private const string ChangePrimaryPlayerEvent = "ChangePrimaryPlayer";
         private const string FileChangedEvent = "FileChanged";
         private const string OnlineStatusChangedEvent = "OnlineStatusChanged";
@@ -77,6 +78,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 ChangePrimaryPlayerEvent,
                 ChangeZoneEvent,
                 ChangeMapEvent,
+                GameVersionEvent,
                 OnlineStatusChangedEvent,
                 PartyChangedEvent,
             });
@@ -387,6 +389,14 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                                 ActGlobals.oFormActMain.EndCombat(true);
                             }));
                         }
+                        break;
+                    case LogMessageType.Process:
+                        var gameVersion = repository.GetGameVersion();
+                        DispatchAndCacheEvent(JObject.FromObject(new
+                        {
+                            type = GameVersionEvent,
+                            gameVersion
+                        }));
                         break;
                 }
 

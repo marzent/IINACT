@@ -17,6 +17,7 @@
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\machina\Machina\Machina.csproj" />
     <ProjectReference Include="..\NotACT\NotACT.csproj" />
   </ItemGroup>
 </Project>

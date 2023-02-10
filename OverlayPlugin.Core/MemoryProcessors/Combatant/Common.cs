@@ -146,6 +146,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         public float CastDurationCurrent;
         public float CastDurationMax;
 
+        public short TransformationId;
+
         private Single GetDistance(Combatant target)
         {
             var distanceX = (float)Math.Abs(PosX - target.PosX);

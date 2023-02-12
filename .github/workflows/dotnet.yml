@@ -2,7 +2,7 @@ name: IINACT build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "machina-iinact" ]
   pull_request:
     branches: [ "main" ]
 

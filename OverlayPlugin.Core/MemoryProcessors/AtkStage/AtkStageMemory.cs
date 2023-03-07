@@ -11,9 +11,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 
         protected IntPtr atkStageInstanceAddress = IntPtr.Zero;
 
-        private int atkStageSingletonAddress;
+        private long atkStageSingletonAddress;
 
-        public AtkStageMemory(TinyIoCContainer container, int atkStageSingletonAddress)
+        public AtkStageMemory(TinyIoCContainer container, long atkStageSingletonAddress)
         {
             this.atkStageSingletonAddress = atkStageSingletonAddress;
             logger = container.Resolve<ILogger>();
@@ -51,7 +51,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 
             List<string> fail = new List<string>();
 
-            long instanceAddress = memory.GetInt64(IntPtr.Add(memory.GetBaseAddress(), atkStageSingletonAddress));
+            long instanceAddress = memory.GetInt64(new IntPtr(memory.GetBaseAddress().ToInt64() + atkStageSingletonAddress));
 
             if (instanceAddress != 0)
             {
@@ -71,7 +71,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find atkStage memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            // @TODO: Change this from Debug to Error once we're actually using atkStage
+            logger.Log(LogLevel.Debug, $"Failed to find atkStage memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 

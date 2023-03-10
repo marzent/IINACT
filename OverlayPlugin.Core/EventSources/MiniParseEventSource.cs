@@ -470,7 +470,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             // Build a lookup table of currently known combatants
             var lookupTable = new Dictionary<uint, PluginCombatant>();
             foreach (var c in combatants) {
-                if (GetPartyType(c) != 0 /* None */) {
+                if (c.type!= 0 /* None */) {
                     lookupTable[c.ID] = c;
                 }
             }

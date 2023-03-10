@@ -53,7 +53,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
          */
     }
 
-    /// <summary>An int offset by 0x104 from the combatant's address that describes the 3D model visibility.</summary>
+    /// <summary>An int that describes the 3D model visibility.</summary>
     // In a fight like O1N, where the main boss (Alte Roite) momentarily disappears and appears at the edge of the map to do his knockback,
     // the ModelStatus gets set to 16384 (Hidden), but the ObjectStatus remains at 191. The fact that the ObjectStatus doesn't change to 189 could mean that 
     // the boss is still accepting damage in this invisibility period, and that no ghosting will occur. Checking the logs shows that

@@ -112,5 +112,17 @@
       "opcode": 112,
       "size": 16
     }
+  },
+  "2023.02.28.0000.0000": {
+    // Region: Global
+    // Version: 6.35
+    "MapEffect": {
+        "opcode": 294,
+        "size": 11
+    },
+    "CEDirector": {
+        "opcode": 647,
+        "size": 16
+    }
   }
 }

@@ -54,14 +54,6 @@ public class FfxivActPluginWrapper {
 
         Repository = iocContainer.Resolve<IDataRepository>();
         _ffxivActPlugin.SetProperty("DataRepository", Repository);
-
-        Monitor = scanPackets.GetField<FFXIVNetworkMonitor>("_monitor");
-
-        Monitor.RPCap.host = Settings.Default.RPcap ? Settings.Default.RPcapHost : "";
-        Monitor.RPCap.port = Settings.Default.RPcapPort;
-        Monitor.RPCap.username = Settings.Default.RPcapUsername;
-        Monitor.RPCap.password = Settings.Default.RPcapPassword;
-
         _ffxivActPlugin._dataCollection.StartMemory();
 
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
@@ -75,7 +67,8 @@ public class FfxivActPluginWrapper {
         DataCollectionSettings = new DataCollectionSettingsEventArgs {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
-            UseWinPCap = true,
+            UseWinPCap = false,
+            UseDeucalion= true,
             ProcessID = targetPid
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
@@ -105,7 +98,7 @@ public class FfxivActPluginWrapper {
         var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets, ParseSettings.LanguageID, ParseSettings.ParseFilter, ParseSettings.SimulateIndividualDoTCrits, ParseSettings.ShowRealDoTTicks);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line);
 
-        var line2 = logFormat.FormatMemorySettings(DataCollectionSettings.ProcessID, DataCollectionSettings.LogFileFolder, DataCollectionSettings.LogAllNetworkData, DataCollectionSettings.DisableCombatLog, DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap, DataCollectionSettings.UseSocketFilter);
+        var line2 = logFormat.FormatMemorySettings(DataCollectionSettings.ProcessID, DataCollectionSettings.LogFileFolder, DataCollectionSettings.LogAllNetworkData, DataCollectionSettings.DisableCombatLog, DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap, DataCollectionSettings.UseSocketFilter, DataCollectionSettings.UseDeucalion);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);

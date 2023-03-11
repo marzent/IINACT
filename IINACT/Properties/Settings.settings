@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="IINACT.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="RPcap" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Language" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
@@ -25,18 +22,6 @@
     </Setting>
     <Setting Name="ShowDebug" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="RPcapHost" Type="System.String" Scope="User">
-      <Value Profile="(Default)">localhost</Value>
-    </Setting>
-    <Setting Name="RPcapPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2002</Value>
-    </Setting>
-    <Setting Name="RPcapUsername" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="RPcapPassword" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="LogFilePath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

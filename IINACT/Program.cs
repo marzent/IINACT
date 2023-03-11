@@ -75,6 +75,10 @@ namespace IINACT {
             });
             Application.ApplicationExit += CleanupTray;
             _settingsForm = new SettingsForm(targetPid);
+            
+            if (Environment.GetEnvironmentVariable("IINACT_SHOW_SETTINGS") == "1") {
+                _settingsForm.Show();
+            }
         }
 
         private static void UpgradeSettings() {

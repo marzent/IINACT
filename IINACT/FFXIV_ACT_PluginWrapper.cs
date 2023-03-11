@@ -9,7 +9,6 @@ using FFXIV_ACT_Plugin.Memory;
 using FFXIV_ACT_Plugin.Memory.MemoryReader;
 using FFXIV_ACT_Plugin.Parse;
 using FFXIV_ACT_Plugin.Resource;
-using IINACT.Properties;
 using Machina.FFXIV;
 using Machina.FFXIV.Headers.Opcodes;
 using Microsoft.MinIoC;
@@ -27,8 +26,10 @@ public class FfxivActPluginWrapper {
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivActPlugin;
     private readonly ParseMediator _parseMediator;
+    private Configuration _configuration;
 
-    public FfxivActPluginWrapper(int targetPid) {
+    public FfxivActPluginWrapper(int targetPid, Configuration configuration) {
+        _configuration = configuration;
         _ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         _ffxivActPlugin.ConfigureIOC();
         OpcodeManager.Instance.SetRegion(GameRegion.Global);
@@ -79,13 +80,13 @@ public class FfxivActPluginWrapper {
             Thread.Sleep(500);
 
         ParseSettings = new ParseSettings() {
-            DisableDamageShield = Settings.Default.DisableDamageShield,
-            DisableCombinePets = Settings.Default.DisableCombinePets,
-            LanguageID = (Language)Settings.Default.Language,
-            ParseFilter = (ParseFilterMode)Settings.Default.ParseFilterMode,
-            SimulateIndividualDoTCrits = Settings.Default.SimulateIndividualDoTCrits,
-            ShowRealDoTTicks = Settings.Default.ShowRealDoTTicks,
-            ShowDebug = Settings.Default.ShowDebug,
+            DisableDamageShield = _configuration.DisableDamageShield,
+            DisableCombinePets = _configuration.DisableCombinePets,
+            LanguageID = (Language)_configuration.Language,
+            ParseFilter = (ParseFilterMode)_configuration.ParseFilterMode,
+            SimulateIndividualDoTCrits = _configuration.SimulateIndividualDoTCrits,
+            ShowRealDoTTicks = _configuration.ShowRealDoTTicks,
+            ShowDebug = _configuration.ShowDebug,
             EnableBenchmarks = false
         };
         settingsMediator.ParseSettings = ParseSettings;

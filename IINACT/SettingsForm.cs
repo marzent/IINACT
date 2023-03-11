@@ -3,40 +3,43 @@ using Advanced_Combat_Tracker;
 using DarkUI.Forms;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
-using IINACT.Properties;
 using RainbowMage.OverlayPlugin;
 
 namespace IINACT {
-    public partial class SettingsForm : DarkForm {
-        public SettingsForm(int targetPid) {
+    public partial class SettingsForm : DarkForm
+    {
+        private Configuration _configuration;
+        
+        public SettingsForm(int targetPid, Configuration configuration) {
             InitializeComponent();
+            _configuration = configuration;
             comboBoxLang.DataSource = Enum.GetValues(typeof(Language));
-            comboBoxLang.SelectedIndex = Settings.Default.Language - 1;
+            comboBoxLang.SelectedIndex = _configuration.Language - 1;
             comboBoxLang.SelectedIndexChanged += comboBoxLang_SelectedIndexChanged;
             comboBoxFilter.DataSource = Enum.GetValues(typeof(ParseFilterMode));
-            comboBoxFilter.SelectedIndex = Settings.Default.ParseFilterMode;
+            comboBoxFilter.SelectedIndex = _configuration.ParseFilterMode;
             comboBoxFilter.SelectedIndexChanged += comboBoxFilter_SelectedIndexChanged;
-            checkBoxShield.Checked = Settings.Default.DisableDamageShield;
-            checkBoxPets.Checked = Settings.Default.DisableCombinePets;
-            checkBoxDotCrit.Checked = Settings.Default.SimulateIndividualDoTCrits;
-            checkBoxDotTick.Checked = Settings.Default.ShowRealDoTTicks;
-            checkBoxDebug.Checked = Settings.Default.ShowDebug;
+            checkBoxShield.Checked = _configuration.DisableDamageShield;
+            checkBoxPets.Checked = _configuration.DisableCombinePets;
+            checkBoxDotCrit.Checked = _configuration.SimulateIndividualDoTCrits;
+            checkBoxDotTick.Checked = _configuration.ShowRealDoTTicks;
+            checkBoxDebug.Checked = _configuration.ShowDebug;
             logFileButton.Click += logFileButton_Clicked;
-            if (Directory.Exists(Settings.Default.LogFilePath))
-                ActGlobals.oFormActMain.LogFilePath = Settings.Default.LogFilePath;
+            if (Directory.Exists(_configuration.LogFilePath))
+                ActGlobals.oFormActMain.LogFilePath = _configuration.LogFilePath;
             logFileButton.Text = ActGlobals.oFormActMain.LogFilePath;
 
             //create window handle
-            Opacity = 0;
+            //Opacity = 0;
             Show();
-            Hide();
+            //Hide();
             Opacity = 1;
 #if DEBUG
             Show();
 #endif
             Task.Run(CheckForUpdate);
             Task.Run(() => {
-                var ffxivActPlugin = new FfxivActPluginWrapper(targetPid);
+                var ffxivActPlugin = new FfxivActPluginWrapper(targetPid, _configuration);
                 Invoke(new MethodInvoker(InitOverlayPlugin));
                 while (ffxivActPlugin.ProcessManager.Verify())
                     Thread.Sleep(2000);
@@ -79,13 +82,13 @@ namespace IINACT {
         }
 
         private void comboBoxLang_SelectedIndexChanged(object? sender, EventArgs e) {
-            Settings.Default.Language = comboBoxLang.SelectedIndex + 1;
-            Settings.Default.Save();
+            _configuration.Language = comboBoxLang.SelectedIndex + 1;
+            _configuration.Save();
         }
 
         private void comboBoxFilter_SelectedIndexChanged(object? sender, EventArgs e) {
-            Settings.Default.ParseFilterMode = comboBoxFilter.SelectedIndex;
-            Settings.Default.Save();
+            _configuration.ParseFilterMode = comboBoxFilter.SelectedIndex;
+            _configuration.Save();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
@@ -95,28 +98,28 @@ namespace IINACT {
         }
 
         private void checkBoxShield_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.DisableDamageShield = checkBoxShield.Checked;
-            Settings.Default.Save();
+            _configuration.DisableDamageShield = checkBoxShield.Checked;
+            _configuration.Save();
         }
 
         private void checkBoxPets_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.DisableCombinePets = checkBoxPets.Checked;
-            Settings.Default.Save();
+            _configuration.DisableCombinePets = checkBoxPets.Checked;
+            _configuration.Save();
         }
 
         private void checkBoxDotCrit_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.SimulateIndividualDoTCrits = checkBoxDotCrit.Checked;
-            Settings.Default.Save();
+            _configuration.SimulateIndividualDoTCrits = checkBoxDotCrit.Checked;
+            _configuration.Save();
         }
 
         private void checkBoxDotTick_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.ShowRealDoTTicks = checkBoxDotTick.Checked;
-            Settings.Default.Save();
+            _configuration.ShowRealDoTTicks = checkBoxDotTick.Checked;
+            _configuration.Save();
         }
 
         private void checkBoxDebug_CheckedChanged(object sender, EventArgs e) {
-            Settings.Default.ShowDebug = checkBoxDebug.Checked;
-            Settings.Default.Save();
+            _configuration.ShowDebug = checkBoxDebug.Checked;
+            _configuration.Save();
         }
 
         private void logFileButton_Clicked(object? sender, EventArgs e) {
@@ -128,8 +131,8 @@ namespace IINACT {
             if (!Directory.Exists(newPath))
                 return;
             ActGlobals.oFormActMain.LogFilePath = newPath;
-            Settings.Default.LogFilePath = newPath;
-            Settings.Default.Save();
+            _configuration.LogFilePath = newPath;
+            _configuration.Save();
         }
 
     }

@@ -2,7 +2,7 @@
   "Author": "Usagi",
   "Name": "IINACT",
   "Punchline": "A parsing plugin.",
-  "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a stripped-down port of Overlay Plugin with Cactbot event sources.",
+  "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a stripped-down port of Overlay Plugin for modern .NET",
   "InternalName": "IINACT",
   "ApplicableVersion": "any",
   "Tags": [

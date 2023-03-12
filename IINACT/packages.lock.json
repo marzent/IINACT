@@ -57,6 +57,12 @@
       "machina": {
         "type": "Project"
       },
+      "machina.ffxiv": {
+        "type": "Project",
+        "dependencies": {
+          "Machina": "[2.3.1.3, )"
+        }
+      },
       "overlayplugin.common": {
         "type": "Project",
         "dependencies": {
@@ -68,9 +74,9 @@
       "overlayplugin.core": {
         "type": "Project",
         "dependencies": {
-          "Advanced Combat Tracker": "[6.9.0, )",
           "DarkModeUI": "[3.1.0, )",
           "Machina": "[2.3.1.3, )",
+          "Machina.FFXIV": "[2.3.6.5, )",
           "Microsoft.CSharp": "[4.7.0, )",
           "OverlayPlugin.Common": "[1.0.0, )",
           "System.Data.DataSetExtensions": "[4.5.0, )",

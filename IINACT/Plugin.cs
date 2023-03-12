@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Advanced_Combat_Tracker;
+﻿using Advanced_Combat_Tracker;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
@@ -10,14 +9,13 @@ namespace IINACT
 {
     public sealed class Plugin : IDalamudPlugin
     {
-        public string Name => "Sample Plugin";
-        private const string CommandName = "/pmycommand";
-        private static string _dependenciesDir = null!;
+        public string Name => "IINACT";
+        private const string CommandName = "/iinact";
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
         public Configuration Configuration { get; init; }
-        public WindowSystem WindowSystem = new("SamplePlugin");
+        public WindowSystem WindowSystem = new("IINACT");
 
         private ConfigWindow ConfigWindow { get; init; }
         private MainWindow MainWindow { get; init; }
@@ -28,18 +26,21 @@ namespace IINACT
         {
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
-            
-            var fetchDeps = new FetchDependencies.FetchDependencies();
+
+            var fetchDeps = new FetchDependencies.FetchDependencies(PluginInterface.AssemblyLocation.Directory?.FullName!);
             fetchDeps.GetFfxivPlugin().Wait();
-            _dependenciesDir = fetchDeps.DependenciesDir;
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             ActGlobals.oFormActMain = new FormActMain();
 
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             Configuration.Initialize(PluginInterface);
             
-            new SettingsForm(0, Configuration);
+            if (Directory.Exists(Configuration.LogFilePath))
+                ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
+
+            var wrapper = new FfxivActPluginWrapper(0, Configuration);
+
+            Task.Run(InitOverlayPlugin);
             
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this);
@@ -54,6 +55,22 @@ namespace IINACT
 
             PluginInterface.UiBuilder.Draw += DrawUI;
             PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        }
+        
+        private static void InitOverlayPlugin() {
+            var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
+            var logger = new RainbowMage.OverlayPlugin.Logger();
+            container.Register(logger);
+            container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
+
+            var pluginMain = new RainbowMage.OverlayPlugin.PluginMain(
+                Path.Combine(ActGlobals.oFormActMain.AppDataFolder.FullName, "OverlayPlugin"), logger, container);
+            container.Register(pluginMain);
+            ActGlobals.oFormActMain.OverlayPluginContainer = container;
+
+            var status = new Label();
+
+            pluginMain.InitPlugin(status);
         }
 
         public void Dispose()
@@ -80,25 +97,6 @@ namespace IINACT
         public void DrawConfigUI()
         {
             ConfigWindow.IsOpen = true;
-        }
-        
-        private static Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args) {
-            if (args.Name.Contains(".resources"))
-                return null;
-
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.Name);
-            if (assembly != null)
-                return assembly;
-
-            var filename = args.Name.Split(',')[0] + ".dll".ToLower();
-            var asmFile = Path.Combine(_dependenciesDir, filename);
-
-            try {
-                return Assembly.LoadFrom(asmFile);
-            }
-            catch (Exception) {
-                return null;
-            }
         }
     }
 }

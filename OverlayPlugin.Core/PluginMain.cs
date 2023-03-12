@@ -25,7 +25,6 @@ namespace RainbowMage.OverlayPlugin {
     public class PluginMain {
         private TinyIoCContainer _container;
         private ILogger _logger;
-        private Panel _panel;
         private Label _label;
 
         private TabPage _wsTabPage;
@@ -57,9 +56,8 @@ namespace RainbowMage.OverlayPlugin {
         /// </summary>
         /// <param name="pluginScreenSpace"></param>
         /// <param name="pluginStatusText"></param>
-        public void InitPlugin(Panel pluginScreenSpace, Label pluginStatusText) {
+        public void InitPlugin(Label pluginStatusText) {
             try {
-                this._panel = pluginScreenSpace;
                 this._label = pluginStatusText;
                 this._label.Text = @"Init Phase 1: Infrastructure";
 
@@ -143,8 +141,6 @@ namespace RainbowMage.OverlayPlugin {
                 // Setup the UI
                 this._wsConfigPanel = new WSConfigPanel(_container);
                 this._wsConfigPanel.Dock = DockStyle.Fill;
-                this._panel.Controls.Add(_wsConfigPanel);
-                this._panel.Name = "WSServer";
 
                 _logger.Log(LogLevel.Info, "InitPlugin: Initialised.");
 

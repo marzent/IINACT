@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
@@ -17,7 +16,6 @@ using ACTWrapper = FFXIV_ACT_Plugin.Common.ACTWrapper;
 namespace IINACT;
 
 public class FfxivActPluginWrapper {
-    public FFXIVNetworkMonitor Monitor;
     public IDataSubscription Subscription;
     public IDataRepository Repository;
     public ParseSettings ParseSettings = null!;

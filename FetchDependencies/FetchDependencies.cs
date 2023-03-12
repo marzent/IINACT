@@ -7,10 +7,8 @@ namespace FetchDependencies {
 
         public string DependenciesDir { get; }
 
-        public FetchDependencies() {
-            Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP3SUPPORT", "0");
-            var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
-            DependenciesDir = Path.Combine(assemblyDir, "external_dependencies");
+        public FetchDependencies(string? _assemblyDir = null) {
+            DependenciesDir = _assemblyDir ?? AppDomain.CurrentDomain.BaseDirectory;
         }
 
         public async Task GetFfxivPlugin() {

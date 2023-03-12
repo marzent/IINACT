@@ -4,7 +4,7 @@ using System.IO.Compression;
 namespace FetchDependencies {
     internal static class Costura {
         public static bool CheckForPlugin(string name) =>
-            name.Contains("ffxiv");
+            name.Contains("act");
 
         public static string Fix(string name) {
             if (name.Contains("act"))

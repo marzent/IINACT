@@ -155,7 +155,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 UpdateInCombat();
                 UpdateEnmity();
 #if TRACE
-                Log(LogLevel.Trace, "UpdateEnmity: {0}ms", stopwatch.ElapsedMilliseconds);
+                // Log(LogLevel.Trace, "UpdateEnmity: {0}ms", stopwatch.ElapsedMilliseconds);
 #endif
             }
             catch (Exception ex) {

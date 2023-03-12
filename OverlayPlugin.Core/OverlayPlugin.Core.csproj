@@ -63,19 +63,9 @@
     <EmbeddedResource Include="resources\reserved_log_lines.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Controls\GeneralConfigTab.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="Controls\LogPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="EventSources\BuiltinEventConfigPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Controls\TabControlExt.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Controls\WSConfigPanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
@@ -83,7 +73,6 @@
     <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DarkModeUI" Version="3.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />

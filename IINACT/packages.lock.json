@@ -14,11 +14,6 @@
         "resolved": "2.1.10",
         "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
       },
-      "DarkModeUI": {
-        "type": "Transitive",
-        "resolved": "3.1.0",
-        "contentHash": "pzaXjTCpaSAWXgoPNWb9XupngXo0TVoc9uOgEJ77Nuh5LuRMCn2XN9jdJrgqjzFiq4nmovtOciD1uBVNvPwpvg=="
-      },
       "Microsoft.CSharp": {
         "type": "Transitive",
         "resolved": "4.7.0",
@@ -73,7 +68,6 @@
       "overlayplugin.core": {
         "type": "Project",
         "dependencies": {
-          "DarkModeUI": "[3.1.0, )",
           "Machina": "[2.3.1.3, )",
           "Machina.FFXIV": "[2.3.6.5, )",
           "Microsoft.CSharp": "[4.7.0, )",

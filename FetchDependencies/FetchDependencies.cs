@@ -12,7 +12,6 @@ namespace FetchDependencies {
         }
 
         public async Task GetFfxivPlugin() {
-            Directory.CreateDirectory(DependenciesDir);
             var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
             var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
 
@@ -35,11 +34,11 @@ namespace FetchDependencies {
             if (!File.Exists(dllPath)) return true;
             try {
                 using var plugin = new TargetAssembly(dllPath);
-                var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(2);
+                var httpClient = new HttpClient {
+                    Timeout = TimeSpan.FromSeconds(2)
+                };
                 httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-                var remoteVersionString =
-                    await httpClient.GetStringAsync("https://www.iinact.com/updater/version");
+                var remoteVersionString = httpClient.GetStringAsync("https://www.iinact.com/updater/version").Result;
                 var remoteVersion = new Version(remoteVersionString);
                 return remoteVersion > plugin.Version;
             }

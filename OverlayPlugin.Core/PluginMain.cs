@@ -27,9 +27,6 @@ namespace RainbowMage.OverlayPlugin {
         private ILogger _logger;
         private Label _label;
 
-        private TabPage _wsTabPage;
-        private WSConfigPanel _wsConfigPanel;
-
         private Timer _initTimer;
         private Timer _configSaveTimer;
 
@@ -136,14 +133,6 @@ namespace RainbowMage.OverlayPlugin {
                 watch.Reset();
 #endif
 
-                this._label.Text = @"Init Phase 1: UI";
-
-                // Setup the UI
-                this._wsConfigPanel = new WSConfigPanel(_container);
-                this._wsConfigPanel.Dock = DockStyle.Fill;
-
-                _logger.Log(LogLevel.Info, "InitPlugin: Initialised.");
-
 
                 this._label.Text = @"Init Phase 1: Presets";
                 // Load our presets
@@ -167,97 +156,85 @@ namespace RainbowMage.OverlayPlugin {
                     foreach (var pair in presets) {
                         registry.RegisterOverlayPreset2(pair.Value);
                     }
-
-                    _wsConfigPanel.RebuildOverlayOptions();
                 }
                 catch (Exception ex) {
                     _logger.Log(LogLevel.Error, string.Format("Failed to load presets: {0}", ex));
                 }
 
-                this._label.Text = @"Init Phase 1: Waiting for plugins to load";
-                _initTimer = new Timer();
-                _initTimer.Interval = 300;
-                _initTimer.Tick += async (o, e) => {
-                    if (ActGlobals.oFormActMain == null) {
-                        // Something went really wrong.
-                        _initTimer.Stop();
-                    } else if (ActGlobals.oFormActMain.Handle != IntPtr.Zero) {
+                if (ActGlobals.oFormActMain == null) {
+                    // Something went really wrong.
+                    _initTimer.Stop();
+                }
+                else if (ActGlobals.oFormActMain.Handle != IntPtr.Zero) {
+                    try {
+                        // ** Init phase 2
+                        this._label.Text = @"Init Phase 2: Integrations";
+
+                        // Initialize the parser in the second phase since it needs the FFXIV plugin.
+                        // If OverlayPlugin is placed above the FFXIV plugin, it won't be available in the first
+                        // phase but it'll be loaded by the time we enter the second phase.
+                        _container.Register(new FFXIVRepository(_container));
+                        _container.Register(new NetworkParser(_container));
+                        _container.Register(new TriggIntegration(_container));
+                        _container.Register(new FFXIVCustomLogLines(_container));
+                        _container.Register(new MemoryProcessors.AtkStage.FFXIVClientStructs.Data(_container));
+                        _container.Register(new OverlayPluginLogLines(_container));
+
+                        // Register FFXIV memory reading subcomponents.
+                        // Must be done before loading addons.
+                        _container.Register(new FFXIVMemory(_container));
+
+                        // These are registered to be lazy-loaded. Use interface to force TinyIoC to use singleton pattern.
+                        _container.Register<ICombatantMemory, CombatantMemoryManager>();
+                        _container.Register<ITargetMemory, TargetMemoryManager>();
+                        _container.Register<IAggroMemory, AggroMemoryManager>();
+                        _container.Register<IEnmityMemory, EnmityMemoryManager>();
+                        _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
+                        _container.Register<IInCombatMemory, InCombatMemoryManager>();
+                        _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
+
+                        // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
+                        // can block for some time. We run it on the background thread to avoid blocking the UI.
+                        // We can't run LoadAddons() in the first init phase since it checks other ACT plugins for
+                        // addons. Plugins below OverlayPlugin wouldn't have been loaded in the first init phase.
+                        // However, in the second phase all plugins have been loaded which means we can look for addons
+                        // in that list.
+                        this._label.Text = @"Init Phase 2: Addons";
+                        LoadAddons();
+
+                        this._label.Text = @"Init Phase 2: Unstable new stuff";
+                        _container.Register(new UnstableNewLogLines(_container));
+
+                        this._label.Text = @"Init Phase 2: UI";
                         try {
-                            _initTimer.Stop();
+                            // Now that addons have been loaded, we can finish the overlay setup.
+                            this._label.Text = @"Init Phase 2: Overlays";
 
-                            // ** Init phase 2
-                            this._label.Text = @"Init Phase 2: Integrations";
+                            InitializeOverlays();
 
-                            // Initialize the parser in the second phase since it needs the FFXIV plugin.
-                            // If OverlayPlugin is placed above the FFXIV plugin, it won't be available in the first
-                            // phase but it'll be loaded by the time we enter the second phase.
-                            _container.Register(new FFXIVRepository(_container));
-                            _container.Register(new NetworkParser(_container));
-                            _container.Register(new TriggIntegration(_container));
-                            _container.Register(new FFXIVCustomLogLines(_container));
-                            _container.Register(new MemoryProcessors.AtkStage.FFXIVClientStructs.Data(_container));
-                            _container.Register(new OverlayPluginLogLines(_container));
+                            this._label.Text = @"Init Phase 2: Overlay tasks";
 
-                            // Register FFXIV memory reading subcomponents.
-                            // Must be done before loading addons.
-                            _container.Register(new FFXIVMemory(_container));
+                            // WSServer has to start after the LoadAddons() call because clients can connect immediately
+                            // after it's initialized and that requires the event sources to be initialized.
+                            if (Config.WSServerRunning) {
+                                this._label.Text = @"Init Phase 2: WSServer";
+                                _container.Resolve<WSServer>().Start();
+                            }
 
-                            // These are registered to be lazy-loaded. Use interface to force TinyIoC to use singleton pattern.
-                            _container.Register<ICombatantMemory, CombatantMemoryManager>();
-                            _container.Register<ITargetMemory, TargetMemoryManager>();
-                            _container.Register<IAggroMemory, AggroMemoryManager>();
-                            _container.Register<IEnmityMemory, EnmityMemoryManager>();
-                            _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
-                            _container.Register<IInCombatMemory, InCombatMemoryManager>();
-                            _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
+                            this._label.Text = @"Init Phase 2: Save timer";
+                            _configSaveTimer.Start();
 
-                            // This timer runs on the UI thread (it has to since we create UI controls) but LoadAddons()
-                            // can block for some time. We run it on the background thread to avoid blocking the UI.
-                            // We can't run LoadAddons() in the first init phase since it checks other ACT plugins for
-                            // addons. Plugins below OverlayPlugin wouldn't have been loaded in the first init phase.
-                            // However, in the second phase all plugins have been loaded which means we can look for addons
-                            // in that list.
-                            this._label.Text = @"Init Phase 2: Addons";
-                            await Task.Run(LoadAddons);
-                            _wsConfigPanel.RebuildOverlayOptions();
-
-                            this._label.Text = @"Init Phase 2: Unstable new stuff";
-                            _container.Register(new UnstableNewLogLines(_container));
-
-                            this._label.Text = @"Init Phase 2: UI";
-                            ActGlobals.oFormActMain.Invoke((Action)(() => {
-                                try {
-                                    // Now that addons have been loaded, we can finish the overlay setup.
-                                    this._label.Text = @"Init Phase 2: Overlays";
-
-                                    InitializeOverlays();
-
-                                    this._label.Text = @"Init Phase 2: Overlay tasks";
-
-                                    // WSServer has to start after the LoadAddons() call because clients can connect immediately
-                                    // after it's initialized and that requires the event sources to be initialized.
-                                    if (Config.WSServerRunning) {
-                                        this._label.Text = @"Init Phase 2: WSServer";
-                                        _container.Resolve<WSServer>().Start();
-                                    }
-
-                                    this._label.Text = @"Init Phase 2: Save timer";
-                                    _configSaveTimer.Start();
-
-                                    this._label.Text = @"Initialised";
-                                    // Make the log small; startup was successful and there shouldn't be any error message to show.
-                                }
-                                catch (Exception ex) {
-                                    _logger.Log(LogLevel.Error, "InitPlugin: {0}", ex);
-                                }
-                            }));
+                            this._label.Text = @"Initialised";
+                            // Make the log small; startup was successful and there shouldn't be any error message to show.
                         }
                         catch (Exception ex) {
                             _logger.Log(LogLevel.Error, "InitPlugin: {0}", ex);
                         }
                     }
-                };
-                _initTimer.Start();
+                    catch (Exception ex) {
+                        _logger.Log(LogLevel.Error, "InitPlugin: {0}", ex);
+                    }
+                }
             }
             catch (Exception e) {
                 _logger.Log(LogLevel.Error, "InitPlugin: {0}", e.ToString());
@@ -285,7 +262,8 @@ namespace RainbowMage.OverlayPlugin {
                 var overlay = (IOverlay)_container.Resolve(overlayConfig.OverlayType, parameters);
                 if (overlay != null) {
                     RegisterOverlay(overlay);
-                } else {
+                }
+                else {
                     _logger.Log(LogLevel.Error, "InitPlugin: Could not find addon for {0}.", overlayConfig.Name);
                 }
             }
@@ -330,13 +308,6 @@ namespace RainbowMage.OverlayPlugin {
 
             try { _container.Resolve<WSServer>().Stop(); }
             catch (Exception) { }
-
-            if (this._wsConfigPanel != null) {
-                this._wsConfigPanel.Stop();
-            }
-
-            if (this._wsTabPage != null && this._wsTabPage.Parent != null)
-                ((TabControl)this._wsTabPage.Parent).TabPages.Remove(this._wsTabPage);
 
             _logger.Log(LogLevel.Info, "DeInitPlugin: Finalized.");
             if (this._label != null) this._label.Text = "Finalized.";

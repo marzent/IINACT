@@ -15,8 +15,7 @@
         "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
       },
       "DarkModeUI": {
-        "type": "Direct",
-        "requested": "[3.1.0, )",
+        "type": "Transitive",
         "resolved": "3.1.0",
         "contentHash": "pzaXjTCpaSAWXgoPNWb9XupngXo0TVoc9uOgEJ77Nuh5LuRMCn2XN9jdJrgqjzFiq4nmovtOciD1uBVNvPwpvg=="
       },

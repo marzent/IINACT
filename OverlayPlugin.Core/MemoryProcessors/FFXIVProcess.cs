@@ -14,12 +14,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors {
             this.process = process;
             if (process == null || process.HasExited)
                 return;
-            Handle = NativeMethods.OpenProcess(ProcessAccessFlags.VirtualMemoryRead, false, process.Id);
+            Handle = -1;
         }
         ~LimitedProcess() {
             if (Handle == IntPtr.Zero)
                 return;
-            NativeMethods.CloseHandle(Handle);
         }
 
         public IntPtr Handle { get; } = IntPtr.Zero;

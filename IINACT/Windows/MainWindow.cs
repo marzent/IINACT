@@ -31,8 +31,9 @@ public class MainWindow : Window, IDisposable
 
         ImGui.Spacing();
 
-        ImGui.Text("Have a goat:");
+        ImGui.Text("OP status:");
         ImGui.Indent(55);
+        ImGui.Text(Plugin.OverlayPluginStatus.Text);
         ImGui.Unindent(55);
     }
 

@@ -16,9 +16,13 @@ namespace IINACT
         private CommandManager CommandManager { get; init; }
         public Configuration Configuration { get; init; }
         public WindowSystem WindowSystem = new("IINACT");
+        public Label OverlayPluginStatus = new();
 
         private ConfigWindow ConfigWindow { get; init; }
         private MainWindow MainWindow { get; init; }
+
+        private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
+        private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
 
         public Plugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -28,7 +32,12 @@ namespace IINACT
             CommandManager = commandManager;
 
             var fetchDeps = new FetchDependencies.FetchDependencies(PluginInterface.AssemblyLocation.Directory?.FullName!);
-            fetchDeps.GetFfxivPlugin().Wait();
+            try {
+                fetchDeps.GetFfxivPlugin().Wait();
+            }
+            catch {
+                return;
+            }
 
             ActGlobals.oFormActMain = new FormActMain();
 
@@ -38,7 +47,7 @@ namespace IINACT
             if (Directory.Exists(Configuration.LogFilePath))
                 ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-            var wrapper = new FfxivActPluginWrapper(0, Configuration);
+            FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration);
 
             Task.Run(InitOverlayPlugin);
             
@@ -57,24 +66,25 @@ namespace IINACT
             PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
         
-        private static void InitOverlayPlugin() {
+        private void InitOverlayPlugin() {
             var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
             var logger = new RainbowMage.OverlayPlugin.Logger();
             container.Register(logger);
             container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
-            var pluginMain = new RainbowMage.OverlayPlugin.PluginMain(
+            OverlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
                 Path.Combine(ActGlobals.oFormActMain.AppDataFolder.FullName, "OverlayPlugin"), logger, container);
-            container.Register(pluginMain);
+            container.Register(OverlayPlugin);
             ActGlobals.oFormActMain.OverlayPluginContainer = container;
 
-            var status = new Label();
-
-            pluginMain.InitPlugin(status);
+            OverlayPlugin.InitPlugin(OverlayPluginStatus);
         }
 
         public void Dispose()
         {
+            FfxivActPluginWrapper.Dispose();
+            OverlayPlugin.DeInitPlugin();
+
             WindowSystem.RemoveAllWindows();
             
             ConfigWindow.Dispose();

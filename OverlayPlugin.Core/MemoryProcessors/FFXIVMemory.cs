@@ -66,7 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             try
             {
                 process = proc;
-                processHandle = NativeMethods.OpenProcess(ProcessAccessFlags.VirtualMemoryRead, false, proc.Id);
+                processHandle = -1;
             }
             catch (Exception e)
             {
@@ -86,7 +86,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         private void CloseProcessHandle()
         {
-            NativeMethods.CloseHandle(processHandle);
             processHandle = IntPtr.Zero;
             process = null;
         }

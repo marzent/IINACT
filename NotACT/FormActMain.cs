@@ -87,7 +87,6 @@ namespace Advanced_Combat_Tracker {
                             }
                         };
                         ttsProcess.Start();
-                        Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
                     }
                     catch (Exception ex) {
                         WriteExceptionLog(ex, $"TTS failed to play back {message}");
@@ -95,6 +94,7 @@ namespace Advanced_Combat_Tracker {
                 } else {
                     Trace.WriteLine($"TTS binary {binary} not found");
                 }
+                Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
             }
         }
 

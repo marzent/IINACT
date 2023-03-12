@@ -2,12 +2,6 @@
   "version": 1,
   "dependencies": {
     "net7.0-windows7.0": {
-      "CommunityToolkit.Diagnostics": {
-        "type": "Direct",
-        "requested": "[8.0.0, )",
-        "resolved": "8.0.0",
-        "contentHash": "wzjy3iA+7qjoL6t89Zhn3qsF9u2linoGEad/sl/MG4i8p8ZnItv3xZ+2/mbIwxwq5u1UdJ0+ZVqMe1wfdV4QRQ=="
-      },
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[2.1.10, )",

@@ -73,10 +73,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
     <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
     <ProjectReference Include="..\machina\Machina\Machina.csproj" />

@@ -3,6 +3,7 @@ using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Game.Network;
 using IINACT.Windows;
 
 namespace IINACT
@@ -14,6 +15,7 @@ namespace IINACT
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
+        private GameNetwork GameNetwork { get; init; }
         public Configuration Configuration { get; init; }
         public WindowSystem WindowSystem = new("IINACT");
         public Label OverlayPluginStatus = new();
@@ -26,16 +28,22 @@ namespace IINACT
 
         public Plugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager)
+            [RequiredVersion("1.0")] CommandManager commandManager,
+            [RequiredVersion("1.0")] GameNetwork gameNetwork)
         {
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
+            GameNetwork = gameNetwork;
+            Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
 
-            var fetchDeps = new FetchDependencies.FetchDependencies(PluginInterface.AssemblyLocation.Directory?.FullName!);
-            try {
-                fetchDeps.GetFfxivPlugin().Wait();
+            var fetchDeps = new FetchDependencies.FetchDependencies(
+                PluginInterface.AssemblyLocation.Directory?.FullName!, Dalamud.Utility.Util.HttpClient);
+            try 
+            {
+                fetchDeps.GetFfxivPlugin();
             }
-            catch {
+            catch
+            {
                 return;
             }
 

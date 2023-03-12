@@ -1,25 +1,20 @@
 ﻿using System.Reflection;
-using CommunityToolkit.Diagnostics;
 
 namespace IINACT;
 
 public static class PrivateHelpers {
     public static T GetProperty<T>(this object obj, string propName) {
-        Guard.IsNotNull(obj, nameof(obj));
         var pi = obj.GetType().GetProperty(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        Guard.IsNotNull(pi, nameof(pi));
         return (T)pi.GetValue(obj, null)!;
     }
 
     public static T GetField<T>(this object obj, string propName) {
-        Guard.IsNotNull(obj, nameof(obj));
         var t = obj.GetType();
         FieldInfo? fi = null;
         while (fi == null && t != null) {
             fi = t.GetField(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             t = t.BaseType;
         }
-        Guard.IsNotNull(fi, nameof(fi));
         return (T)fi.GetValue(obj)!;
     }
 
@@ -34,19 +29,16 @@ public static class PrivateHelpers {
     }
 
     public static void SetField<T>(this object obj, string propName, T val) {
-        Guard.IsNotNull(obj, nameof(obj));
         var t = obj.GetType();
         FieldInfo? fi = null;
         while (fi == null && t != null) {
             fi = t.GetField(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             t = t.BaseType;
         }
-        Guard.IsNotNull(fi, nameof(fi));
         fi.SetValue(obj, val);
     }
 
     public static MethodInfo? GetMethod(this object obj, string methodName) {
-        Guard.IsNotNull(obj, nameof(obj));
         var type = obj.GetType();
         var method = type.GetMethod(methodName);
         return method ?? type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -54,7 +46,6 @@ public static class PrivateHelpers {
 
     public static object? CallMethod(this object obj, string methodName, object?[]? parameters) {
         var method = GetMethod(obj, methodName);
-        Guard.IsNotNull(method, nameof(method));
         return method.Invoke(obj, parameters);
     }
 }

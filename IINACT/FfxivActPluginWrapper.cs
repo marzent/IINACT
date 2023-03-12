@@ -24,7 +24,7 @@ public class FfxivActPluginWrapper : IDisposable {
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivActPlugin;
     private readonly ParseMediator _parseMediator;
-    private readonly Configuration _configuration;
+    private Configuration _configuration;
 
     public FfxivActPluginWrapper(Configuration configuration) {
         _configuration = configuration;

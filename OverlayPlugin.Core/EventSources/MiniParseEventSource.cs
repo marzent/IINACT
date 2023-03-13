@@ -655,7 +655,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
             obj["isActive"] = ActGlobals.oFormActMain.ActiveZone.ActiveEncounter?.Active == true ? "true" : "false";
 
-#if TRACE
+#if DEBUG
             stopwatch.Stop();
             Log(LogLevel.Trace, "CreateUpdateScript: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
 #endif

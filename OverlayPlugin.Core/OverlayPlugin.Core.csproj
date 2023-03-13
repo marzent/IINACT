@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -76,5 +76,10 @@
     <Reference Include="FFXIV_ACT_Plugin.Logfile">
       <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

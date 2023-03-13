@@ -1,4 +1,4 @@
-﻿
+
 
 //produced with ILSpy from ACT v3.6.0.275
 
@@ -214,7 +214,7 @@ namespace Advanced_Combat_Tracker {
         public DateTime ShortEndTime {
             get {
                 var dateTime = DateTime.MinValue;
-                List<CombatantData> list = null;
+                List<CombatantData> list = null!;
                 list = ((!ignoreEnemies) ? GetAllies() : new List<CombatantData>(Items.Values));
                 if (list.Count == 0) {
                     list = new List<CombatantData>(Items.Values);
@@ -371,7 +371,7 @@ namespace Advanced_Combat_Tracker {
                 EndTimes.Add(StartTimes[EndTimes.Count] < EndTime ? EndTime : StartTimes[EndTimes.Count]);
                 if (!Finalize) return;
                 Trim();
-                Title = GetStrongestEnemy(ActGlobals.charName);
+                Title = GetStrongestEnemy(ActGlobals.charName)!;
             }
         }
 
@@ -479,7 +479,7 @@ namespace Advanced_Combat_Tracker {
             return 3;
         }
 
-        public string GetStrongestEnemy(string combatant) {
+        public string? GetStrongestEnemy(string combatant) {
             if (sParsing && ignoreEnemies) {
                 return ActGlobals.Trans["encounterData-defaultEncounterName"];
             }
@@ -530,7 +530,7 @@ namespace Advanced_Combat_Tracker {
 
         public string GetMaxHeal(bool ShowType = true, bool CountWards = true, bool UseSuffix = true) {
             var list = ((!ignoreEnemies) ? GetAllies() : new List<CombatantData>(Items.Values));
-            MasterSwing masterSwing = null;
+            MasterSwing masterSwing = null!;
             var arg = string.Empty;
             foreach (var combatantData in list) {
                 var attackType = combatantData.GetAttackType(ActGlobals.Trans["attackTypeTerm-all"], CombatantData.DamageTypeDataOutgoingHealing);

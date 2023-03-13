@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
 namespace RainbowMage.OverlayPlugin {
@@ -30,7 +30,6 @@ namespace RainbowMage.OverlayPlugin {
         private const uint EVENT_SYSTEM_FOREGROUND = 3;
         private const uint EVENT_SYSTEM_MINIMIZEEND = 0x0017;
 
-        public event EventHandler<IntPtr> ActiveWindowChanged;
         public IntPtr ActiveWindowHandle;
         private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             //ActiveWindowHandle = hwnd;

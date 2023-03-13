@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using static System.String;
 
 //produced with ILSpy from ACT v3.6.0.275
@@ -631,7 +631,7 @@ namespace Advanced_Combat_Tracker {
 
         public string GetColumnByName(string name) => ColumnDefs.ContainsKey(name) ? ColumnDefs[name].GetCellData(this) : Empty;
 
-        public AttackType GetAttackType(string AttackTypeName, string Type) => Items[Type].Items.TryGetValue(AttackTypeName, out var value) ? value : null;
+        public AttackType? GetAttackType(string AttackTypeName, string Type) => Items[Type].Items.TryGetValue(AttackTypeName, out var value) ? value : null;
 
         public long GetThreatDelta(string DamageTypeDataLabel) {
             if (threatCached) {

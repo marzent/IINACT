@@ -10,12 +10,12 @@ namespace Advanced_Combat_Tracker {
         private volatile bool inCombat;
         private HistoryRecord lastZoneRecord;
         private DateTime lastSetEncounter;
-        private DateTime _lastKnownTime;
-        private readonly ConcurrentQueue<MasterSwing> _afterActionsQueue = new();
-        private Thread _afterActionQueueThread;
-        private Thread _logReaderThread;
-        private Thread _logWriterThread;
-        private readonly object _ttsLock = new();
+        private DateTime lastKnownTime;
+        private readonly ConcurrentQueue<MasterSwing> afterActionsQueue = new();
+        private Thread afterActionQueueThread;
+        private Thread logReaderThread;
+        private Thread logWriterThread;
+        private readonly object ttsLock = new();
 
         internal volatile bool refreshTree;
 
@@ -37,7 +37,7 @@ namespace Advanced_Combat_Tracker {
 
         public event LogLineEventDelegate BeforeLogLineRead;
         public event LogLineEventDelegate OnLogLineRead;
-        public event LogFileChangedDelegate LogFileChanged;
+        public event LogFileChangedDelegate LogFileChanged { add { }  remove { } }
         public event CombatActionDelegate AfterCombatAction;
         public delegate DateTime DateTimeLogParser(string logLine);
 
@@ -75,7 +75,7 @@ namespace Advanced_Combat_Tracker {
 
 
         public void TTS(string message, string binary = "/usr/bin/say", string args = "") {
-            lock (_ttsLock) {
+            lock (ttsLock) {
                 if (new FileInfo(binary).Exists) {
                     try {
                         var ttsProcess = new Process {
@@ -110,10 +110,10 @@ namespace Advanced_Combat_Tracker {
         public int TimeStampLen { get; set; }
 
         public DateTime LastKnownTime {
-            get => _lastKnownTime;
+            get => lastKnownTime;
             set {
                 if (!(value == DateTime.MinValue)) {
-                    _lastKnownTime = value;
+                    lastKnownTime = value;
                 }
             }
         }
@@ -219,16 +219,16 @@ namespace Advanced_Combat_Tracker {
             Action.attacker = string.Intern(combatActionEventArgs.attacker);
             Action.damageType = string.Intern(combatActionEventArgs.theDamageType);
             Action.victim = string.Intern(combatActionEventArgs.victim);
-            _afterActionsQueue.Enqueue(Action);
+            afterActionsQueue.Enqueue(Action);
         }
 
         private void StartLogWriterThread() {
-            _logWriterThread = new Thread(LogWriter) {
+            logWriterThread = new Thread(LogWriter) {
                 IsBackground = true,
                 Name = "LogWriterThread",
                 Priority = ThreadPriority.BelowNormal
             };
-            _logWriterThread.Start();
+            logWriterThread.Start();
         }
 
         private void LogWriter() {
@@ -254,12 +254,12 @@ namespace Advanced_Combat_Tracker {
         }
 
         private void StartLogReaderThread() {
-            _logReaderThread = new Thread(LogReader) {
+            logReaderThread = new Thread(LogReader) {
                 IsBackground = true,
                 Name = "LogReaderThread",
                 Priority = ThreadPriority.Normal
             };
-            _logReaderThread.Start();
+            logReaderThread.Start();
         }
 
         private void LogReader() {
@@ -288,18 +288,18 @@ namespace Advanced_Combat_Tracker {
         }
 
         private void StartAfterCombatActionThread() {
-            _afterActionQueueThread = new Thread(ThreadAfterCombatAction) {
+            afterActionQueueThread = new Thread(ThreadAfterCombatAction) {
                 IsBackground = true,
                 Name = "AfterActionQueueThread",
                 Priority = ThreadPriority.Normal
             };
-            _afterActionQueueThread.Start();
+            afterActionQueueThread.Start();
         }
 
         private void ThreadAfterCombatAction() {
             try {
                 while (true) {
-                    while (_afterActionsQueue.TryDequeue(out var masterSwing)) {
+                    while (afterActionsQueue.TryDequeue(out var masterSwing)) {
                         ActiveZone.AddCombatAction(masterSwing);
                         if (this.AfterCombatAction == null) {
                             continue;

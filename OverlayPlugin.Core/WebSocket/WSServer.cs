@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.Overlays;
@@ -218,7 +218,7 @@ namespace RainbowMage.OverlayPlugin {
                     try {
                         Send(e.ToString(Formatting.None));
                     }
-                    catch (Exception ex) {
+                    catch (Exception) {
                         _logger.Log(LogLevel.Error, Resources.WSMessageSendFailed, e);
                         _dispatcher.UnsubscribeAll(this);
                     }

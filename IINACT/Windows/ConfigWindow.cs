@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -28,7 +28,6 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.Checkbox("Show Debug", ref configValue))
         {
             Configuration.ShowDebug = configValue;
-            // can save immediately on change, if you don't want to provide a "Save and Close" button
             Configuration.Save();
         }
     }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ namespace RainbowMage.OverlayPlugin {
         public string Url { get; set; }
         [JsonProperty("http_proxy")]
         public string HttpUrl { get; set; }
+        public string Options { get; set; }
         public bool Modern { get; set; }
 
         public override string ToString() {

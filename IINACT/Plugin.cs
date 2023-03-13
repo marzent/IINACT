@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
@@ -79,7 +79,8 @@ namespace IINACT
             PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
         
-        private void InitOverlayPlugin() {
+        private void InitOverlayPlugin() 
+        {
             var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
             var logger = new RainbowMage.OverlayPlugin.Logger();
             container.Register(logger);
@@ -91,6 +92,11 @@ namespace IINACT
             ActGlobals.oFormActMain.OverlayPluginContainer = container;
 
             OverlayPlugin.InitPlugin(OverlayPluginStatus);
+
+            var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
+            MainWindow.OverlayPresets = registry.OverlayPresets;
+            var overlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+            MainWindow.OverlayPluginConfig = overlayPluginConfig;
         }
 
         public void Dispose()
@@ -112,7 +118,8 @@ namespace IINACT
             MainWindow.IsOpen = true;
         }
 
-        private void EndEncounter(string command, string args) {
+        private void EndEncounter(string command, string args) 
+        {
             ActGlobals.oFormActMain.EndCombat(false);
         }
 

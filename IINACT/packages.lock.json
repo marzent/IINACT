@@ -13,11 +13,6 @@
         "resolved": "4.7.0",
         "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
       },
-      "Mono.Cecil": {
-        "type": "Transitive",
-        "resolved": "0.11.4",
-        "contentHash": "IC1h5g0NeJGHIUgzM1P82ld57knhP0IcQfrYITDPXlNpMYGUrsG5TxuaWTjaeqDNQMBDNZkB8L0rBnwsY6JHuQ=="
-      },
       "System.Data.DataSetExtensions": {
         "type": "Transitive",
         "resolved": "4.5.0",
@@ -37,10 +32,7 @@
         "type": "Project"
       },
       "fetchdependencies": {
-        "type": "Project",
-        "dependencies": {
-          "Mono.Cecil": "[0.11.4, )"
-        }
+        "type": "Project"
       },
       "machina": {
         "type": "Project"

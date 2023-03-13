@@ -11,7 +11,8 @@ namespace IINACT
     public sealed class Plugin : IDalamudPlugin
     {
         public string Name => "IINACT";
-        private const string CommandName = "/iinact";
+        private const string MainWindowCommandName = "/iinact";
+        private const string EndEncCommandName = "/endenc";
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
@@ -65,9 +66,13 @@ namespace IINACT
             WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
 
-            CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+            CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "A useful message to display in /xlhelp"
+                HelpMessage = "Displays the IINACT main window"
+            });
+
+            CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter) {
+                HelpMessage = "Ends the current encounter IINACT is parsing"
             });
 
             PluginInterface.UiBuilder.Draw += DrawUI;
@@ -98,13 +103,17 @@ namespace IINACT
             ConfigWindow.Dispose();
             MainWindow.Dispose();
             
-            CommandManager.RemoveHandler(CommandName);
+            CommandManager.RemoveHandler(MainWindowCommandName);
+            CommandManager.RemoveHandler(EndEncCommandName);
         }
 
         private void OnCommand(string command, string args)
         {
-            // in response to the slash command, just display our main ui
             MainWindow.IsOpen = true;
+        }
+
+        private void EndEncounter(string command, string args) {
+            ActGlobals.oFormActMain.EndCombat(false);
         }
 
         private void DrawUI()

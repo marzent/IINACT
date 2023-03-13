@@ -4,7 +4,6 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <OutputType>Library</OutputType>
     <RootNamespace>RainbowMage.OverlayPlugin</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -33,7 +32,6 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

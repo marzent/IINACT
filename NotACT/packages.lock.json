@@ -1,17 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
-      "machina": {
-        "type": "Project"
-      },
-      "machina.ffxiv": {
-        "type": "Project",
-        "dependencies": {
-          "Machina": "[2.3.1.3, )"
-        }
-      }
-    },
+    "net7.0-windows7.0": {},
     "net7.0-windows7.0/win-x64": {}
   }
 }

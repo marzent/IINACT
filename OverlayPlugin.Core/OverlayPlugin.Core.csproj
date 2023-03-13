@@ -63,11 +63,6 @@
     <EmbeddedResource Include="resources\reserved_log_lines.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="EventSources\BuiltinEventConfigPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
     <ProjectReference Include="..\machina\Machina\Machina.csproj" />
     <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
@@ -22,27 +22,40 @@ public class FfxivActPluginWrapper : IDisposable {
     public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
     public readonly ProcessManager ProcessManager;
 
-    private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivActPlugin;
-    private readonly ParseMediator _parseMediator;
-    private Configuration _configuration;
+    private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
+    private readonly ParseMediator parseMediator;
+    private readonly Configuration configuration;
+    private readonly Dalamud.ClientLanguage dalamudClientLanguage;
 
-    public FfxivActPluginWrapper(Configuration configuration) {
-        _configuration = configuration;
-        _ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
-        _ffxivActPlugin.ConfigureIOC();
+    private Language clientLanguage =>
+        dalamudClientLanguage switch
+        {
+            Dalamud.ClientLanguage.Japanese => Language.Japanese,
+            Dalamud.ClientLanguage.English => Language.English,
+            Dalamud.ClientLanguage.German => Language.German,
+            Dalamud.ClientLanguage.French => Language.French,
+            _ => Language.English
+        };
+
+    public FfxivActPluginWrapper(Configuration configuration, Dalamud.ClientLanguage dalamudClientLanguage) {
+        this.configuration = configuration;
+        this.dalamudClientLanguage= dalamudClientLanguage;
+
+        ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
+        ffxivActPlugin.ConfigureIOC();
         OpcodeManager.Instance.SetRegion(GameRegion.Global);
 
-        var iocContainer = _ffxivActPlugin._iocContainer;
+        var iocContainer = ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();
 
         Subscription = iocContainer.Resolve<DataSubscription>();
-        _ffxivActPlugin.SetProperty("DataSubscription", Subscription);
+        ffxivActPlugin.SetProperty("DataSubscription", Subscription);
 
-        _parseMediator = iocContainer.Resolve<ParseMediator>();
+        parseMediator = iocContainer.Resolve<ParseMediator>();
 
-        _ffxivActPlugin._dataCollection = iocContainer.Resolve<DataCollection>();
+        ffxivActPlugin._dataCollection = iocContainer.Resolve<DataCollection>();
 
-        var scanPackets = _ffxivActPlugin._dataCollection._scanPackets;
+        var scanPackets = ffxivActPlugin._dataCollection._scanPackets;
         ProcessManager = scanPackets.GetField<ProcessManager>("_processManager");
 
         SetupActWrapper();
@@ -52,19 +65,16 @@ public class FfxivActPluginWrapper : IDisposable {
         SetupSettingsMediator();
 
         Repository = iocContainer.Resolve<IDataRepository>();
-        _ffxivActPlugin.SetProperty("DataRepository", Repository);
+        ffxivActPlugin.SetProperty("DataRepository", Repository);
 
-        ProcessManager.Current.Handle = -1;
-        _ffxivActPlugin._dataCollection.StartMemory();
-        ProcessManager.Current.Handle = -1;
+        ffxivActPlugin._dataCollection.StartMemory();
 
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
     }
 
-
     private void SetupSettingsMediator()
     {
-        var settingsMediator = _ffxivActPlugin._dataCollection._settingsMediator;
+        var settingsMediator = ffxivActPlugin._dataCollection._settingsMediator;
 
         DataCollectionSettings = new DataCollectionSettingsEventArgs {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
@@ -79,21 +89,21 @@ public class FfxivActPluginWrapper : IDisposable {
         readProcesses.Read64(true);
 
         ParseSettings = new ParseSettings() {
-            DisableDamageShield = _configuration.DisableDamageShield,
-            DisableCombinePets = _configuration.DisableCombinePets,
-            LanguageID = (Language)_configuration.Language,
-            ParseFilter = (ParseFilterMode)_configuration.ParseFilterMode,
-            SimulateIndividualDoTCrits = _configuration.SimulateIndividualDoTCrits,
-            ShowRealDoTTicks = _configuration.ShowRealDoTTicks,
-            ShowDebug = _configuration.ShowDebug,
+            DisableDamageShield = configuration.DisableDamageShield,
+            DisableCombinePets = configuration.DisableCombinePets,
+            LanguageID = clientLanguage,
+            ParseFilter = (ParseFilterMode)configuration.ParseFilterMode,
+            SimulateIndividualDoTCrits = configuration.SimulateIndividualDoTCrits,
+            ShowRealDoTTicks = configuration.ShowRealDoTTicks,
+            ShowDebug = configuration.ShowDebug,
             EnableBenchmarks = false
         };
         settingsMediator.ParseSettings = ParseSettings;
 
         settingsMediator.ProcessException = OnProcessException;
 
-        var logOutput = _ffxivActPlugin._dataCollection._logOutput;
-        var logFormat = _ffxivActPlugin._dataCollection._logFormat;
+        var logOutput = ffxivActPlugin._dataCollection._logOutput;
+        var logFormat = ffxivActPlugin._dataCollection._logFormat;
 
         var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets, ParseSettings.LanguageID, ParseSettings.ParseFilter, ParseSettings.SimulateIndividualDoTCrits, ParseSettings.ShowRealDoTTicks);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line);
@@ -102,13 +112,13 @@ public class FfxivActPluginWrapper : IDisposable {
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);
-        ActGlobals.oFormActMain.GetDateTimeFromLog = _parseMediator.ParseLogDateTime;
+        ActGlobals.oFormActMain.GetDateTimeFromLog = parseMediator.ParseLogDateTime;
 
         ProcessManager.Verify();
     }
 
     private void SetupActWrapper() {
-        var logOutput = _ffxivActPlugin._dataCollection._logOutput;
+        var logOutput = ffxivActPlugin._dataCollection._logOutput;
         var actWrapper = logOutput.GetField<ACTWrapper>("_actWrapper");
 
         actWrapper.TimeStampLen = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture).Length + 3;
@@ -117,15 +127,15 @@ public class FfxivActPluginWrapper : IDisposable {
 
         ACT_UIMods.UpdateACTTables(false);
 
-        ActGlobals.oFormActMain.FfxivPlugin = _ffxivActPlugin;
+        ActGlobals.oFormActMain.FfxivPlugin = ffxivActPlugin;
     }
 
     private void OFormActMain_BeforeLogLineRead(bool isImport, LogLineEventArgs logInfo) {
-        (logInfo.logLine, logInfo.detectedType) = _parseMediator.BeforeLogLineRead(isImport, logInfo.detectedTime, logInfo.logLine);
+        (logInfo.logLine, logInfo.detectedType) = parseMediator.BeforeLogLineRead(isImport, logInfo.detectedTime, logInfo.logLine);
     }
 
     private void SetupDataSubscription() {
-        _ffxivActPlugin.DataSubscription.ZoneChanged += OnZoneChanged;
+        ffxivActPlugin.DataSubscription.ZoneChanged += OnZoneChanged;
     }
 
     private static void OnZoneChanged(uint ZoneID, string ZoneName) {
@@ -137,7 +147,7 @@ public class FfxivActPluginWrapper : IDisposable {
 
     public void Dispose()
     {
-        _ffxivActPlugin.DeInitPlugin();
-        _ffxivActPlugin.Dispose();
+        ffxivActPlugin.DeInitPlugin();
+        ffxivActPlugin.Dispose();
     }
 }

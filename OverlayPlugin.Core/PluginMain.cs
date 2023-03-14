@@ -27,6 +27,7 @@ namespace RainbowMage.OverlayPlugin {
         private ILogger _logger;
         private Label _label;
 
+        private string _configPath;
         private Timer _configSaveTimer;
 
         internal PluginConfig Config { get; private set; }
@@ -52,10 +53,12 @@ namespace RainbowMage.OverlayPlugin {
         /// </summary>
         /// <param name="pluginScreenSpace"></param>
         /// <param name="pluginStatusText"></param>
-        public void InitPlugin(Label pluginStatusText) {
+        public void InitPlugin(Label pluginStatusText, string configPath) {
             try {
                 this._label = pluginStatusText;
                 this._label.Text = @"Init Phase 1: Infrastructure";
+
+                this._configPath = configPath;
 
 #if DEBUG
                 _logger.Log(LogLevel.Warning, "##################################");
@@ -380,10 +383,9 @@ namespace RainbowMage.OverlayPlugin {
         /// 設定ファイルのパスを取得します。
         /// </summary>
         /// <returns></returns>
-        private static string GetConfigPath(bool xml = false) {
-            var dirPath = Path.Combine(ActGlobals.oFormActMain.AppDataFolder.FullName, "Config");
-            Directory.CreateDirectory(dirPath);
-            var path = Path.Combine(dirPath, "RainbowMage.OverlayPlugin.config." + (xml ? "xml" : "json"));
+        private string GetConfigPath(bool xml = false) {
+            Directory.CreateDirectory(_configPath);
+            var path = Path.Combine(_configPath, "RainbowMage.OverlayPlugin.config." + (xml ? "xml" : "json"));
 
             return path;
         }

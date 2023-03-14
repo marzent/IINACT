@@ -1,4 +1,4 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
 using Dalamud.Plugin;
 
 namespace IINACT
@@ -7,8 +7,6 @@ namespace IINACT
     public class Configuration : IPluginConfiguration
     {
         public int Version { get; set; } = 0;
-
-        public int Language { get; set; } = 1;
         
         public int ParseFilterMode { get; set; } = 0;
         
@@ -22,7 +20,7 @@ namespace IINACT
         
         public bool ShowDebug { get; set; } = false;
         
-        public string LogFilePath { get; set; }
+        public string? LogFilePath { get; set; }
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]

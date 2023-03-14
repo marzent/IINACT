@@ -7,6 +7,7 @@ namespace IINACT.Windows;
 public class ConfigWindow : Window, IDisposable
 {
     private Configuration Configuration;
+    public RainbowMage.OverlayPlugin.IPluginConfig? OverlayPluginConfig { get; set; }
 
     public ConfigWindow(Plugin plugin) : base(
         "IINACT Configuration",
@@ -30,5 +31,7 @@ public class ConfigWindow : Window, IDisposable
             Configuration.ShowDebug = configValue;
             Configuration.Save();
         }
+
+        
     }
 }

@@ -95,9 +95,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 endEncounterToken = new CancellationTokenSource();
                 Task.Run(async delegate {
                     await Task.Delay(endEncounterOutOfCombatDelayMs, endEncounterToken.Token);
-                    ActGlobals.oFormActMain.Invoke((Action)(() => {
-                        ActGlobals.oFormActMain.EndCombat(true);
-                    }));
+                    ActGlobals.oFormActMain.EndCombat(true);
                 });
             }
             // If combat starts again, cancel any outstanding tasks to stop the ACT encounter.

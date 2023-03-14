@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
@@ -108,7 +108,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             });
             RegisterEventHandler("cactbotChooseDirectory", (msg) => {
                 var ret = new JObject();
-                var data = (string)ActGlobals.oFormActMain.Invoke((ChooseDirectoryDelegate)ChooseDirectory);
+                var data = ChooseDirectory();
                 if (data != null)
                     ret["data"] = data;
                 return ret;
@@ -122,6 +122,7 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         private delegate string ChooseDirectoryDelegate();
 
         private string ChooseDirectory() {
+            return null;
             var dialog = new FolderBrowserDialog();
             var result = dialog.ShowDialog(ActGlobals.oFormActMain);
             if (result != DialogResult.OK)

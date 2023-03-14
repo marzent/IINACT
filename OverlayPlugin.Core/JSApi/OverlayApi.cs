@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using System;
 using System.Threading.Tasks;
 
@@ -38,9 +38,7 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         public void endEncounter() {
-            ActGlobals.oFormActMain.Invoke((Action)(() => {
-                ActGlobals.oFormActMain.EndCombat(true);
-            }));
+            ActGlobals.oFormActMain.EndCombat(true);
         }
 
         // Also handles (un)subscription to make switching between this and WS easier.

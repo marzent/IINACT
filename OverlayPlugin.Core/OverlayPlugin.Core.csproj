@@ -59,9 +59,9 @@
         <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Fleck" Version="1.2.0" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-        <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
         <PackageReference Include="YamlDotNet" Version="12.3.1" />
     </ItemGroup>
     <PropertyGroup>

@@ -1,69 +1,69 @@
 {
-    "version": 1,
-    "dependencies": {
-        "net7.0-windows7.0": {
-            "DalamudPackager": {
-                "type": "Direct",
-                "requested": "[2.1.10, )",
-                "resolved": "2.1.10",
-                "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
-            },
-            "Microsoft.CSharp": {
-                "type": "Transitive",
-                "resolved": "4.7.0",
-                "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
-            },
-            "System.Data.DataSetExtensions": {
-                "type": "Transitive",
-                "resolved": "4.5.0",
-                "contentHash": "221clPs1445HkTBZPL+K9sDBdJRB8UN8rgjO3ztB0CQ26z//fmJXtlsr6whGatscsKGBrhJl5bwJuKSA8mwFOw=="
-            },
-            "WebSocketSharp-netstandard": {
-                "type": "Transitive",
-                "resolved": "1.0.1",
-                "contentHash": "knoinAv31vbdxXdypnzN2MPX5hyntVLWceq6OdWRXkr9zzqp/RWbxSuLFGbkW8De1061URgNAN43BUTlgMx1CA=="
-            },
-            "YamlDotNet": {
-                "type": "Transitive",
-                "resolved": "12.3.1",
-                "contentHash": "5AuPSmnxs77+u8oLEW9iF+DUOzkb+VVsJ1IUPYcRJCho0hkLWGO59ZZOr7Mto31oExP8Nm9Q+4BzVwU6sIDQWA=="
-            },
-            "Advanced Combat Tracker": {
-                "type": "Project"
-            },
-            "fetchdependencies": {
-                "type": "Project"
-            },
-            "machina": {
-                "type": "Project"
-            },
-            "machina.ffxiv": {
-                "type": "Project",
-                "dependencies": {
-                    "Machina": "[2.3.1.3, )"
-                }
-            },
-            "overlayplugin.common": {
-                "type": "Project",
-                "dependencies": {
-                    "Advanced Combat Tracker": "[6.9.0, )",
-                    "Microsoft.CSharp": "[4.7.0, )",
-                    "System.Data.DataSetExtensions": "[4.5.0, )"
-                }
-            },
-            "overlayplugin.core": {
-                "type": "Project",
-                "dependencies": {
-                    "Machina": "[2.3.1.3, )",
-                    "Machina.FFXIV": "[2.3.6.5, )",
-                    "Microsoft.CSharp": "[4.7.0, )",
-                    "OverlayPlugin.Common": "[1.0.0, )",
-                    "System.Data.DataSetExtensions": "[4.5.0, )",
-                    "WebSocketSharp-netstandard": "[1.0.1, )",
-                    "YamlDotNet": "[12.3.1, )"
-                }
-            }
-        },
-        "net7.0-windows7.0/win-x64": {}
-    }
+  "version": 1,
+  "dependencies": {
+    "net7.0-windows7.0": {
+      "DalamudPackager": {
+        "type": "Direct",
+        "requested": "[2.1.10, )",
+        "resolved": "2.1.10",
+        "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
+      },
+      "Fleck": {
+        "type": "Transitive",
+        "resolved": "1.2.0",
+        "contentHash": "bPLXn6QbLAFoviur6XbrKB0Zn6x04E8VibHXyHZeJsoC7bkUl5DVtzM5cZgDuqHkIrBqAXJyTNJwSNIc6wBJ2Q=="
+      },
+      "Microsoft.CSharp": {
+        "type": "Transitive",
+        "resolved": "4.7.0",
+        "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
+      },
+      "System.Data.DataSetExtensions": {
+        "type": "Transitive",
+        "resolved": "4.5.0",
+        "contentHash": "221clPs1445HkTBZPL+K9sDBdJRB8UN8rgjO3ztB0CQ26z//fmJXtlsr6whGatscsKGBrhJl5bwJuKSA8mwFOw=="
+      },
+      "YamlDotNet": {
+        "type": "Transitive",
+        "resolved": "12.3.1",
+        "contentHash": "5AuPSmnxs77+u8oLEW9iF+DUOzkb+VVsJ1IUPYcRJCho0hkLWGO59ZZOr7Mto31oExP8Nm9Q+4BzVwU6sIDQWA=="
+      },
+      "Advanced Combat Tracker": {
+        "type": "Project"
+      },
+      "fetchdependencies": {
+        "type": "Project"
+      },
+      "machina": {
+        "type": "Project"
+      },
+      "machina.ffxiv": {
+        "type": "Project",
+        "dependencies": {
+          "Machina": "[2.3.1.3, )"
+        }
+      },
+      "overlayplugin.common": {
+        "type": "Project",
+        "dependencies": {
+          "Advanced Combat Tracker": "[6.9.0, )",
+          "Microsoft.CSharp": "[4.7.0, )",
+          "System.Data.DataSetExtensions": "[4.5.0, )"
+        }
+      },
+      "overlayplugin.core": {
+        "type": "Project",
+        "dependencies": {
+          "Fleck": "[1.2.0, )",
+          "Machina": "[2.3.1.3, )",
+          "Machina.FFXIV": "[2.3.6.5, )",
+          "Microsoft.CSharp": "[4.7.0, )",
+          "OverlayPlugin.Common": "[1.0.0, )",
+          "System.Data.DataSetExtensions": "[4.5.0, )",
+          "YamlDotNet": "[12.3.1, )"
+        }
+      }
+    },
+    "net7.0-windows7.0/win-x64": {}
+  }
 }

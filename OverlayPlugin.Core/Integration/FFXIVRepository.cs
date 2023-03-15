@@ -14,7 +14,8 @@ using System.Runtime.CompilerServices;
 
 namespace RainbowMage.OverlayPlugin {
     /* Taken from FFIXV_ACT_Plugin.Logfile. Copy&pasted to avoid issues if the FFXIV plugin ever changes this enum. */
-    public enum LogMessageType {
+    public enum LogMessageType
+    {
         LogLine,
         ChangeZone,
         ChangePrimaryPlayer,
@@ -55,7 +56,13 @@ namespace RainbowMage.OverlayPlugin {
         PacketDump,
         Version,
         Error,
-        Timer
+        Timer,
+        // OverlayPlugin lines
+        RegisterLogLine = 256,
+        MapEffect,
+        FateDirector,
+        CEDirector,
+        InCombat,
     }
 
     internal class FFXIVRepository {

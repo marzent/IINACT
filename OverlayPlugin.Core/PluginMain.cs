@@ -317,6 +317,8 @@ namespace RainbowMage.OverlayPlugin {
 
                 // Make sure the event sources are ready before we load any overlays.
                 registry.StartEventSource(new MiniParseEventSource(_container));
+                registry.StartEventSource(new FFXIVOptionalEventSource(_container));
+                registry.StartEventSource(new FFXIVRequiredEventSource(_container));
                 registry.StartEventSource(new EnmityEventSource(_container));
                 registry.StartEventSource(new FFXIVClientStructsEventSource(_container));
 

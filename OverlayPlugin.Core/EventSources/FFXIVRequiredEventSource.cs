@@ -18,6 +18,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
         private ReadOnlyCollection<uint> cachedPartyList = null;
         private List<uint> missingPartyMembers = new List<uint>();
         private bool ffxivPluginPresent = false;
+
         private static Dictionary<uint, string> StatusMap = new Dictionary<uint, string>
         {
             { 0, "Online" },
@@ -47,9 +48,9 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             if (haveRepository && haveCombatantMemory)
             {
-
                 // These events need to deliver cached values to new subscribers.
-                RegisterCachedEventTypes(new List<string> {
+                RegisterCachedEventTypes(new List<string>
+                {
                     OnlineStatusChangedEvent,
                     PartyChangedEvent,
                 });
@@ -139,7 +140,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void InitFFXIVIntegration()
         {
-            repository.RegisterPartyChangeDelegate((partyList, partySize) => DispatchPartyChangeEvent(partyList, partySize));
+            repository.RegisterPartyChangeDelegate((partyList, partySize) =>
+                                                       DispatchPartyChangeEvent(partyList, partySize));
             ffxivPluginPresent = true;
         }
 
@@ -210,15 +212,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     {
                         WorldName = GetWorldName(WorldID);
                     }
+
                     jObjCombatant["WorldName"] = WorldName;
 
                     // If the request is filtering properties, remove them here
                     if (props.Count > 0)
                     {
                         jObjCombatant.Keys
-                            .Where(k => !props.Contains(k))
-                            .ToList()
-                            .ForEach(k => jObjCombatant.Remove(k));
+                                     .Where(k => !props.Contains(k))
+                                     .ToList()
+                                     .ForEach(k => jObjCombatant.Remove(k));
                     }
 
                     filteredCombatants.Add(jObjCombatant);
@@ -233,10 +236,14 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // Player id in hex (for ease in matching logs).
             public string id;
             public string name;
+
             public uint worldId;
+
             // Raw job id.
             public int job;
+
             public int level;
+
             // In immediate party (true), vs in alliance (false).
             public bool inParty;
         }
@@ -301,37 +308,38 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // Accumulate party members from cached info.  If they don't exist,
             // still send *something*, since it's better than nothing.
             List<PartyMember> result = new List<PartyMember>(24);
-            lock (missingPartyMembers) lock (partyList)
+            lock (missingPartyMembers)
+            lock (partyList)
+            {
+                missingPartyMembers.Clear();
+
+                foreach (var id in partyList)
                 {
-                    missingPartyMembers.Clear();
-
-                    foreach (var id in partyList)
+                    PluginCombatant c;
+                    if (lookupTable.TryGetValue(id, out c))
                     {
-                        PluginCombatant c;
-                        if (lookupTable.TryGetValue(id, out c))
+                        result.Add(new PartyMember
                         {
-                            result.Add(new PartyMember
-                            {
-                                id = $"{id:X}",
-                                name = c.Name,
-                                worldId = c.WorldID,
-                                job = c.Job,
-                                level = c.Level,
-                                inParty = GetPartyType(c) == 1 /* Party */,
-                            });
-                        }
-                        else
-                        {
-                            missingPartyMembers.Add(id);
-                        }
+                            id = $"{id:X}",
+                            name = c.Name,
+                            worldId = c.WorldID,
+                            job = c.Job,
+                            level = c.Level,
+                            inParty = GetPartyType(c) == 1 /* Party */,
+                        });
                     }
-
-                    if (missingPartyMembers.Count > 0)
+                    else
                     {
-                        Log(LogLevel.Debug, "Party changed event delayed until members are available");
-                        return;
+                        missingPartyMembers.Add(id);
                     }
                 }
+
+                if (missingPartyMembers.Count > 0)
+                {
+                    Log(LogLevel.Debug, "Party changed event delayed until members are available");
+                    return;
+                }
+            }
 
             Log(LogLevel.Debug, "party list: {0}", JObject.FromObject(new { party = result }).ToString());
 
@@ -346,16 +354,10 @@ namespace RainbowMage.OverlayPlugin.EventSources
         {
             this.Config = container.Resolve<BuiltinEventConfig>();
 
-            this.Config.UpdateIntervalChanged += (o, e) =>
-            {
-                this.Start();
-            };
+            this.Config.UpdateIntervalChanged += (o, e) => { this.Start(); };
         }
 
-        public override void SaveConfig(IPluginConfig config)
-        {
-
-        }
+        public override void SaveConfig(IPluginConfig config) { }
 
         public override void Start()
         {

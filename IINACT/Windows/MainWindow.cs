@@ -50,7 +50,7 @@ public class MainWindow : Window, IDisposable
             var port = OverlayPluginConfig?.WSServerPort;
 
             if (selectedOverlay?.Modern ?? false)
-                overlayURL += $"?OVERLAY_WS=ws://{ip}:{port}/ws"; 
+                overlayURL += $"?OVERLAY_WS=ws://{ip}:{port}/ws";
             else
                 overlayURL += $"?HOST_PORT=ws://{ip}:{port}";
             if (!string.IsNullOrEmpty(selectedOverlay?.Options))

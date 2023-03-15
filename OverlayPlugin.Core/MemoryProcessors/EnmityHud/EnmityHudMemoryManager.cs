@@ -33,6 +33,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -50,6 +51,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
             {
                 return false;
             }
+
             return true;
         }
 
@@ -66,6 +68,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
             {
                 return null;
             }
+
             return memory.GetEnmityHudEntries();
         }
     }

@@ -20,7 +20,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
         private int focusTargetOffset;
         private int hoverTargetOffset;
 
-        public TargetMemory(TinyIoCContainer container, string targetSignature, int targetTargetOffset, int focusTargetOffset, int hoverTargetOffset)
+        public TargetMemory(
+            TinyIoCContainer container, string targetSignature, int targetTargetOffset, int focusTargetOffset,
+            int hoverTargetOffset)
         {
             this.targetSignature = targetSignature;
             this.targetTargetOffset = targetTargetOffset;
@@ -81,7 +83,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find target memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            logger.Log(LogLevel.Error,
+                       $"Failed to find target memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 
@@ -110,6 +113,5 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
         {
             return GetTargetRelativeCombatant(hoverTargetOffset);
         }
-
     }
 }

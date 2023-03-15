@@ -2,11 +2,14 @@
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace RainbowMage.OverlayPlugin.EventSources {
-    internal partial class MiniParseEventSource : EventSourceBase {
+namespace RainbowMage.OverlayPlugin.EventSources
+{
+    internal partial class MiniParseEventSource : EventSourceBase
+    {
         // Part of ACTWebSocket
         // Copyright (c) 2016 ZCube; Licensed under MIT license.
-        public enum MessageType {
+        public enum MessageType
+        {
             LogLine = 0,
             ChangeZone = 1,
             ChangePrimaryPlayer = 2,
@@ -38,7 +41,8 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             Timer = 255
         }
 
-        private void LogLineReader(bool isImported, LogLineEventArgs e) {
+        private void LogLineReader(bool isImported, LogLineEventArgs e)
+        {
             Log(LogLevel.Info, e.logLine);
 
             var d = e.logLine.Split('|');
@@ -50,23 +54,27 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
             var type = (MessageType)Convert.ToInt32(d[0]);
 
-            switch (type) {
+            switch (type)
+            {
                 case MessageType.LogLine:
                     if (d.Length < 5) // Invalid
                     {
                         break;
                     }
+
                     var logType = Convert.ToInt32(d[2], 16);
 
                     if (logType == 56) // type:echo
                     {
                         sendEchoEvent(isImported, "echo", d[4]);
                     }
+
                     break;
             }
         }
 
-        private void sendEchoEvent(bool isImported, string type, string text) {
+        private void sendEchoEvent(bool isImported, string type, string text)
+        {
             var message = new JObject();
             message["isImported"] = isImported;
             message["type"] = type;

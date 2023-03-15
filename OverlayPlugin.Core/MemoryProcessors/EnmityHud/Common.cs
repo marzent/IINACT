@@ -11,5 +11,4 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
         public uint EnmityPercent;
         public uint CastPercent;
     }
-
 }

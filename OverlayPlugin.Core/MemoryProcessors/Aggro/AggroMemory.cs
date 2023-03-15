@@ -122,6 +122,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
                     {
                         return new MemoryAggroListEntry();
                     }
+
                     fixed (byte* p = EntryBuffer)
                     {
                         return *(MemoryAggroListEntry*)&p[index * MemoryAggroListEntry.Size];
@@ -201,8 +202,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
                         };
                     }
                 }
+
                 result.Add(entry);
             }
+
             return result;
         }
     }

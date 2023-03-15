@@ -1,34 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>Advanced Combat Tracker</AssemblyName>
-    <RootNamespace>Advanced_Combat_Tracker</RootNamespace>
-    <PlatformTarget>x64</PlatformTarget>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <Version>6.9</Version>
-    <LangVersion>11</LangVersion>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <NoWarn>1701;1702;CS8618;IDE1006</NoWarn>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>Advanced Combat Tracker</AssemblyName>
+        <RootNamespace>Advanced_Combat_Tracker</RootNamespace>
+        <PlatformTarget>x64</PlatformTarget>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <Version>6.9</Version>
+        <LangVersion>11</LangVersion>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <NoWarn>1701;1702;CS8618;IDE1006</NoWarn>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Datatypes\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Datatypes\"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="FFXIV_ACT_Plugin">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Logfile">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup>
+        <Reference Include="FFXIV_ACT_Plugin">
+            <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Logfile">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
 </Project>

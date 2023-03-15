@@ -1,5 +1,7 @@
-﻿namespace Advanced_Combat_Tracker {
-    public class ZoneData : IComparable<ZoneData> {
+﻿namespace Advanced_Combat_Tracker
+{
+    public class ZoneData : IComparable<ZoneData>
+    {
         public bool PopulateAll { get; set; }
 
         public DateTime StartTime { get; set; }
@@ -12,46 +14,53 @@
 
         public Dictionary<string, object> Tags { get; set; } = new Dictionary<string, object>();
 
-        public ZoneData(DateTime Start, string ZoneName, bool PopulateAll, bool FullSelective, bool IgnoreEnemies) {
+        public ZoneData(DateTime Start, string ZoneName, bool PopulateAll, bool FullSelective, bool IgnoreEnemies)
+        {
             StartTime = Start;
             this.ZoneName = ZoneName;
             Items = new List<EncounterData>
             {
                 FullSelective
                     ? new EncounterData(ActGlobals.charName, ActGlobals.Trans["mergedEncounterTerm-all"], IgnoreEnemies,
-                        this)
+                                        this)
                     : new EncounterData(ActGlobals.charName, ActGlobals.Trans["mergedEncounterTerm-all"], this)
             };
             this.PopulateAll = PopulateAll;
             if (!this.PopulateAll) return;
         }
 
-        public void AddCombatAction(MasterSwing action) {
-            if (PopulateAll) {
-                if (!Items[0].Active) {
+        public void AddCombatAction(MasterSwing action)
+        {
+            if (PopulateAll)
+            {
+                if (!Items[0].Active)
+                {
                     Items[0].StartTimes.Add(action.Time);
                     Items[0].Active = true;
                 }
+
                 Items[0].AddCombatAction(action);
             }
-            if (!Items[^1].Active) {
+
+            if (!Items[^1].Active)
+            {
                 Items[^1].StartTimes.Add(action.Time);
                 Items[^1].Active = true;
             }
+
             Items[^1].AddCombatAction(action);
         }
 
-        public int CompareTo(ZoneData? other) {
+        public int CompareTo(ZoneData? other)
+        {
             return StartTime.CompareTo(other?.StartTime);
         }
 
         public override string ToString() =>
             ZoneName == ActGlobals.Trans["zoneDataTerm-import"]
-                ?
-                string.Format(ActGlobals.Trans["zoneDataTerm-importMerge"], Items.Count)
+                ? string.Format(ActGlobals.Trans["zoneDataTerm-importMerge"], Items.Count)
                 : !PopulateAll
                     ? string.Format("{0} - [{2}] {1}", ZoneName, StartTime.ToLongTimeString(), Items.Count)
                     : string.Format("{0} - [{2}] {1}", ZoneName, StartTime.ToLongTimeString(), Items.Count - 1);
     }
-
 }

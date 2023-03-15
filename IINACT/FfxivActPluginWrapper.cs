@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
@@ -15,7 +15,8 @@ using ACTWrapper = FFXIV_ACT_Plugin.Common.ACTWrapper;
 
 namespace IINACT;
 
-public class FfxivActPluginWrapper : IDisposable {
+public class FfxivActPluginWrapper : IDisposable
+{
     public IDataSubscription Subscription;
     public IDataRepository Repository;
     public ParseSettings ParseSettings = null!;
@@ -37,9 +38,10 @@ public class FfxivActPluginWrapper : IDisposable {
             _ => Language.English
         };
 
-    public FfxivActPluginWrapper(Configuration configuration, Dalamud.ClientLanguage dalamudClientLanguage) {
+    public FfxivActPluginWrapper(Configuration configuration, Dalamud.ClientLanguage dalamudClientLanguage)
+    {
         this.configuration = configuration;
-        this.dalamudClientLanguage= dalamudClientLanguage;
+        this.dalamudClientLanguage = dalamudClientLanguage;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -76,11 +78,12 @@ public class FfxivActPluginWrapper : IDisposable {
     {
         var settingsMediator = ffxivActPlugin._dataCollection._settingsMediator;
 
-        DataCollectionSettings = new DataCollectionSettingsEventArgs {
+        DataCollectionSettings = new DataCollectionSettingsEventArgs
+        {
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
             UseWinPCap = false,
-            UseDeucalion= true,
+            UseDeucalion = true,
             ProcessID = Environment.ProcessId
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
@@ -88,7 +91,8 @@ public class FfxivActPluginWrapper : IDisposable {
         var readProcesses = ProcessManager.GetField<ReadProcesses>("_readProcesses");
         readProcesses.Read64(true);
 
-        ParseSettings = new ParseSettings() {
+        ParseSettings = new ParseSettings()
+        {
             DisableDamageShield = configuration.DisableDamageShield,
             DisableCombinePets = configuration.DisableCombinePets,
             LanguageID = clientLanguage,
@@ -105,10 +109,19 @@ public class FfxivActPluginWrapper : IDisposable {
         var logOutput = ffxivActPlugin._dataCollection._logOutput;
         var logFormat = ffxivActPlugin._dataCollection._logFormat;
 
-        var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets, ParseSettings.LanguageID, ParseSettings.ParseFilter, ParseSettings.SimulateIndividualDoTCrits, ParseSettings.ShowRealDoTTicks);
+        var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets,
+                                                 ParseSettings.LanguageID, ParseSettings.ParseFilter,
+                                                 ParseSettings.SimulateIndividualDoTCrits,
+                                                 ParseSettings.ShowRealDoTTicks);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line);
 
-        var line2 = logFormat.FormatMemorySettings(DataCollectionSettings.ProcessID, DataCollectionSettings.LogFileFolder, DataCollectionSettings.LogAllNetworkData, DataCollectionSettings.DisableCombatLog, DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap, DataCollectionSettings.UseSocketFilter, DataCollectionSettings.UseDeucalion);
+        var line2 = logFormat.FormatMemorySettings(DataCollectionSettings.ProcessID,
+                                                   DataCollectionSettings.LogFileFolder,
+                                                   DataCollectionSettings.LogAllNetworkData,
+                                                   DataCollectionSettings.DisableCombatLog,
+                                                   DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap,
+                                                   DataCollectionSettings.UseSocketFilter,
+                                                   DataCollectionSettings.UseDeucalion);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);
@@ -117,7 +130,8 @@ public class FfxivActPluginWrapper : IDisposable {
         ProcessManager.Verify();
     }
 
-    private void SetupActWrapper() {
+    private void SetupActWrapper()
+    {
         var logOutput = ffxivActPlugin._dataCollection._logOutput;
         var actWrapper = logOutput.GetField<ACTWrapper>("_actWrapper");
 
@@ -130,20 +144,23 @@ public class FfxivActPluginWrapper : IDisposable {
         ActGlobals.oFormActMain.FfxivPlugin = ffxivActPlugin;
     }
 
-    private void OFormActMain_BeforeLogLineRead(bool isImport, LogLineEventArgs logInfo) {
-        (logInfo.logLine, logInfo.detectedType) = parseMediator.BeforeLogLineRead(isImport, logInfo.detectedTime, logInfo.logLine);
+    private void OFormActMain_BeforeLogLineRead(bool isImport, LogLineEventArgs logInfo)
+    {
+        (logInfo.logLine, logInfo.detectedType) =
+            parseMediator.BeforeLogLineRead(isImport, logInfo.detectedTime, logInfo.logLine);
     }
 
-    private void SetupDataSubscription() {
+    private void SetupDataSubscription()
+    {
         ffxivActPlugin.DataSubscription.ZoneChanged += OnZoneChanged;
     }
 
-    private static void OnZoneChanged(uint ZoneID, string ZoneName) {
+    private static void OnZoneChanged(uint ZoneID, string ZoneName)
+    {
         ActGlobals.oFormActMain.ChangeZone(ZoneName);
     }
 
-    private static void OnProcessException(DateTime timestamp, string text) {
-    }
+    private static void OnProcessException(DateTime timestamp, string text) { }
 
     public void Dispose()
     {

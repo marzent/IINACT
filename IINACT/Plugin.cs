@@ -34,18 +34,18 @@ namespace IINACT
             [RequiredVersion("1.0")] CommandManager commandManager,
             [RequiredVersion("1.0")] GameNetwork gameNetwork,
             [RequiredVersion("1.0")] DataManager dataManager
-            )
+        )
         {
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
             GameNetwork = gameNetwork;
-            DataManager= dataManager;
+            DataManager = dataManager;
 
             Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
-            
+
             var fetchDeps = new FetchDependencies.FetchDependencies(
                 PluginInterface.AssemblyLocation.Directory!.FullName, Dalamud.Utility.Util.HttpClient);
-            try 
+            try
             {
                 fetchDeps.GetFfxivPlugin();
             }
@@ -58,17 +58,17 @@ namespace IINACT
 
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             Configuration.Initialize(PluginInterface);
-            
+
             if (Directory.Exists(Configuration.LogFilePath))
                 ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
             FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
 
             Task.Run(InitOverlayPlugin);
-            
+
             ConfigWindow = new ConfigWindow(this);
             MainWindow = new MainWindow(this);
-            
+
             WindowSystem.AddWindow(ConfigWindow);
             WindowSystem.AddWindow(MainWindow);
 
@@ -77,15 +77,16 @@ namespace IINACT
                 HelpMessage = "Displays the IINACT main window"
             });
 
-            CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter) {
+            CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
+            {
                 HelpMessage = "Ends the current encounter IINACT is parsing"
             });
 
             PluginInterface.UiBuilder.Draw += DrawUI;
             PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
-        
-        private void InitOverlayPlugin() 
+
+        private void InitOverlayPlugin()
         {
             var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
             var logger = new RainbowMage.OverlayPlugin.Logger();
@@ -112,10 +113,10 @@ namespace IINACT
             OverlayPlugin.DeInitPlugin();
 
             WindowSystem.RemoveAllWindows();
-            
+
             ConfigWindow.Dispose();
             MainWindow.Dispose();
-            
+
             CommandManager.RemoveHandler(MainWindowCommandName);
             CommandManager.RemoveHandler(EndEncCommandName);
         }
@@ -125,7 +126,7 @@ namespace IINACT
             MainWindow.IsOpen = true;
         }
 
-        private void EndEncounter(string command, string args) 
+        private void EndEncounter(string command, string args)
         {
             ActGlobals.oFormActMain.EndCombat(false);
         }

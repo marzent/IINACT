@@ -10,8 +10,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
 
         // Aggro uses the same signature as Enmity
         public AggroMemory60(TinyIoCContainer container)
-            : base(container, Enmity.EnmityMemory60.enmitySignature, aggroEnmityOffset)
-        { }
+            : base(container, Enmity.EnmityMemory60.enmitySignature, aggroEnmityOffset) { }
 
         public override Version GetVersion()
         {

@@ -76,7 +76,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find enmity memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            logger.Log(LogLevel.Error,
+                       $"Failed to find enmity memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 
@@ -114,6 +115,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
                     {
                         return new MemoryEnmityListEntry();
                     }
+
                     fixed (byte* p = EntryBuffer)
                     {
                         return *(MemoryEnmityListEntry*)&p[index * MemoryEnmityListEntry.Size];
@@ -168,8 +170,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
 
                 result.Add(entry);
             }
+
             return result;
         }
-
     }
 }

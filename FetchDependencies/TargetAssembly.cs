@@ -1,16 +1,20 @@
 ﻿using Mono.Cecil;
 
-namespace FetchDependencies {
-    internal class TargetAssembly: IDisposable {
+namespace FetchDependencies
+{
+    internal class TargetAssembly : IDisposable
+    {
         public AssemblyDefinition Assembly { get; }
         private string AssemblyPath { get; }
 
-        public TargetAssembly(string assemblyPath) {
+        public TargetAssembly(string assemblyPath)
+        {
             AssemblyPath = assemblyPath;
 
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
-            Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath, new ReaderParameters { AssemblyResolver = resolver });
+            Assembly = AssemblyDefinition.ReadAssembly(AssemblyPath,
+                                                       new ReaderParameters { AssemblyResolver = resolver });
         }
 
         public void Dispose() => Assembly.Dispose();
@@ -23,12 +27,15 @@ namespace FetchDependencies {
                 .SelectMany(type => type.Methods)
                 .First(o => o.FullName.Contains(name));
 
-        public void MakePublic() {
+        public void MakePublic()
+        {
             static bool CheckCompilerGeneratedAttribute(ICustomAttributeProvider member) =>
                 member.CustomAttributes.Any(x =>
-                    x.AttributeType.FullName == "System.Runtime.CompilerServices.CompilerGeneratedAttribute");
+                                                x.AttributeType.FullName ==
+                                                "System.Runtime.CompilerServices.CompilerGeneratedAttribute");
 
-            foreach (var type in GetAllTypes()) {
+            foreach (var type in GetAllTypes())
+            {
                 if (CheckCompilerGeneratedAttribute(type))
                     continue;
 
@@ -38,24 +45,29 @@ namespace FetchDependencies {
                     type.IsPublic = true;
 
                 foreach (var method in type.Methods.Where(method =>
-                             !CheckCompilerGeneratedAttribute(method) && !method.IsCompilerControlled))
+                                                              !CheckCompilerGeneratedAttribute(method) &&
+                                                              !method.IsCompilerControlled))
                     method.IsPublic = true;
 
                 foreach (var field in type.Fields.Where(field =>
-                             !CheckCompilerGeneratedAttribute(field) && !field.IsCompilerControlled))
+                                                            !CheckCompilerGeneratedAttribute(field) &&
+                                                            !field.IsCompilerControlled))
                     field.IsPublic = true;
             }
         }
 
-        public void RemoveStrongNaming() {
+        public void RemoveStrongNaming()
+        {
             var name = Assembly.Name;
             name.HasPublicKey = false;
             name.PublicKey = Array.Empty<byte>();
 
-            foreach (var module in Assembly.Modules) {
+            foreach (var module in Assembly.Modules)
+            {
                 module.Attributes &= ~ModuleAttributes.StrongNameSigned;
                 var coreLibs = new[] { "netstandard", "mscorlib", "System" };
-                foreach (var reference in module.AssemblyReferences) {
+                foreach (var reference in module.AssemblyReferences)
+                {
                     if (coreLibs.Any(coreLib => reference.Name == coreLib))
                         continue;
                     reference.HasPublicKey = false;
@@ -64,10 +76,12 @@ namespace FetchDependencies {
             }
         }
 
-        private IEnumerable<TypeDefinition> GetAllTypes() {
+        private IEnumerable<TypeDefinition> GetAllTypes()
+        {
             var types = new Queue<TypeDefinition>(Assembly.MainModule.Types);
 
-            while (types.Count > 0) {
+            while (types.Count > 0)
+            {
                 var type = types.Dequeue();
                 yield return type;
                 foreach (var nestedType in type.NestedTypes)
@@ -75,7 +89,8 @@ namespace FetchDependencies {
             }
         }
 
-        public void WriteOut() {
+        public void WriteOut()
+        {
             var patchedPath = AssemblyPath + ".patched";
             Assembly.Write(patchedPath);
             Assembly.Dispose();

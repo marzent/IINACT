@@ -17,11 +17,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage.FFXIVClientStructs
     public class Data
     {
         private readonly ILogger logger;
-        private readonly Dictionary<DataNamespace, ClientStructsData> data = new Dictionary<DataNamespace, ClientStructsData>();
+
+        private readonly Dictionary<DataNamespace, ClientStructsData> data =
+            new Dictionary<DataNamespace, ClientStructsData>();
 
         // @TODO: Is there some way to get this from the module instead?
         private const long DataBaseOffset = 0x140000000;
-        
+
         public Data(TinyIoCContainer container)
         {
             logger = container.Resolve<ILogger>();
@@ -65,15 +67,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage.FFXIVClientStructs
                 var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("data.yml"));
                 string dataYaml;
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
-                using (var reader = new StreamReader(stream)) {
+                using (var reader = new StreamReader(stream))
+                {
                     dataYaml = reader.ReadToEnd();
                 }
+
                 var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(NullNamingConvention.Instance)
-                    .Build();
+                                   .WithNamingConvention(NullNamingConvention.Instance)
+                                   .Build();
                 baseObj = deserializer.Deserialize<ClientStructsData>(dataYaml);
                 data[ns] = baseObj;
             }
+
             return baseObj;
         }
 

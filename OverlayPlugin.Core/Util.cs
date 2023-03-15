@@ -5,20 +5,23 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace RainbowMage.OverlayPlugin {
-    internal static class Util {
+namespace RainbowMage.OverlayPlugin
+{
+    internal static class Util
+    {
         /// <summary>
         /// JSON 用に文字列をエスケープします。
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static string CreateJsonSafeString(string str) {
+        public static string CreateJsonSafeString(string str)
+        {
             return str
-                .Replace("\"", "\\\"")
-                .Replace("'", "\\'")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n")
-                .Replace("\t", "\\t");
+                   .Replace("\"", "\\\"")
+                   .Replace("'", "\\'")
+                   .Replace("\r", "\\r")
+                   .Replace("\n", "\\n")
+                   .Replace("\t", "\\t");
         }
 
         /// <summary>
@@ -27,7 +30,8 @@ namespace RainbowMage.OverlayPlugin {
         /// <param name="str"></param>
         /// <param name="replace"></param>
         /// <returns></returns>
-        public static string ReplaceNaNString(string str, string replace) {
+        public static string ReplaceNaNString(string str, string replace)
+        {
             return str.Replace(double.NaN.ToString(), replace);
         }
 
@@ -38,18 +42,20 @@ namespace RainbowMage.OverlayPlugin {
         /// <returns>スクリーン上にある場合は true、そうでない場合は false。</returns>
         public static bool IsOnScreen(Form form) =>
             (Screen.AllScreens
-                .Select(screen => new {
-                    screen,
-                    formRectangle = new Rectangle(form.Left, form.Top, form.Width, form.Height)
-                })
-                .Where(@t => @t.screen.WorkingArea.IntersectsWith(@t.formRectangle))
-                .Select(@t => @t.screen)).Any();
+                   .Select(screen => new
+                   {
+                       screen,
+                       formRectangle = new Rectangle(form.Left, form.Top, form.Width, form.Height)
+                   })
+                   .Where(@t => @t.screen.WorkingArea.IntersectsWith(@t.formRectangle))
+                   .Select(@t => @t.screen)).Any();
 
         /// <summary>
         /// 指定されたフォームを Windows の Alt+Tab の切り替え候補から除外します。
         /// </summary>
         /// <param name="form"></param>
-        public static void HidePreview(System.Windows.Forms.Form form) {
+        public static void HidePreview(System.Windows.Forms.Form form)
+        {
             var ex = NativeMethods.GetWindowLong(form.Handle, NativeMethods.GWL_EXSTYLE);
             ex |= NativeMethods.WS_EX_TOOLWINDOW;
             NativeMethods.SetWindowLongA(form.Handle, NativeMethods.GWL_EXSTYLE, (IntPtr)ex);
@@ -63,24 +69,32 @@ namespace RainbowMage.OverlayPlugin {
         /// <param name="key"></param>
         /// <param name="defaultText"></param>
         /// <returns></returns>
-        public static string GetHotkeyString(Keys modifier, Keys key, String defaultText = "") {
+        public static string GetHotkeyString(Keys modifier, Keys key, String defaultText = "")
+        {
             var sbKeys = new StringBuilder();
-            if ((modifier & Keys.Shift) == Keys.Shift) {
+            if ((modifier & Keys.Shift) == Keys.Shift)
+            {
                 sbKeys.Append("Shift + ");
             }
-            if ((modifier & Keys.Control) == Keys.Control) {
+
+            if ((modifier & Keys.Control) == Keys.Control)
+            {
                 sbKeys.Append("Ctrl + ");
             }
-            if ((modifier & Keys.Alt) == Keys.Alt) {
+
+            if ((modifier & Keys.Alt) == Keys.Alt)
+            {
                 sbKeys.Append("Alt + ");
             }
-            if ((modifier & Keys.LWin) == Keys.LWin || (modifier & Keys.RWin) == Keys.RWin) {
+
+            if ((modifier & Keys.LWin) == Keys.LWin || (modifier & Keys.RWin) == Keys.RWin)
+            {
                 sbKeys.Append("Win + ");
             }
+
             sbKeys.Append(Enum.ToObject(typeof(Keys), key).ToString());
             return sbKeys.ToString();
         }
-
 
 
         /// <summary>
@@ -91,15 +105,23 @@ namespace RainbowMage.OverlayPlugin {
         /// <param name="keyCode"></param>
         /// <param name="modifiers"></param>
         /// <returns></returns>
-        public static Keys RemoveModifiers(Keys keyCode, Keys modifiers) {
+        public static Keys RemoveModifiers(Keys keyCode, Keys modifiers)
+        {
             var key = keyCode;
-            var modifierList = new List<Keys>() { Keys.ControlKey, Keys.LControlKey, Keys.Alt, Keys.ShiftKey, Keys.Shift, Keys.LShiftKey, Keys.RShiftKey, Keys.Control, Keys.LWin, Keys.RWin };
-            foreach (var mod in modifierList) {
-                if (key.HasFlag(mod)) {
+            var modifierList = new List<Keys>()
+            {
+                Keys.ControlKey, Keys.LControlKey, Keys.Alt, Keys.ShiftKey, Keys.Shift, Keys.LShiftKey, Keys.RShiftKey,
+                Keys.Control, Keys.LWin, Keys.RWin
+            };
+            foreach (var mod in modifierList)
+            {
+                if (key.HasFlag(mod))
+                {
                     if (key == mod)
                         key &= ~mod;
                 }
             }
+
             return key;
         }
     }

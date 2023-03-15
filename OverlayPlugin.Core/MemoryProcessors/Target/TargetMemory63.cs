@@ -14,8 +14,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
         private const int hoverTargetOffset = 208;
 
         public TargetMemory63(TinyIoCContainer container)
-            : base(container, targetSignature, targetTargetOffset, focusTargetOffset, hoverTargetOffset)
-        { }
+            : base(container, targetSignature, targetTargetOffset, focusTargetOffset, hoverTargetOffset) { }
 
         public override Version GetVersion()
         {

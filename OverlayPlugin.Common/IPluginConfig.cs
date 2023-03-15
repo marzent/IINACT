@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace RainbowMage.OverlayPlugin {
-    public interface IPluginConfig {
+namespace RainbowMage.OverlayPlugin
+{
+    public interface IPluginConfig
+    {
         OverlayConfigList<IOverlayConfig> Overlays { get; set; }
         bool HideOverlaysWhenNotActive { get; set; }
         bool HideOverlayDuringCutscene { get; set; }

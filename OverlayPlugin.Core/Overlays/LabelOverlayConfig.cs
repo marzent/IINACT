@@ -2,17 +2,24 @@
 using System.IO;
 using System.Xml.Serialization;
 
-namespace RainbowMage.OverlayPlugin.Overlays {
+namespace RainbowMage.OverlayPlugin.Overlays
+{
     [Serializable]
-    public class LabelOverlayConfig : OverlayConfigBase {
+    public class LabelOverlayConfig : OverlayConfigBase
+    {
         private string text;
+
         [XmlElement("Text")]
-        public string Text {
+        public string Text
+        {
             get => this.text;
-            set {
-                if (this.text != value) {
+            set
+            {
+                if (this.text != value)
+                {
                     this.text = value;
-                    if (TextChanged != null) {
+                    if (TextChanged != null)
+                    {
                         TextChanged(this, new TextChangedEventArgs(this.text));
                     }
                 }
@@ -20,13 +27,18 @@ namespace RainbowMage.OverlayPlugin.Overlays {
         }
 
         private bool htmlModeEnabled;
+
         [XmlElement("HTMLModeEnabled")]
-        public bool HtmlModeEnabled {
+        public bool HtmlModeEnabled
+        {
             get => this.htmlModeEnabled;
-            set {
-                if (this.htmlModeEnabled != value) {
+            set
+            {
+                if (this.htmlModeEnabled != value)
+                {
                     this.htmlModeEnabled = value;
-                    if (HTMLModeChanged != null) {
+                    if (HTMLModeChanged != null)
+                    {
                         HTMLModeChanged(this, new StateChangedEventArgs<bool>(this.htmlModeEnabled));
                     }
                 }
@@ -37,7 +49,8 @@ namespace RainbowMage.OverlayPlugin.Overlays {
         public event EventHandler<StateChangedEventArgs<bool>> HTMLModeChanged;
 
         public LabelOverlayConfig(TinyIoCContainer container, string name)
-            : base(name) {
+            : base(name)
+        {
             var pluginPath = container.Resolve<PluginMain>().PluginDirectory;
 
             this.Text = "";
@@ -51,16 +64,17 @@ namespace RainbowMage.OverlayPlugin.Overlays {
 
         // XmlSerializer用
         private LabelOverlayConfig()
-            : base(null) {
-
-        }
+            : base(null) { }
 
         public override Type OverlayType => typeof(LabelOverlay);
     }
 
-    public class TextChangedEventArgs : EventArgs {
+    public class TextChangedEventArgs : EventArgs
+    {
         public string Text { get; private set; }
-        public TextChangedEventArgs(string text) {
+
+        public TextChangedEventArgs(string text)
+        {
             this.Text = text;
         }
     }

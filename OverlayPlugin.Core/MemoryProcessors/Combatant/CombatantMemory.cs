@@ -21,7 +21,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         // Constants.
         protected const uint emptyID = 0xE0000000;
 
-        public CombatantMemory(TinyIoCContainer container, string charmapSignature, int combatantSize, int effectSize, int numMemoryCombatants = 421)
+        public CombatantMemory(
+            TinyIoCContainer container, string charmapSignature, int combatantSize, int effectSize,
+            int numMemoryCombatants = 421)
         {
             this.charmapSignature = charmapSignature;
             this.combatantSize = combatantSize;
@@ -87,7 +89,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find combatant memory via {GetType().Name}: {string.Join(",", fail)}.");
+            logger.Log(LogLevel.Error,
+                       $"Failed to find combatant memory via {GetType().Name}: {string.Join(",", fail)}.");
             return;
         }
 
@@ -148,7 +151,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
         // Will return any kind of combatant, even if not a mob.
         // This function always returns a combatant object, even if empty.
-        protected abstract unsafe Combatant GetCombatantFromByteArray(byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false);
+        protected abstract unsafe Combatant GetCombatantFromByteArray(
+            byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false);
 
         protected unsafe List<EffectEntry> GetEffectEntries(byte* source, ObjectType type, uint mycharID)
         {

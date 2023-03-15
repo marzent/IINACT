@@ -27,14 +27,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
             Name = "FFXIVOptional";
             var haveRepository = container.TryResolve(out repository);
 
-            RegisterEventTypes(new List<string> {
+            RegisterEventTypes(new List<string>
+            {
                 LogLineEvent,
             });
 
             if (haveRepository)
             {
                 // These events need to deliver cached values to new subscribers.
-                RegisterCachedEventTypes(new List<string> {
+                RegisterCachedEventTypes(new List<string>
+                {
                     ChangePrimaryPlayerEvent,
                     ChangeZoneEvent,
                     ChangeMapEvent,
@@ -47,10 +49,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void StopACTCombat()
         {
-            ActGlobals.oFormActMain.Invoke((Action)(() =>
-            {
-                ActGlobals.oFormActMain.EndCombat(true);
-            }));
+            ActGlobals.oFormActMain.Invoke((Action)(() => { ActGlobals.oFormActMain.EndCombat(true); }));
         }
 
         private void LogLineHandler(bool isImport, LogLineEventArgs args)
@@ -164,6 +163,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                         {
                             StopACTCombat();
                         }
+
                         break;
                     case LogMessageType.Process:
                         var gameVersion = repository.GetGameVersion();
@@ -194,24 +194,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
         {
             this.Config = container.Resolve<BuiltinEventConfig>();
 
-            this.Config.UpdateIntervalChanged += (o, e) =>
-            {
-                this.Start();
-            };
+            this.Config.UpdateIntervalChanged += (o, e) => { this.Start(); };
         }
 
-        public override void SaveConfig(IPluginConfig config)
-        {
-
-        }
+        public override void SaveConfig(IPluginConfig config) { }
 
         public override void Start()
         {
             this.timer.Change(0, this.Config.UpdateInterval * 1000);
         }
 
-        protected override void Update()
-        {
-        }
+        protected override void Update() { }
     }
 }

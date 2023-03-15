@@ -20,7 +20,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
 
         private DateTimeOffset lastDateTimeDynamicAddressChecked = DateTimeOffset.UtcNow;
 
-        public EnmityHudMemory(TinyIoCContainer container, string enmityHudSignature, int[] enmityHudPointerPath, int enmityHudCountOffset, int enmityHudEntryOffset, int enmityHudEntrySize)
+        public EnmityHudMemory(
+            TinyIoCContainer container, string enmityHudSignature, int[] enmityHudPointerPath, int enmityHudCountOffset,
+            int enmityHudEntryOffset, int enmityHudEntrySize)
         {
             this.enmityHudSignature = enmityHudSignature;
             this.enmityHudPointerPath = enmityHudPointerPath;
@@ -86,7 +88,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find enmity HUD memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            logger.Log(LogLevel.Error,
+                       $"Failed to find enmity HUD memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 
@@ -115,14 +118,17 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
                         return false;
                     }
                 }
+
                 enmityHudDynamicAddress = new IntPtr(tmpEnmityHudDynamicAddress.ToInt64());
             }
+
             return true;
         }
 
         public List<EnmityHudEntry> GetEnmityHudEntries()
         {
-            var entries = new List<EnmityHudEntry>(); ;
+            var entries = new List<EnmityHudEntry>();
+            ;
 
             if (!GetDynamicPointerAddress())
             {
@@ -147,6 +153,5 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
         }
 
         protected abstract unsafe EnmityHudEntry GetEnmityHudEntryFromBytes(byte[] source, int num);
-
     }
 }

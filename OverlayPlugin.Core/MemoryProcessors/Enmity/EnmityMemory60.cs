@@ -10,8 +10,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
         private const int enmitySignatureOffset = -2608;
 
         public EnmityMemory60(TinyIoCContainer container)
-            : base(container, enmitySignature, enmitySignatureOffset)
-        { }
+            : base(container, enmitySignature, enmitySignatureOffset) { }
 
         public override Version GetVersion()
         {

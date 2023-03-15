@@ -32,6 +32,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -48,6 +49,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
             {
                 return false;
             }
+
             return true;
         }
 
@@ -64,6 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
             {
                 return null;
             }
+
             return memory.GetAggroList(combatantList);
         }
     }

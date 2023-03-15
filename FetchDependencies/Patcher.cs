@@ -1,20 +1,26 @@
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace FetchDependencies {
-    internal class Patcher {
+namespace FetchDependencies
+{
+    internal class Patcher
+    {
         private readonly string _workPath;
 
-        public Patcher(string workPath) {
+        public Patcher(string workPath)
+        {
             _workPath = workPath;
         }
 
-        public void MainPlugin() {
+        public void MainPlugin()
+        {
             var plugin = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.dll"));
             var resources = plugin.Assembly.MainModule.Resources.ToArray();
 
-            foreach (var resource in resources) {
-                if (Costura.CheckForPlugin(resource.Name)) {
+            foreach (var resource in resources)
+            {
+                if (Costura.CheckForPlugin(resource.Name))
+                {
                     using var stream = (resource as EmbeddedResource)!.GetResourceStream();
                     var dllPath = Path.Combine(_workPath, Costura.Fix(resource.Name));
                     Costura.Decompress(stream, dllPath);
@@ -23,6 +29,7 @@ namespace FetchDependencies {
                     resourceAssembly.MakePublic();
                     resourceAssembly.WriteOut();
                 }
+
                 plugin.Assembly.MainModule.Resources.Remove(resource);
             }
 
@@ -36,7 +43,8 @@ namespace FetchDependencies {
             plugin.WriteOut();
         }
 
-        public void LogFilePlugin() {
+        public void LogFilePlugin()
+        {
             var logfile = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Logfile.dll"));
             {
                 var method = logfile.GetMethod(
@@ -51,24 +59,31 @@ namespace FetchDependencies {
                 var ilProcessor = method.Body.GetILProcessor();
                 while (ilProcessor.Body.Instructions.First().OpCode != OpCodes.Ldstr)
                     ilProcessor.RemoveAt(0);
-                ilProcessor.Replace(0, Instruction.Create(OpCodes.Ldstr, "This is IINACT based on FFXIV_ACT_Plugin {0}"));
+                ilProcessor.Replace(
+                    0, Instruction.Create(OpCodes.Ldstr, "This is IINACT based on FFXIV_ACT_Plugin {0}"));
                 ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4_1));
-                var stelemIndex = Array.FindIndex(ilProcessor.Body.Instructions.ToArray(), code => code.OpCode == OpCodes.Stelem_Ref);
+                var stelemIndex = Array.FindIndex(ilProcessor.Body.Instructions.ToArray(),
+                                                  code => code.OpCode == OpCodes.Stelem_Ref);
                 Enumerable.Range(0, 5).ToList().ForEach(_ => ilProcessor.RemoveAt(stelemIndex + 1));
             }
 
             logfile.WriteOut();
         }
 
-        public void MemoryPlugin() {
+        public void MemoryPlugin()
+        {
             var memory = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Memory.dll"));
 
             var dataSubscription = memory.Assembly.MainModule.Types.First(type => type.Name == "DataSubscription");
             var delegates = dataSubscription.Methods.Where(method => method.Name.StartsWith("On"));
 
-            void BeginInvokeFix(MethodDefinition method) {
+            void BeginInvokeFix(MethodDefinition method)
+            {
                 var originalIl = method.Body.Instructions.ToArray();
-                var invokeIndex = Array.FindIndex(originalIl, code => code.OpCode == OpCodes.Callvirt && code.Operand.ToString()!.Contains("BeginInvoke"));
+                var invokeIndex =
+                    Array.FindIndex(
+                        originalIl,
+                        code => code.OpCode == OpCodes.Callvirt && code.Operand.ToString()!.Contains("BeginInvoke"));
                 if (invokeIndex == -1)
                     throw new DllNotFoundException("Could not find BeginInvoke instruction");
                 var invokeInstruction = originalIl[invokeIndex];
@@ -88,6 +103,5 @@ namespace FetchDependencies {
 
             memory.WriteOut();
         }
-
     }
 }

@@ -8,6 +8,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
 namespace RainbowMage.OverlayPlugin.EventSources
 {
     using Utilities = MemoryProcessors.AtkStage.FFXIVClientStructs.Utilities;
+
     public class SortedPartyList
     {
         public string PartyType;
@@ -22,6 +23,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
             public int Index;
             public string Name;
             public EntryType Type;
+
             public enum EntryType
             {
                 Party = 0,
@@ -50,10 +52,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 return GetAddon(key);
             });
 
-            RegisterEventHandler("getSortedPartyList", (msg) =>
-            {
-                return GetSortedPartyList();
-            });
+            RegisterEventHandler("getSortedPartyList", (msg) => { return GetSortedPartyList(); });
         }
 
         private JObject GetSortedPartyList()
@@ -72,20 +71,24 @@ namespace RainbowMage.OverlayPlugin.EventSources
             partyList.PartyType = addonPartyList.PartyTypeTextNode.NodeText;
             partyList.PetCount = addonPartyList.PetCount;
             partyList.TrustCount = addonPartyList.TrustCount;
-            
+
             for (int i = 0; i < partyList.MemberCount; ++i)
             {
-                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i, SortedPartyList.Entry.EntryType.Party));
+                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i,
+                                                         SortedPartyList.Entry.EntryType.Party));
             }
+
             for (int i = 0; i < partyList.TrustCount; ++i)
             {
-                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i, SortedPartyList.Entry.EntryType.Party));
+                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i,
+                                                         SortedPartyList.Entry.EntryType.Party));
             }
 
             return JObject.FromObject(partyList);
         }
 
-        private SortedPartyList.Entry PartyMemberToEntry(dynamic partyMemberListStruct, int index, SortedPartyList.Entry.EntryType type)
+        private SortedPartyList.Entry PartyMemberToEntry(
+            dynamic partyMemberListStruct, int index, SortedPartyList.Entry.EntryType type)
         {
             string key = type.ToString() + "Member" + index;
             var member = partyMemberListStruct[key];
@@ -96,6 +99,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
             {
                 nameStr = "";
             }
+
             // Trim the utf8 chars at the start of the string by splitting on first space
             // Example raw string:
             // " Player Name"
@@ -140,21 +144,15 @@ namespace RainbowMage.OverlayPlugin.EventSources
             return jobj;
         }
 
-        public override void Start()
-        {
-        }
+        public override void Start() { }
 
         public override void LoadConfig(IPluginConfig cfg)
         {
             Config = container.Resolve<BuiltinEventConfig>();
         }
 
-        public override void SaveConfig(IPluginConfig config)
-        {
-        }
+        public override void SaveConfig(IPluginConfig config) { }
 
-        protected override void Update()
-        {
-        }
+        protected override void Update() { }
     }
 }

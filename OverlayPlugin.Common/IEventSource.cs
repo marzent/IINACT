@@ -1,7 +1,9 @@
 ﻿using System;
 
-namespace RainbowMage.OverlayPlugin {
-    public interface IEventSource : IDisposable {
+namespace RainbowMage.OverlayPlugin
+{
+    public interface IEventSource : IDisposable
+    {
         /// <summary>
         /// ユーザーが設定したオーバーレイの名前を取得します。
         /// </summary>

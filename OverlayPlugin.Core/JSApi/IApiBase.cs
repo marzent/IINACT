@@ -1,6 +1,7 @@
-﻿namespace RainbowMage.OverlayPlugin {
-    internal interface IApiBase : IEventReceiver {
-
+﻿namespace RainbowMage.OverlayPlugin
+{
+    internal interface IApiBase : IEventReceiver
+    {
         void OverlayMessage(string msg);
 
         void InitModernAPI();

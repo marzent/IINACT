@@ -1,118 +1,118 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Authors>Usagi</Authors>
-    <Company>Dezent</Company>
-    <Version>2.0.0</Version>
-    <Description>A parsing plugin.</Description>
-    <Copyright></Copyright>
-    <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWindowsForms>True</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <PlatformTarget>x64</PlatformTarget>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>1.1</Version>
-    <LangVersion>11</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Authors>Usagi</Authors>
+        <Company>Dezent</Company>
+        <Version>2.0.0</Version>
+        <Description>A parsing plugin.</Description>
+        <Copyright></Copyright>
+        <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>True</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PlatformTarget>x64</PlatformTarget>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <Version>1.1</Version>
+        <LangVersion>11</LangVersion>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
-    <DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">
-    <DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
+        <DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="Icon-IINACT-512x512%402x.ico" />
-  </ItemGroup>
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">
+        <DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.10" />
-    <Reference Include="FFXIVClientStructs">
-      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Dalamud">
-      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGui.NET">
-      <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGuiScene">
-      <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Lumina">
-      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Lumina.Excel">
-      <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="Icon-IINACT-512x512%402x.ico"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
-    <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
-    <ProjectReference Include="..\machina\Machina\Machina.csproj" />
-    <ProjectReference Include="..\NotACT\NotACT.csproj" />
-    <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DalamudPackager" Version="2.1.10"/>
+        <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Lumina">
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Lumina.Excel">
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="FFXIV_ACT_Plugin">
-      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Common">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Config">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Config.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Logfile">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Memory">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Memory.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Network">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Network.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Parse">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Parse.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="FFXIV_ACT_Plugin.Resource">
-      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj"/>
+        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj"/>
+        <ProjectReference Include="..\machina\Machina\Machina.csproj"/>
+        <ProjectReference Include="..\NotACT\NotACT.csproj"/>
+        <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="FFXIV_ACT_Plugin">
+            <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Common">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Config">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Config.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Logfile">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Memory">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Memory.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Network">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Network.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Parse">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Parse.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Resource">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
 
 </Project>

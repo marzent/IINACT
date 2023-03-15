@@ -11,10 +11,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         private const string charmapSignature = "488B5720B8000000E0483BD00F84????????488D0D";
 
         public CombatantMemory63(TinyIoCContainer container)
-            : base(container, charmapSignature, CombatantMemory.Size, EffectMemory.Size)
-        {
-
-        }
+            : base(container, charmapSignature, CombatantMemory.Size, EffectMemory.Size) { }
 
         public override Version GetVersion()
         {
@@ -31,12 +28,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 if (mem.ID == 0 || mem.ID == emptyID)
                     return null;
             }
+
             return GetCombatantFromByteArray(source, mycharID, false);
         }
 
         // Will return any kind of combatant, even if not a mob.
         // This function always returns a combatant object, even if empty.
-        protected override unsafe Combatant GetCombatantFromByteArray(byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false)
+        protected override unsafe Combatant GetCombatantFromByteArray(
+            byte[] source, uint mycharID, bool isPlayer, bool exceptEffects = false)
         {
             fixed (byte* p = source)
             {
@@ -71,7 +70,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                     TargetID = (ObjectType)mem.Type == ObjectType.PC ? mem.PCTargetID : mem.NPCTargetID,
                     CurrentHP = mem.CurrentHP,
                     MaxHP = mem.MaxHP,
-                    Effects = exceptEffects ? new List<EffectEntry>() : GetEffectEntries(mem.Effects, (ObjectType)mem.Type, mycharID),
+                    Effects = exceptEffects
+                                  ? new List<EffectEntry>()
+                                  : GetEffectEntries(mem.Effects, (ObjectType)mem.Type, mycharID),
 
                     BNpcID = mem.BNpcID,
                     CurrentMP = mem.CurrentMP,
@@ -100,13 +101,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 };
                 combatant.IsTargetable =
                     (combatant.ModelStatus == ModelStatus.Visible)
-                    && ((combatant.Status == ObjectStatus.NormalActorStatus) || (combatant.Status == ObjectStatus.NormalSubActorStatus));
+                    && ((combatant.Status == ObjectStatus.NormalActorStatus) ||
+                        (combatant.Status == ObjectStatus.NormalSubActorStatus));
                 if (combatant.Type != ObjectType.PC && combatant.Type != ObjectType.Monster)
                 {
                     // Other types have garbage memory for hp.
                     combatant.CurrentHP = 0;
                     combatant.MaxHP = 0;
                 }
+
                 return combatant;
             }
         }

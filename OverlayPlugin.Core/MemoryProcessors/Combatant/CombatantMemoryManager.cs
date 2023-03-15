@@ -37,6 +37,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -55,6 +56,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             {
                 return false;
             }
+
             return true;
         }
 
@@ -71,6 +73,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             {
                 return null;
             }
+
             return memory.GetCombatantFromAddress(address, selfCharID);
         }
 
@@ -80,6 +83,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             {
                 return new List<Combatant>();
             }
+
             return memory.GetCombatantList();
         }
 
@@ -89,6 +93,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             {
                 return null;
             }
+
             return memory.GetSelfCombatant();
         }
     }

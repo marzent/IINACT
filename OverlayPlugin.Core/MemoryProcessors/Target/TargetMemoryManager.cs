@@ -37,6 +37,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -54,6 +55,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             {
                 return false;
             }
+
             return true;
         }
 
@@ -70,6 +72,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             {
                 return null;
             }
+
             return memory.GetTargetCombatant();
         }
 
@@ -79,6 +82,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             {
                 return null;
             }
+
             return memory.GetFocusCombatant();
         }
 
@@ -88,6 +92,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             {
                 return null;
             }
+
             return memory.GetHoverCombatant();
         }
     }

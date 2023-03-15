@@ -31,7 +31,5 @@ public class ConfigWindow : Window, IDisposable
             Configuration.ShowDebug = configValue;
             Configuration.Save();
         }
-
-        
     }
 }

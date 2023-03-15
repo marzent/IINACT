@@ -25,7 +25,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
         {
             Name = "MiniParse";
 
-            RegisterEventTypes(new List<string> {
+            RegisterEventTypes(new List<string>
+            {
                 CombatDataEvent,
                 ImportedLogLinesEvent,
                 BroadcastMessageEvent,
@@ -80,7 +81,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
             {
                 if (!msg.ContainsKey("msg") || !msg.ContainsKey("source"))
                 {
-                    Log(LogLevel.Error, "Called broadcast handler without specifying a source or message (\"source\" or \"msg\" property are missing).");
+                    Log(LogLevel.Error,
+                        "Called broadcast handler without specifying a source or message (\"source\" or \"msg\" property are missing).");
                     return null;
                 }
 
@@ -106,8 +108,10 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
                 if (!msg.ContainsKey("url"))
                 {
-                    Log(LogLevel.Error, "Called openWebsiteWithWS handler without specifying a URL (\"url\" property is missing).");
-                    result["$error"] = "Called openWebsiteWithWS handler without specifying a URL (\"url\" property is missing).";
+                    Log(LogLevel.Error,
+                        "Called openWebsiteWithWS handler without specifying a URL (\"url\" property is missing).");
+                    result["$error"] =
+                        "Called openWebsiteWithWS handler without specifying a URL (\"url\" property is missing).";
                     return result;
                 }
 
@@ -153,26 +157,17 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void StopACTCombat()
         {
-            ActGlobals.oFormActMain.Invoke((Action)(() =>
-            {
-                ActGlobals.oFormActMain.EndCombat(true);
-            }));
+            ActGlobals.oFormActMain.Invoke((Action)(() => { ActGlobals.oFormActMain.EndCombat(true); }));
         }
 
         public override void LoadConfig(IPluginConfig config)
         {
             this.Config = container.Resolve<BuiltinEventConfig>();
 
-            this.Config.UpdateIntervalChanged += (o, e) =>
-            {
-                this.Start();
-            };
+            this.Config.UpdateIntervalChanged += (o, e) => { this.Start(); };
         }
 
-        public override void SaveConfig(IPluginConfig config)
-        {
-
-        }
+        public override void SaveConfig(IPluginConfig config) { }
 
         public override void Start()
         {
@@ -301,64 +296,68 @@ namespace RainbowMage.OverlayPlugin.EventSources
             return obj;
         }
 
-        private List<KeyValuePair<CombatantData, Dictionary<string, string>>> GetCombatantList(List<CombatantData> allies)
+        private List<KeyValuePair<CombatantData, Dictionary<string, string>>> GetCombatantList(
+            List<CombatantData> allies)
         {
-#if TRACE 
+#if TRACE
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
 
             var combatantList = new List<KeyValuePair<CombatantData, Dictionary<string, string>>>();
             Parallel.ForEach(allies, (ally) =>
-            //foreach (var ally in allies)
-            {
-                var valueDict = new Dictionary<string, string>();
-                foreach (var exportValuePair in CombatantData.ExportVariables)
-                {
-                    try
-                    {
-                        /*varStopwatch.Reset();
-                        varStopwatch.Start();*/
+                                 //foreach (var ally in allies)
+                             {
+                                 var valueDict = new Dictionary<string, string>();
+                                 foreach (var exportValuePair in CombatantData.ExportVariables)
+                                 {
+                                     try
+                                     {
+                                         /*varStopwatch.Reset();
+                                         varStopwatch.Start();*/
 
-                        // NAME タグには {NAME:8} のようにコロンで区切られたエクストラ情報が必要で、
-                        // プラグインの仕組み的に対応することができないので除外する
-                        if (exportValuePair.Key.StartsWith("NAME"))
-                        {
-                            continue;
-                        }
+                                         // NAME タグには {NAME:8} のようにコロンで区切られたエクストラ情報が必要で、
+                                         // プラグインの仕組み的に対応することができないので除外する
+                                         if (exportValuePair.Key.StartsWith("NAME"))
+                                         {
+                                             continue;
+                                         }
 
-                        // ACT_FFXIV_Plugin が提供する LastXXDPS は、
-                        // ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items に All キーが存在しない場合に、
-                        // プラグイン内で例外が発生してしまい、パフォーマンスが悪化するので代わりに空の文字列を挿入する
-                        if (exportValuePair.Key == "Last10DPS" ||
-                            exportValuePair.Key == "Last30DPS" ||
-                            exportValuePair.Key == "Last60DPS" ||
-                            exportValuePair.Key == "Last180DPS")
-                        {
-                            if (!ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items.ContainsKey("All"))
-                            {
-                                valueDict.Add(exportValuePair.Key, "");
-                                //Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
-                                continue;
-                            }
-                        }
+                                         // ACT_FFXIV_Plugin が提供する LastXXDPS は、
+                                         // ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items に All キーが存在しない場合に、
+                                         // プラグイン内で例外が発生してしまい、パフォーマンスが悪化するので代わりに空の文字列を挿入する
+                                         if (exportValuePair.Key == "Last10DPS" ||
+                                             exportValuePair.Key == "Last30DPS" ||
+                                             exportValuePair.Key == "Last60DPS" ||
+                                             exportValuePair.Key == "Last180DPS")
+                                         {
+                                             if (!ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items
+                                                      .ContainsKey("All"))
+                                             {
+                                                 valueDict.Add(exportValuePair.Key, "");
+                                                 //Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
+                                                 continue;
+                                             }
+                                         }
 
-                        var value = exportValuePair.Value.GetExportString(ally, "");
-                        valueDict.Add(exportValuePair.Key, value);
-                        // Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
-                    }
-                    catch (Exception e)
-                    {
-                        Log(LogLevel.Debug, "GetCombatantList: {0}: {1}: {2}", ally.Name, exportValuePair.Key, e);
-                        continue;
-                    }
-                }
+                                         var value = exportValuePair.Value.GetExportString(ally, "");
+                                         valueDict.Add(exportValuePair.Key, value);
+                                         // Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
+                                     }
+                                     catch (Exception e)
+                                     {
+                                         Log(LogLevel.Debug, "GetCombatantList: {0}: {1}: {2}", ally.Name,
+                                             exportValuePair.Key, e);
+                                         continue;
+                                     }
+                                 }
 
-                lock (combatantList)
-                {
-                    combatantList.Add(new KeyValuePair<CombatantData, Dictionary<string, string>>(ally, valueDict));
-                }
-            }
+                                 lock (combatantList)
+                                 {
+                                     combatantList.Add(
+                                         new KeyValuePair<CombatantData, Dictionary<string, string>>(ally, valueDict));
+                                 }
+                             }
             );
 
 #if TRACE
@@ -394,7 +393,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
                         exportValuePair.Key == "Last60DPS" ||
                         exportValuePair.Key == "Last180DPS")
                     {
-                        if (!allies.All((ally) => ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items.ContainsKey("All")))
+                        if (!allies.All((ally) => ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items
+                                                      .ContainsKey("All")))
                         {
                             encounterDict.Add(exportValuePair.Key, "");
                             // Log(LogLevel.Debug, $"Encounter: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");

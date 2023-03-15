@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace RainbowMage.OverlayPlugin {
-    public abstract class OverlayConfigBase : IOverlayConfig {
+namespace RainbowMage.OverlayPlugin
+{
+    public abstract class OverlayConfigBase : IOverlayConfig
+    {
         public event EventHandler<VisibleStateChangedEventArgs> VisibleChanged;
         public event EventHandler DisabledChanged;
         public event EventHandler<ThruStateChangedEventArgs> ClickThruChanged;
@@ -21,10 +23,14 @@ namespace RainbowMage.OverlayPlugin {
         public Guid Uuid { get; set; }
 
         private bool isVisible;
-        public bool IsVisible {
+
+        public bool IsVisible
+        {
             get => this.isVisible;
-            set {
-                if (this.isVisible != value) {
+            set
+            {
+                if (this.isVisible != value)
+                {
                     this.isVisible = value;
                     VisibleChanged?.Invoke(this, new VisibleStateChangedEventArgs(this.isVisible));
                 }
@@ -32,10 +38,14 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private bool disabled;
-        public bool Disabled {
+
+        public bool Disabled
+        {
             get => disabled;
-            set {
-                if (disabled != value) {
+            set
+            {
+                if (disabled != value)
+                {
                     disabled = value;
                     DisabledChanged?.Invoke(this, EventArgs.Empty);
                 }
@@ -43,10 +53,14 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private bool isClickThru;
-        public bool IsClickThru {
+
+        public bool IsClickThru
+        {
             get => this.isClickThru;
-            set {
-                if (this.isClickThru != value) {
+            set
+            {
+                if (this.isClickThru != value)
+                {
                     this.isClickThru = value;
                     ClickThruChanged?.Invoke(this, new ThruStateChangedEventArgs(this.isClickThru));
                 }
@@ -57,10 +71,14 @@ namespace RainbowMage.OverlayPlugin {
         public Size Size { get; set; }
 
         private string url;
-        public string Url {
+
+        public string Url
+        {
             get => this.url;
-            set {
-                if (this.url != value) {
+            set
+            {
+                if (this.url != value)
+                {
                     this.url = value;
                     UrlChanged?.Invoke(this, new UrlChangedEventArgs(this.url));
                 }
@@ -68,10 +86,14 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private int maxFrameRate;
-        public int MaxFrameRate {
+
+        public int MaxFrameRate
+        {
             get => this.maxFrameRate;
-            set {
-                if (this.maxFrameRate != value) {
+            set
+            {
+                if (this.maxFrameRate != value)
+                {
                     this.maxFrameRate = value;
                     MaxFrameRateChanged?.Invoke(this, new MaxFrameRateChangedEventArgs(this.maxFrameRate));
                 }
@@ -93,10 +115,14 @@ namespace RainbowMage.OverlayPlugin {
         public List<GlobalHotkey> GlobalHotkeys;
 
         private bool isLocked;
-        public bool IsLocked {
+
+        public bool IsLocked
+        {
             get => this.isLocked;
-            set {
-                if (this.isLocked != value) {
+            set
+            {
+                if (this.isLocked != value)
+                {
                     this.isLocked = value;
                     LockChanged?.Invoke(this, new LockStateChangedEventArgs(this.isLocked));
                 }
@@ -104,10 +130,14 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private bool logConsoleMessages = true;
-        public bool LogConsoleMessages {
+
+        public bool LogConsoleMessages
+        {
             get => this.logConsoleMessages;
-            set {
-                if (this.logConsoleMessages != value) {
+            set
+            {
+                if (this.logConsoleMessages != value)
+                {
                     this.logConsoleMessages = value;
                     LogConsoleMessagesChanged?.Invoke(this, EventArgs.Empty);
                 }
@@ -115,17 +145,22 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         private bool hideOutOfCombat = false;
-        public bool HideOutOfCombat {
+
+        public bool HideOutOfCombat
+        {
             get => this.hideOutOfCombat;
-            set {
-                if (this.hideOutOfCombat != value) {
+            set
+            {
+                if (this.hideOutOfCombat != value)
+                {
                     this.hideOutOfCombat = value;
                     HideOutOfCombatChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
 
-        protected OverlayConfigBase(string name) {
+        protected OverlayConfigBase(string name)
+        {
             this.Name = name;
             this.Uuid = Guid.NewGuid();
             this.IsVisible = true;
@@ -138,7 +173,8 @@ namespace RainbowMage.OverlayPlugin {
             this.logConsoleMessages = true;
         }
 
-        public void TriggerGlobalHotkeyChanged() {
+        public void TriggerGlobalHotkeyChanged()
+        {
             GlobalHotkeyChanged?.Invoke(null, EventArgs.Empty);
         }
 
@@ -146,14 +182,16 @@ namespace RainbowMage.OverlayPlugin {
         public abstract Type OverlayType { get; }
     }
 
-    public enum GlobalHotkeyType {
+    public enum GlobalHotkeyType
+    {
         ToggleVisible,
         ToggleClickthru,
         ToggleLock,
         ToogleEnabled,
     }
 
-    public class GlobalHotkey {
+    public class GlobalHotkey
+    {
         public bool Enabled;
         public Keys Key;
         public Keys Modifiers;

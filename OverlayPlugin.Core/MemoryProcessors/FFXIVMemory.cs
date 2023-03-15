@@ -79,7 +79,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             OnProcessChange?.Invoke(this, process);
         }
 
-        public IntPtr GetBaseAddress() 
+        public IntPtr GetBaseAddress()
         {
             return process.MainModule.BaseAddress;
         }
@@ -115,9 +115,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 {
                     continue;
                 }
+
                 realSize = i;
                 break;
             }
+
             Array.Resize(ref bytes, realSize);
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
@@ -133,9 +135,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 {
                     continue;
                 }
+
                 realSize = i;
                 break;
             }
+
             Array.Resize(ref bytes, realSize);
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
@@ -178,7 +182,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return ret;
         }
 
-        public unsafe long GetInt64(IntPtr address, int offset = 0) 
+        public unsafe long GetInt64(IntPtr address, int offset = 0)
         {
             long ret;
             var value = new byte[8];
@@ -193,7 +197,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             int buffer_len = 1 * count;
             var buffer = new byte[buffer_len];
             var bytes_read = IntPtr.Zero;
-            bool ok = NativeMethods.ReadProcessMemory(processHandle, addr, buffer, new IntPtr(buffer_len), ref bytes_read);
+            bool ok = NativeMethods.ReadProcessMemory(processHandle, addr, buffer, new IntPtr(buffer_len),
+                                                      ref bytes_read);
             if (!ok || bytes_read.ToInt32() != buffer_len)
                 return null;
             return buffer;
@@ -325,13 +330,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 IntPtr read_size = (IntPtr)Math.Min(bytes_left, kMaxReadSize);
 
                 IntPtr num_bytes_read = IntPtr.Zero;
-                if (NativeMethods.ReadProcessMemory(processHandle, read_start_addr, read_buffer, read_size, ref num_bytes_read))
+                if (NativeMethods.ReadProcessMemory(processHandle, read_start_addr, read_buffer, read_size,
+                                                    ref num_bytes_read))
                 {
-                    int max_search_offset = num_bytes_read.ToInt32() - pattern_array.Length - Math.Max(0, pattern_offset);
+                    int max_search_offset =
+                        num_bytes_read.ToInt32() - pattern_array.Length - Math.Max(0, pattern_offset);
                     // With RIP we will read a 4byte pointer at the |offset|, else we read an 8byte pointer. Either
                     // way we can't find a pattern such that the pointer we want to read is off the end of the buffer.
                     if (rip_addressing)
-                        max_search_offset -= 4;  //  + 1L; ?
+                        max_search_offset -= 4; //  + 1L; ?
                     else
                         max_search_offset -= 8;
 
@@ -349,15 +356,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                                 break;
                             }
                         }
+
                         if (found_pattern)
                         {
                             IntPtr pointer;
                             if (rip_addressing)
                             {
-                                Int32 rip_ptr_offset = BitConverter.ToInt32(read_buffer, search_offset + pattern_array.Length + pattern_offset);
+                                Int32 rip_ptr_offset =
+                                    BitConverter.ToInt32(read_buffer,
+                                                         search_offset + pattern_array.Length + pattern_offset);
                                 Int64 pattern_start_game_addr = read_start_addr.ToInt64() + search_offset;
                                 Int64 pointer_offset_from_pattern_start = pattern_array.Length + pattern_offset;
-                                Int64 rip_ptr_base = pattern_start_game_addr + pointer_offset_from_pattern_start + 4 + rip_offset;
+                                Int64 rip_ptr_base = pattern_start_game_addr + pointer_offset_from_pattern_start + 4 +
+                                                     rip_offset;
                                 // In RIP addressing, the pointer from the executable is 32bits which we stored as |rip_ptr_offset|. The pointer
                                 // is then added to the address of the byte following the pointer, making it relative to that address, which we
                                 // stored as |rip_ptr_base|.
@@ -366,8 +377,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                             else
                             {
                                 // In normal addressing, the 64bits found with the pattern are the absolute pointer.
-                                pointer = new IntPtr(BitConverter.ToInt64(read_buffer, search_offset + pattern_array.Length + pattern_offset));
+                                pointer = new IntPtr(
+                                    BitConverter.ToInt64(read_buffer,
+                                                         search_offset + pattern_array.Length + pattern_offset));
                             }
+
                             matches_list.Add(pointer);
                         }
                     }
@@ -428,6 +442,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 if (candidate.IsValid())
                     return candidate;
             }
+
             return default(T);
         }
     }

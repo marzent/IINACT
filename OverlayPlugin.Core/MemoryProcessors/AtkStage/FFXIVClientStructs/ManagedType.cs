@@ -41,11 +41,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="type">The struct type to read from memory</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/> with a <typeparamref name="T"/> of <paramref name="type"/></returns>
-        public static dynamic GetDynamicManagedTypeFromIntPtr(IntPtr ptr, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
+        public static dynamic GetDynamicManagedTypeFromIntPtr(
+            IntPtr ptr, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
         {
             return ManagedTypify(type)
-                .GetMethod("GetManagedTypeFromIntPtr")
-                .Invoke(null, new object[] { ptr, memory, readPtrMap });
+                   .GetMethod("GetManagedTypeFromIntPtr")
+                   .Invoke(null, new object[] { ptr, memory, readPtrMap });
         }
 
         /// <summary>
@@ -55,16 +56,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="memory">FFXIVMemory instance which should be valid for the lifetime of this object</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/> instance read from memory</returns>
-        public static ManagedType<T> GetManagedTypeFromIntPtr(IntPtr ptr, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
+        public static ManagedType<T> GetManagedTypeFromIntPtr(
+            IntPtr ptr, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
         {
             if (readPtrMap == null)
             {
                 readPtrMap = new Dictionary<IntPtr, object>();
             }
+
             if (readPtrMap.ContainsKey(ptr))
             {
                 return (ManagedType<T>)readPtrMap[ptr];
             }
+
             return new ManagedType<T>(ptr, memory, readPtrMap);
         }
 
@@ -76,11 +80,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="type">The struct type to read from memory</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/> with a <typeparamref name="T"/> of <paramref name="type"/></returns>
-        public static dynamic GetDynamicManagedTypeFromBaseType(IntPtr ptr, object baseObj, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
+        public static dynamic GetDynamicManagedTypeFromBaseType(
+            IntPtr ptr, object baseObj, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
         {
             return ManagedTypify(type)
-                .GetMethod("GetManagedTypeFromBaseType")
-                .Invoke(null, new object[] { ptr, baseObj, memory, readPtrMap });
+                   .GetMethod("GetManagedTypeFromBaseType")
+                   .Invoke(null, new object[] { ptr, baseObj, memory, readPtrMap });
         }
 
         /// <summary>
@@ -90,12 +95,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="memory">FFXIVMemory instance which should be valid for the lifetime of this object</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/></returns>
-        public static ManagedType<T> GetManagedTypeFromBaseType(IntPtr ptr, T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
+        public static ManagedType<T> GetManagedTypeFromBaseType(
+            IntPtr ptr, T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
         {
             if (readPtrMap == null)
             {
                 readPtrMap = new Dictionary<IntPtr, object>();
             }
+
             return new ManagedType<T>(ptr, baseObj, memory, readPtrMap);
         }
 
@@ -107,31 +114,37 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
 
         [IgnoreDataMember]
         private readonly FFXIVMemory memory;
+
         /// <summary>
         /// Track if we've read the object from memory already, so we don't read multiple times
         /// </summary>
         [IgnoreDataMember]
         private bool haveReadBaseObj = false;
+
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are pointers which need read from memory when accessed
         /// </summary>
         [IgnoreDataMember]
         private Dictionary<string, IntPtr> ptrMap = new Dictionary<string, IntPtr>();
+
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are pointers and which have been read from memory
         /// </summary>
         [IgnoreDataMember]
         private Dictionary<string, object> objMap = new Dictionary<string, object>();
+
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are not pointers, and their read values
         /// </summary>
         [IgnoreDataMember]
         private Dictionary<string, object> valMap = new Dictionary<string, object>();
+
         /// <summary>
         /// Map of pointers of objects read as part of the topmost object in this tree, to avoid reading objects multiple times
         /// </summary>
         [IgnoreDataMember]
         private Dictionary<IntPtr, object> readPtrMap = new Dictionary<IntPtr, object>();
+
         /// <summary>
         /// Cached raw version of this instance
         /// </summary>
@@ -153,10 +166,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             {
                 throw new Exception($"NPE! {ptr.ToInt64():X}, {typeof(T).Name}");
             }
+
             if (readPtrMap.ContainsKey(ptr))
             {
                 throw new Exception($"Already read this object! {ptr.ToInt64():X}, {typeof(T).Name}");
             }
+
             readPtrMap[ptr] = this;
         }
 
@@ -184,6 +199,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             {
                 return TryGetField((string)indexes[0], out result);
             }
+
             return base.TryGetIndex(binder, indexes, out result);
         }
 
@@ -197,6 +213,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             {
                 return true;
             }
+
             return base.TryGetMember(binder, out result);
         }
 
@@ -230,6 +247,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                         result = null;
                         return true;
                     }
+
                     // If this pointer was already read by another object in this object tree
                     if (readPtrMap.ContainsKey(ptr))
                     {
@@ -239,13 +257,17 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                         objMap[name] = result;
                         return true;
                     }
+
                     // If we haven't already bailed, we need to read this object from memory.
                     // Wrap the pointer, set it as the out param, and store it off for future calls.
-                    var obj = GetDynamicManagedTypeFromIntPtr(ptr, memory, typeof(T).GetField(name).FieldType.GetElementType(), readPtrMap);
+                    var obj = GetDynamicManagedTypeFromIntPtr(ptr, memory,
+                                                              typeof(T).GetField(name).FieldType.GetElementType(),
+                                                              readPtrMap);
                     objMap[name] = obj;
                     result = obj;
                     return true;
                 }
+
                 // We've already read this pointer, return the cached value
                 result = objMap[name];
                 return true;
@@ -256,6 +278,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                 result = valMap[name];
                 return true;
             }
+
             // Field not found
             result = null;
             return false;
@@ -267,13 +290,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             {
                 ReadBaseObjFromMemory();
             }
+
             var members = new List<string>(ptrMap.Keys);
             members.AddRange(valMap.Keys);
             return members;
         }
 
         [IgnoreDataMember]
-        private static readonly List<string> SkipIterators = new List<string>() {
+        private static readonly List<string> SkipIterators = new List<string>()
+        {
             "FFXIV.Component.GUI.AtkResNode",
             "FFXIV.Client.Graphics.Render.Notifier",
         };
@@ -297,6 +322,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             {
                 rawObject = *(T*)&p[0];
             }
+
             ReadBaseObj();
         }
 
@@ -312,8 +338,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                 {
                     continue;
                 }
+
                 // Check to see if this field is a fixed native type buffer, e.g. `fixed byte foo[20]`
-                FixedBufferAttribute fixedBuffer = (FixedBufferAttribute)field.GetCustomAttribute(typeof(FixedBufferAttribute));
+                FixedBufferAttribute fixedBuffer =
+                    (FixedBufferAttribute)field.GetCustomAttribute(typeof(FixedBufferAttribute));
                 if (field.FieldType.IsPointer)
                 {
                     // `GetValue` returns an object of type `Pointer` when called against a pointer field, need to unbox it
@@ -355,6 +383,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                             array.SetValue(DynamicCast(fixedBuffer.ElementType, &fixedPtr[i]), i);
                         }
                     }
+
                     valMap[field.Name] = array;
                 }
                 else if (field.FieldType.Name == "Utf8String")
@@ -380,7 +409,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                 else
                 {
                     // Objects get wrapped
-                    dynamic obj = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(typeof(T), field.Name), field.GetValue(rawObject), memory, field.FieldType, readPtrMap);
+                    dynamic obj = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(typeof(T), field.Name),
+                                                                    field.GetValue(rawObject), memory, field.FieldType,
+                                                                    readPtrMap);
                     valMap[field.Name] = obj;
                 }
             }
@@ -480,7 +511,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         }
 
         [IgnoreDataMember]
-        private static readonly string[] ConcreteGenerics = new[] {
+        private static readonly string[] ConcreteGenerics = new[]
+        {
             "StdPair",
             "StdSet",
             "StdVector",
@@ -497,7 +529,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         {
             foreach (string prefix in ConcreteGenerics)
             {
-                if (type.Name.StartsWith(prefix) && type.Name != prefix && type.FullName.StartsWith("FFXIVClientStructs."))
+                if (type.Name.StartsWith(prefix) && type.Name != prefix &&
+                    type.FullName.StartsWith("FFXIVClientStructs."))
                 {
                     return true;
                 }
@@ -508,27 +541,33 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
 
         private object ConcreteGenericToManaged(FieldInfo field, object generic)
         {
-            dynamic cast = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(field.FieldType, field.Name), generic, memory, generic.GetType(), readPtrMap);
+            dynamic cast = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(field.FieldType, field.Name), generic,
+                                                             memory, generic.GetType(), readPtrMap);
             if (generic.GetType().Name.StartsWith("StdPair"))
             {
                 return ConcreteStdPairToManaged(cast, generic);
             }
+
             if (generic.GetType().Name.StartsWith("StdSet"))
             {
                 return ConcreteStdSetToManaged(cast, generic);
             }
+
             if (generic.GetType().Name.StartsWith("StdVector"))
             {
                 return ConcreteStdVectorToManaged(cast, generic);
             }
+
             if (generic.GetType().Name.StartsWith("StdMap"))
             {
                 return ConcreteStdMapToManaged(cast, generic);
             }
+
             if (generic.GetType().Name.StartsWith("AtkLinkedList"))
             {
                 return ConcreteAtkLinkedListToManaged(cast, generic);
             }
+
             return null;
         }
 
@@ -544,9 +583,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
 
             return
                 typeof(KeyValuePair<,>)
-                .MakeGenericType(keyType, valType)
-                .GetConstructor(new Type[] { keyType, valType })
-                .Invoke(new object[] { key, value });
+                    .MakeGenericType(keyType, valType)
+                    .GetConstructor(new Type[] { keyType, valType })
+                    .Invoke(new object[] { key, value });
         }
 
         private unsafe object ConcreteStdSetToManaged(dynamic cast, object generic)
@@ -554,14 +593,16 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             Type nodeType = generic.GetType().GetNestedType("Node");
             Type objType = nodeType.GetField("Key").GetType();
 
-            dynamic set = typeof(HashSet<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            dynamic set = typeof(HashSet<>).MakeGenericType(objType).GetConstructor(new Type[] { })
+                                           .Invoke(new object[] { });
 
             IntPtr nodePtr = new IntPtr(cast.Head);
 
             for (int i = 0; i < cast.Count; ++i)
             {
                 dynamic node = ManagedType<int>.GetDynamicManagedTypeFromIntPtr(nodePtr, memory, nodeType, readPtrMap);
-                dynamic key = ManagedType<int>.GetDynamicManagedTypeFromIntPtr(new IntPtr(node.Key), memory, objType, readPtrMap);
+                dynamic key =
+                    ManagedType<int>.GetDynamicManagedTypeFromIntPtr(new IntPtr(node.Key), memory, objType, readPtrMap);
 
                 set.Add(key.ToType());
                 nodePtr = new IntPtr(node.Right);
@@ -577,7 +618,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
 
             int count = (int)(((ulong)cast.Last - (ulong)cast.First) / (ulong)objSize);
 
-            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { })
+                                         .Invoke(new object[] { });
 
             // This way is slower (reading from memory `count` times) as opposed to doing a large single read
             // But it's less complex this way.
@@ -600,7 +642,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             Type keyType = pairType.GetField("Item1").FieldType.GetElementType();
             Type valType = pairType.GetField("Item2").FieldType.GetElementType();
 
-            dynamic dict = typeof(Dictionary<,>).MakeGenericType(ManagedTypify(keyType), ManagedTypify(valType)).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            dynamic dict = typeof(Dictionary<,>).MakeGenericType(ManagedTypify(keyType), ManagedTypify(valType))
+                                                .GetConstructor(new Type[] { }).Invoke(new object[] { });
 
             if (cast.Count > 0)
             {
@@ -615,6 +658,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                     {
                         continue;
                     }
+
                     var kvp = currNode.KeyValuePair;
                     dict[kvp.Key] = kvp.Value;
                 }
@@ -628,7 +672,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             Type nodeType = generic.GetType().GetNestedType("Node");
             Type objType = nodeType.GetField("Value").FieldType.GetElementType();
 
-            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { })
+                                         .Invoke(new object[] { });
 
             if (cast.Count > 0)
             {

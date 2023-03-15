@@ -16,7 +16,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
         private int inCombatSignatureOffset;
         private int inCombatRIPOffset;
 
-        public InCombatMemory(TinyIoCContainer container, string inCombatSignature, int inCombatSignatureOffset, int inCombatRIPOffset)
+        public InCombatMemory(
+            TinyIoCContainer container, string inCombatSignature, int inCombatSignatureOffset, int inCombatRIPOffset)
         {
             this.inCombatSignature = inCombatSignature;
             this.inCombatSignatureOffset = inCombatSignatureOffset;
@@ -77,7 +78,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
                 return;
             }
 
-            logger.Log(LogLevel.Error, $"Failed to find in combat memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            logger.Log(LogLevel.Error,
+                       $"Failed to find in combat memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 

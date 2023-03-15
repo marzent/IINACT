@@ -3,37 +3,47 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace RainbowMage.OverlayPlugin.EventSources {
+namespace RainbowMage.OverlayPlugin.EventSources
+{
     [Serializable]
-    public class CactbotEventSourceConfig {
+    public class CactbotEventSourceConfig
+    {
         public event EventHandler WatchFileChangesChanged;
 
         private static IPluginConfig _pluginConfig;
 
-        public CactbotEventSourceConfig() {
-        }
+        public CactbotEventSourceConfig() { }
 
-        public static CactbotEventSourceConfig LoadConfig(IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger) {
+        public static CactbotEventSourceConfig LoadConfig(
+            IPluginConfig pluginConfig, RainbowMage.OverlayPlugin.ILogger logger)
+        {
             _pluginConfig = pluginConfig;
             var result = new CactbotEventSourceConfig();
 
-            if (pluginConfig.EventSourceConfigs.ContainsKey("CactbotESConfig")) {
+            if (pluginConfig.EventSourceConfigs.ContainsKey("CactbotESConfig"))
+            {
                 var obj = pluginConfig.EventSourceConfigs["CactbotESConfig"];
 
-                if (obj.TryGetValue("OverlayData", out var value)) {
-                    try {
+                if (obj.TryGetValue("OverlayData", out var value))
+                {
+                    try
+                    {
                         result.OverlayData = value.ToObject<Dictionary<string, JToken>>();
                     }
-                    catch (Exception e) {
+                    catch (Exception e)
+                    {
                         logger.Log(LogLevel.Error, "Failed to load OverlayData setting: {0}", e.ToString());
                     }
                 }
 
-                if (obj.TryGetValue("LastUpdateCheck", out value)) {
-                    try {
+                if (obj.TryGetValue("LastUpdateCheck", out value))
+                {
+                    try
+                    {
                         result.LastUpdateCheck = value.ToObject<DateTime>();
                     }
-                    catch (Exception e) {
+                    catch (Exception e)
+                    {
                         logger.Log(LogLevel.Error, "Failed to load LastUpdateCheck setting: {0}", e.ToString());
                     }
                 }
@@ -42,12 +52,14 @@ namespace RainbowMage.OverlayPlugin.EventSources {
             return result;
         }
 
-        public void SaveConfig(IPluginConfig pluginConfig) {
+        public void SaveConfig(IPluginConfig pluginConfig)
+        {
             _pluginConfig = pluginConfig;
             pluginConfig.EventSourceConfigs["CactbotESConfig"] = JObject.FromObject(this);
         }
 
-        public void OnUpdateConfig() {
+        public void OnUpdateConfig()
+        {
             var currentValue = WatchFileChanges;
             if (watchFileChanges != currentValue)
                 WatchFileChangesChanged?.Invoke(this, EventArgs.Empty);
@@ -61,8 +73,10 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         public DateTime LastUpdateCheck;
 
         [JsonIgnore]
-        public string DisplayLanguage {
-            get {
+        public string DisplayLanguage
+        {
+            get
+            {
                 if (!OverlayData.TryGetValue("options", out var options))
                     return null;
                 var general = options["general"];
@@ -76,8 +90,10 @@ namespace RainbowMage.OverlayPlugin.EventSources {
         }
 
         [JsonIgnore]
-        public string UserConfigFile {
-            get {
+        public string UserConfigFile
+        {
+            get
+            {
                 if (!OverlayData.TryGetValue("options", out var options))
                     return null;
                 var general = options["general"];
@@ -92,9 +108,12 @@ namespace RainbowMage.OverlayPlugin.EventSources {
 
         [JsonIgnore]
         private bool watchFileChanges = false;
+
         [JsonIgnore]
-        public bool WatchFileChanges {
-            get {
+        public bool WatchFileChanges
+        {
+            get
+            {
                 if (!OverlayData.TryGetValue("options", out var options))
                     return false;
                 var general = options["general"];
@@ -103,10 +122,12 @@ namespace RainbowMage.OverlayPlugin.EventSources {
                 var dir = general["ReloadOnFileChange"];
                 if (dir == null)
                     return false;
-                try {
+                try
+                {
                     return dir.ToObject<bool>();
                 }
-                catch {
+                catch
+                {
                     return false;
                 }
             }

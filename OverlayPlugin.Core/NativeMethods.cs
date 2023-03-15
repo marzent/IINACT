@@ -1,37 +1,50 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace RainbowMage.OverlayPlugin {
+namespace RainbowMage.OverlayPlugin
+{
     /// <summary>
     /// ネイティブ関数を提供します。
     /// </summary>
-    internal class NativeMethods {
+    internal class NativeMethods
+    {
         private WinEventDelegate dele = null;
 
-        public NativeMethods(TinyIoCContainer container) {
+        public NativeMethods(TinyIoCContainer container)
+        {
             ActiveWindowHandle = GetForegroundWindow();
 
             dele = new WinEventDelegate(WinEventProc);
-            var result = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
+            var result = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0,
+                                         WINEVENT_OUTOFCONTEXT);
             if (result == IntPtr.Zero)
                 container.Resolve<ILogger>().Log(LogLevel.Error, "Failed to register window foreground hook!");
 
-            result = SetWinEventHook(EVENT_SYSTEM_MINIMIZEEND, EVENT_SYSTEM_MINIMIZEEND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
+            result = SetWinEventHook(EVENT_SYSTEM_MINIMIZEEND, EVENT_SYSTEM_MINIMIZEEND, IntPtr.Zero, dele, 0, 0,
+                                     WINEVENT_OUTOFCONTEXT);
             if (result == IntPtr.Zero)
                 container.Resolve<ILogger>().Log(LogLevel.Error, "Failed to register window minimized hook!");
         }
 
-        private delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+        private delegate void WinEventDelegate(
+            IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread,
+            uint dwmsEventTime);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
+        private static extern IntPtr SetWinEventHook(
+            uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess,
+            uint idThread, uint dwFlags);
 
         private const uint WINEVENT_OUTOFCONTEXT = 0;
         private const uint EVENT_SYSTEM_FOREGROUND = 3;
         private const uint EVENT_SYSTEM_MINIMIZEEND = 0x0017;
 
         public IntPtr ActiveWindowHandle;
-        private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+
+        private void WinEventProc(
+            IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread,
+            uint dwmsEventTime)
+        {
             //ActiveWindowHandle = hwnd;
             //ActiveWindowChanged?.Invoke(null, hwnd);
         }
@@ -39,7 +52,8 @@ namespace RainbowMage.OverlayPlugin {
         // C# compiler can't track assignments in unmanaged code and thus complains about variables that
         // are never assigned to. Disable the warning here since it's pointless.
 #pragma warning disable 0649
-        public struct BlendFunction {
+        public struct BlendFunction
+        {
             public byte BlendOp;
             public byte BlendFlags;
             public byte SourceConstantAlpha;
@@ -49,12 +63,14 @@ namespace RainbowMage.OverlayPlugin {
         public const byte AC_SRC_ALPHA = 1;
         public const byte AC_SRC_OVER = 0;
 
-        public struct Point {
+        public struct Point
+        {
             public int X;
             public int Y;
         }
 
-        public struct Size {
+        public struct Size
+        {
             public int Width;
             public int Height;
         }
@@ -100,14 +116,17 @@ namespace RainbowMage.OverlayPlugin {
         public static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
 
         [StructLayoutAttribute(LayoutKind.Sequential)]
-        public struct BitmapInfo {
+        public struct BitmapInfo
+        {
             public BitmapInfoHeader bmiHeader;
+
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 1, ArraySubType = UnmanagedType.Struct)]
             public RgbQuad[] bmiColors;
         }
 
         [StructLayoutAttribute(LayoutKind.Sequential)]
-        public struct BitmapInfoHeader {
+        public struct BitmapInfoHeader
+        {
             public uint biSize;
             public int biWidth;
             public int biHeight;
@@ -120,12 +139,14 @@ namespace RainbowMage.OverlayPlugin {
             public uint biClrUsed;
             public uint biClrImportant;
 
-            public void Init() {
+            public void Init()
+            {
                 biSize = (uint)Marshal.SizeOf(this);
             }
         }
 
-        public enum BitmapCompressionMode : uint {
+        public enum BitmapCompressionMode : uint
+        {
             BI_RGB = 0,
             BI_RLE8 = 1,
             BI_RLE4 = 2,
@@ -135,7 +156,8 @@ namespace RainbowMage.OverlayPlugin {
         }
 
         [StructLayoutAttribute(LayoutKind.Sequential)]
-        public struct RgbQuad {
+        public struct RgbQuad
+        {
             public byte rgbBlue;
             public byte rgbGreen;
             public byte rgbRed;
@@ -175,26 +197,32 @@ namespace RainbowMage.OverlayPlugin {
         [DllImport("kernel32.dll", EntryPoint = "SetLastError")]
         public static extern void SetLastError(int dwErrorCode);
 
-        private static int ToIntPtr32(IntPtr intPtr) {
+        private static int ToIntPtr32(IntPtr intPtr)
+        {
             return unchecked((int)intPtr.ToInt64());
         }
 
-        public static IntPtr SetWindowLongA(IntPtr hWnd, int nIndex, IntPtr dwNewLong) {
+        public static IntPtr SetWindowLongA(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
             int error;
             IntPtr result;
 
             SetLastError(0);
 
-            if (IntPtr.Size == 4) {
+            if (IntPtr.Size == 4)
+            {
                 var result32 = SetWindowLong(hWnd, nIndex, ToIntPtr32(dwNewLong));
                 error = Marshal.GetLastWin32Error();
                 result = new IntPtr(result32);
-            } else {
+            }
+            else
+            {
                 result = SetWindowLongPtr(hWnd, nIndex, dwNewLong);
                 error = Marshal.GetLastWin32Error();
             }
 
-            if ((result == IntPtr.Zero) && (error != 0)) {
+            if ((result == IntPtr.Zero) && (error != 0))
+            {
                 throw new System.ComponentModel.Win32Exception(error);
             }
 
@@ -203,21 +231,21 @@ namespace RainbowMage.OverlayPlugin {
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindow(
-            IntPtr hWnd,  // 元ウィンドウのハンドル
-            uint uCmd     // 関係
+            IntPtr hWnd, // 元ウィンドウのハンドル
+            uint uCmd    // 関係
         );
 
         public const uint GW_HWNDPREV = 0x0003;
 
         [DllImport("user32.dll")]
         public static extern bool SetWindowPos(
-            IntPtr hWnd,             // ウィンドウのハンドル
-            IntPtr hWndInsertAfter,  // 配置順序のハンドル
-            int X,                   // 横方向の位置
-            int Y,                   // 縦方向の位置
-            int cx,                  // 幅
-            int cy,                  // 高さ
-            uint uFlags              // ウィンドウ位置のオプション
+            IntPtr hWnd,            // ウィンドウのハンドル
+            IntPtr hWndInsertAfter, // 配置順序のハンドル
+            int X,                  // 横方向の位置
+            int Y,                  // 縦方向の位置
+            int cx,                 // 幅
+            int cy,                 // 高さ
+            uint uFlags             // ウィンドウ位置のオプション
         );
 
         public static readonly IntPtr HWND_TOP = new IntPtr(0);
@@ -251,24 +279,32 @@ namespace RainbowMage.OverlayPlugin {
 
         [DllImport("user32.dll")]
         public static extern int SetScrollPos(IntPtr hWnd, int nBar, int nPos, bool bRedraw);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetScrollPos(IntPtr hWnd, int nBar);
+
         [DllImport("user32.dll")]
         public static extern bool PostMessageA(IntPtr hWnd, int nBar, int wParam, int lParam);
+
         [DllImport("user32.dll")]
         public static extern bool GetScrollRange(IntPtr hWnd, int nBar, out int lpMinPos, out int lpMaxPos);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool bInheritHandle, int processId);
+
         [DllImport("kernel32.dll")]
         public static extern int CloseHandle(IntPtr hObject);
+
         [DllImport("kernel32.dll")]
-        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, IntPtr nSize, ref IntPtr lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(
+            IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, IntPtr nSize, ref IntPtr lpNumberOfBytesRead);
 
 #pragma warning restore 0649
     }
 
     [Flags]
-    public enum ProcessAccessFlags : uint {
+    public enum ProcessAccessFlags : uint
+    {
         All = 0x1F0FFF,
         Terminate = 0x1,
         CreateThread = 0x2,

@@ -32,6 +32,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -48,6 +49,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
             {
                 return false;
             }
+
             return true;
         }
 
@@ -64,6 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
             {
                 return false;
             }
+
             return memory.GetInCombat();
         }
     }

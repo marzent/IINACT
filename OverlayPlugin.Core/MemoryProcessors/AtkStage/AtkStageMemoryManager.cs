@@ -34,6 +34,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -50,6 +51,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             {
                 return false;
             }
+
             return true;
         }
 
@@ -66,6 +68,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             {
                 return IntPtr.Zero;
             }
+
             return memory.GetAddonAddress(name);
         }
 
@@ -75,6 +78,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             {
                 return null;
             }
+
             return memory.GetAddon(name);
         }
     }

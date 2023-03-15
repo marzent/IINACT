@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
 
-namespace RainbowMage.OverlayPlugin {
+namespace RainbowMage.OverlayPlugin
+{
     /// <summary>
     /// <see cref="RainbowMage.OverlayPlugin.IOverlay"/> の設定に必要なプロパティを定義します。
     /// </summary>
@@ -9,7 +10,8 @@ namespace RainbowMage.OverlayPlugin {
     /// アドオンを作成する場合はこのインターフェイスを実装するのではなく、
     /// <see cref="RainbowMage.OverlayPlugin.OverlayConfigBase"/> 抽象クラスを継承してください。
     /// </remarks>
-    public interface IOverlayConfig {
+    public interface IOverlayConfig
+    {
         string Name { get; set; }
         bool IsVisible { get; set; }
         bool HideOutOfCombat { get; set; }

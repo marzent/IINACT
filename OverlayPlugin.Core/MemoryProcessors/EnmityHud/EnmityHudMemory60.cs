@@ -15,8 +15,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
         private const int enmityHudEntryOffset = 16;
 
         public EnmityHudMemory60(TinyIoCContainer container)
-            : base(container, enmityHudSignature, enmityHudPointerPath, enmityHudCountOffset, enmityHudEntryOffset, EnmityHudEntryMemory.Size)
-        { }
+            : base(container, enmityHudSignature, enmityHudPointerPath, enmityHudCountOffset, enmityHudEntryOffset,
+                   EnmityHudEntryMemory.Size) { }
 
         public override Version GetVersion()
         {

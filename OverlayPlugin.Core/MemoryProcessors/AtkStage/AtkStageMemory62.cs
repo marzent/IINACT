@@ -8,6 +8,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs;
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 {
     using AtkStage = global::FFXIVClientStructs.FFXIV.Component.GUI.AtkStage;
+
     interface IAtkStageMemory62 : IAtkStageMemory { }
 
     class AtkStageMemory62 : AtkStageMemory, IAtkStageMemory62
@@ -15,10 +16,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
         private static long GetAtkStageSingletonAddress(TinyIoCContainer container)
         {
             var data = container.Resolve<FFXIVClientStructs.Data>();
-            return (long)data.GetClassInstanceAddress(FFXIVClientStructs.DataNamespace.Global, "Component::GUI::AtkStage");
+            return (long)data.GetClassInstanceAddress(FFXIVClientStructs.DataNamespace.Global,
+                                                      "Component::GUI::AtkStage");
         }
 
-        public AtkStageMemory62(TinyIoCContainer container) : base(container, GetAtkStageSingletonAddress(container)) { }
+        public AtkStageMemory62(TinyIoCContainer container) :
+            base(container, GetAtkStageSingletonAddress(container)) { }
 
         public override Version GetVersion()
         {
@@ -39,6 +42,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             {
                 return IntPtr.Zero;
             }
+
             dynamic atkStage = ManagedType<AtkStage>.GetManagedTypeFromIntPtr(atkStageInstanceAddress, memory);
             dynamic raptureAtkUnitManager = atkStage.RaptureAtkUnitManager;
             dynamic unitMgr = raptureAtkUnitManager.AtkUnitManager;
@@ -61,7 +65,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             return IntPtr.Zero;
         }
 
-        private static Dictionary<string, Type> AddonMap = new Dictionary<string, Type>() {
+        private static Dictionary<string, Type> AddonMap = new Dictionary<string, Type>()
+        {
             // These addon entries are confirmed from the FFXIVClientStructs repos
             { "_ActionCross", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonActionCross) },
             { "_ActionBar01", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonActionBarX) },
@@ -78,7 +83,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             { "_PartyList", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonPartyList) },
             { "Macro", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonMacro) },
             { "Teleport", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonTeleport) },
-            
+
             // These addons are guessed based on patterns
             { "_ActionBar", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonActionBarX) },
             { "_ActionBar03", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonActionBarX) },
@@ -103,7 +108,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             { "FieldMarker", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonFieldMarker) },
             { "Gathering", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGathering) },
             { "GatheringMasterpiece", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGatheringMasterpiece) },
-            { "GrandCompanySupplyReward", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGrandCompanySupplyReward) },
+            {
+                "GrandCompanySupplyReward",
+                typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGrandCompanySupplyReward)
+            },
             { "GuildLeve", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGuildLeve) },
             { "_HudLayoutScreen", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonHudLayoutScreen) },
             { "_HudLayoutWindow", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonHudLayoutWindow) },

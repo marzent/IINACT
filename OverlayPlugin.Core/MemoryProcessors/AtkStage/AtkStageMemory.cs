@@ -51,7 +51,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 
             List<string> fail = new List<string>();
 
-            long instanceAddress = memory.GetInt64(new IntPtr(memory.GetBaseAddress().ToInt64() + atkStageSingletonAddress));
+            long instanceAddress =
+                memory.GetInt64(new IntPtr(memory.GetBaseAddress().ToInt64() + atkStageSingletonAddress));
 
             if (instanceAddress != 0)
             {
@@ -72,7 +73,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             }
 
             // @TODO: Change this from Debug to Error once we're actually using atkStage
-            logger.Log(LogLevel.Debug, $"Failed to find atkStage memory via {GetType().Name}: {string.Join(", ", fail)}.");
+            logger.Log(LogLevel.Debug,
+                       $"Failed to find atkStage memory via {GetType().Name}: {string.Join(", ", fail)}.");
             return;
         }
 

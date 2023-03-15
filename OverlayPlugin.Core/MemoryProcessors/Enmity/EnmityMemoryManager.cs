@@ -32,6 +32,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
             {
                 return;
             }
+
             ScanPointers();
         }
 
@@ -48,6 +49,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
             {
                 return false;
             }
+
             return true;
         }
 
@@ -64,6 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
             {
                 return null;
             }
+
             return memory.GetEnmityEntryList(combatantList);
         }
     }

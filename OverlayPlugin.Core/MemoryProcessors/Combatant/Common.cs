@@ -66,6 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
     public enum ModelStatus : int
     {
         Visible = 0,
+
         /// <summary>Indicates that the combatant's model has unloaded from the game's memory, be it from a death or a wipe.</summary>
         Unloaded = 2048,
         Hidden = 16384,
@@ -84,10 +85,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
     {
         /// <summary>Indicates a combatant that doesn't aggro on sight and is out of combat.</summary>
         Passive = 0,
+
         /// <summary>Indicates a combatant that aggros on sight and is out of combat.</summary>
         Aggressive = 1,
+
         /// <summary>Indicates a combatant that doesn't aggro on sight and is in combat.</summary>
         EngagedPassive = 2,
+
         /// <summary>Indicates a combatant that aggros on sight and is in combat.</summary>
         EngagedAggressive = 3
     }
@@ -119,6 +123,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
         public string Distance;
         public string EffectiveDistance;
+
         [NonSerialized]
         public byte RawEffectiveDistance;
 

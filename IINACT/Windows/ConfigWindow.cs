@@ -1,13 +1,13 @@
 using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using RainbowMage.OverlayPlugin;
 
 namespace IINACT.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
-    private Configuration Configuration;
-    public RainbowMage.OverlayPlugin.IPluginConfig? OverlayPluginConfig { get; set; }
+    private readonly Configuration Configuration;
 
     public ConfigWindow(Plugin plugin) : base(
         "IINACT Configuration",
@@ -19,6 +19,8 @@ public class ConfigWindow : Window, IDisposable
 
         Configuration = plugin.Configuration;
     }
+
+    public IPluginConfig? OverlayPluginConfig { get; set; }
 
     public void Dispose() { }
 

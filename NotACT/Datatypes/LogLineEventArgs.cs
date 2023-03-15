@@ -1,48 +1,46 @@
-﻿namespace Advanced_Combat_Tracker
+﻿namespace Advanced_Combat_Tracker;
+
+public delegate void LogLineEventDelegate(bool isImport, LogLineEventArgs logInfo);
+
+public delegate void LogFileChangedDelegate(bool IsImport, string NewLogFileName);
+
+public class LogLineEventArgs : EventArgs
 {
-    public delegate void LogLineEventDelegate(bool isImport, LogLineEventArgs logInfo);
+    public readonly string companionLogName;
 
-    public delegate void LogFileChangedDelegate(bool IsImport, string NewLogFileName);
+    public readonly DateTime detectedTime;
 
-    public class LogLineEventArgs : EventArgs
+    public readonly string detectedZone;
+
+    public readonly bool inCombat;
+
+    public readonly string originalLogLine;
+
+    public int detectedType;
+    public string logLine;
+
+    public LogLineEventArgs(
+        string LogLine, int DetectedType, DateTime DetectedTime, string DetectedZone, bool InCombat)
     {
-        public string logLine;
+        originalLogLine = LogLine;
+        logLine = LogLine;
+        detectedType = DetectedType;
+        detectedTime = DetectedTime;
+        detectedZone = DetectedZone;
+        inCombat = InCombat;
+        companionLogName = string.Empty;
+    }
 
-        public int detectedType;
-
-        public readonly DateTime detectedTime;
-
-        public readonly string detectedZone;
-
-        public readonly bool inCombat;
-
-        public readonly string originalLogLine;
-
-        public readonly string companionLogName;
-
-        public LogLineEventArgs(
-            string LogLine, int DetectedType, DateTime DetectedTime, string DetectedZone, bool InCombat)
-        {
-            originalLogLine = LogLine;
-            logLine = LogLine;
-            detectedType = DetectedType;
-            detectedTime = DetectedTime;
-            detectedZone = DetectedZone;
-            inCombat = InCombat;
-            companionLogName = string.Empty;
-        }
-
-        public LogLineEventArgs(
-            string LogLine, int DetectedType, DateTime DetectedTime, string DetectedZone, bool InCombat,
-            string CompanionLogName)
-        {
-            originalLogLine = LogLine;
-            logLine = LogLine;
-            detectedType = DetectedType;
-            detectedTime = DetectedTime;
-            detectedZone = DetectedZone;
-            inCombat = InCombat;
-            companionLogName = CompanionLogName;
-        }
+    public LogLineEventArgs(
+        string LogLine, int DetectedType, DateTime DetectedTime, string DetectedZone, bool InCombat,
+        string CompanionLogName)
+    {
+        originalLogLine = LogLine;
+        logLine = LogLine;
+        detectedType = DetectedType;
+        detectedTime = DetectedTime;
+        detectedZone = DetectedZone;
+        inCombat = InCombat;
+        companionLogName = CompanionLogName;
     }
 }

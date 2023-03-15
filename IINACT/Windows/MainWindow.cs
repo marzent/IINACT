@@ -8,10 +8,7 @@ namespace IINACT.Windows;
 public class MainWindow : Window, IDisposable
 {
     private readonly Plugin Plugin;
-    public IPluginConfig? OverlayPluginConfig { get; set; }
-    public IReadOnlyList<IOverlayPreset>? OverlayPresets { get; set; }
-    private string[]? OverlayNames => OverlayPresets?.Select(x => x.Name).ToArray();
-    private int selectedOverlayIndex = 0;
+    private int selectedOverlayIndex;
 
     public MainWindow(Plugin plugin) : base(
         "IINACT", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
@@ -21,6 +18,12 @@ public class MainWindow : Window, IDisposable
 
         Plugin = plugin;
     }
+
+    public IPluginConfig? OverlayPluginConfig { get; set; }
+    public IReadOnlyList<IOverlayPreset>? OverlayPresets { get; set; }
+    private string[]? OverlayNames => OverlayPresets?.Select(x => x.Name).ToArray();
+
+    public void Dispose() { }
 
     public override void Draw()
     {
@@ -62,11 +65,6 @@ public class MainWindow : Window, IDisposable
 
         ImGui.Spacing();
 
-        if (ImGui.Button("Show Settings"))
-        {
-            Plugin.DrawConfigUI();
-        }
+        if (ImGui.Button("Show Settings")) Plugin.DrawConfigUI();
     }
-
-    public void Dispose() { }
 }

@@ -1,67 +1,66 @@
 ﻿using System.IO.Compression;
 
-namespace FetchDependencies
+namespace FetchDependencies;
+
+public class FetchDependencies
 {
-    public class FetchDependencies
+    private readonly HttpClient HttpClient;
+
+    public FetchDependencies(string assemblyDir, HttpClient httpClient)
     {
-        private readonly HttpClient HttpClient;
+        DependenciesDir = assemblyDir;
+        HttpClient = httpClient;
+    }
 
-        public string DependenciesDir { get; }
+    public string DependenciesDir { get; }
 
-        public FetchDependencies(string assemblyDir, HttpClient httpClient)
+    public void GetFfxivPlugin()
+    {
+        var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
+        var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
+
+        if (!NeedsUpdate(pluginPath))
+            return;
+
+        if (!File.Exists(pluginZipPath))
+            DownloadPlugin(pluginZipPath);
+
+        ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        File.Delete(pluginZipPath);
+
+        var patcher = new Patcher(DependenciesDir);
+        patcher.MainPlugin();
+        patcher.LogFilePlugin();
+        patcher.MemoryPlugin();
+    }
+
+    private bool NeedsUpdate(string dllPath)
+    {
+        if (!File.Exists(dllPath)) return true;
+        try
         {
-            DependenciesDir = assemblyDir;
-            HttpClient = httpClient;
+            using var plugin = new TargetAssembly(dllPath);
+            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            var remoteVersionString = HttpClient
+                                      .GetStringAsync("https://www.iinact.com/updater/version",
+                                                      cancelAfterDelay.Token).Result;
+            var remoteVersion = new Version(remoteVersionString);
+            return remoteVersion > plugin.Version;
         }
-
-        public void GetFfxivPlugin()
+        catch
         {
-            var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
-            var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
-
-            if (!NeedsUpdate(pluginPath))
-                return;
-
-            if (!File.Exists(pluginZipPath))
-                DownloadPlugin(pluginZipPath);
-
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, overwriteFiles: true);
-            File.Delete(pluginZipPath);
-
-            var patcher = new Patcher(DependenciesDir);
-            patcher.MainPlugin();
-            patcher.LogFilePlugin();
-            patcher.MemoryPlugin();
+            return false;
         }
+    }
 
-        private bool NeedsUpdate(string dllPath)
-        {
-            if (!File.Exists(dllPath)) return true;
-            try
-            {
-                using var plugin = new TargetAssembly(dllPath);
-                using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                var remoteVersionString = HttpClient
-                                          .GetStringAsync("https://www.iinact.com/updater/version",
-                                                          cancelAfterDelay.Token).Result;
-                var remoteVersion = new Version(remoteVersionString);
-                return remoteVersion > plugin.Version;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void DownloadPlugin(string path)
-        {
-            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            using var downloadStream = HttpClient
-                                       .GetStreamAsync("https://www.iinact.com/updater/download",
-                                                       cancelAfterDelay.Token).Result;
-            using var zipFileStream = new FileStream(path, FileMode.Create);
-            downloadStream.CopyTo(zipFileStream);
-            zipFileStream.Close();
-        }
+    private void DownloadPlugin(string path)
+    {
+        using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var downloadStream = HttpClient
+                                   .GetStreamAsync("https://www.iinact.com/updater/download",
+                                                   cancelAfterDelay.Token).Result;
+        using var zipFileStream = new FileStream(path, FileMode.Create);
+        downloadStream.CopyTo(zipFileStream);
+        zipFileStream.Close();
     }
 }

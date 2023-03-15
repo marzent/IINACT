@@ -1,144 +1,146 @@
 using Advanced_Combat_Tracker;
+using Dalamud.Data;
 using Dalamud.Game.Command;
+using Dalamud.Game.Network;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using Dalamud.Game.Network;
+using Dalamud.Utility;
 using IINACT.Windows;
-using Dalamud.Data;
+using Machina.FFXIV.Dalamud;
+using RainbowMage.OverlayPlugin;
 
-namespace IINACT
+namespace IINACT;
+
+public sealed class Plugin : IDalamudPlugin
 {
-    public sealed class Plugin : IDalamudPlugin
+    private const string MainWindowCommandName = "/iinact";
+    private const string EndEncCommandName = "/endenc";
+    public Label OverlayPluginStatus = new();
+    public WindowSystem WindowSystem = new("IINACT");
+
+    public Plugin(
+        [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+        [RequiredVersion("1.0")] CommandManager commandManager,
+        [RequiredVersion("1.0")] GameNetwork gameNetwork,
+        [RequiredVersion("1.0")] DataManager dataManager
+    )
     {
-        public string Name => "IINACT";
-        private const string MainWindowCommandName = "/iinact";
-        private const string EndEncCommandName = "/endenc";
+        PluginInterface = pluginInterface;
+        CommandManager = commandManager;
+        GameNetwork = gameNetwork;
+        DataManager = dataManager;
 
-        private DalamudPluginInterface PluginInterface { get; init; }
-        private CommandManager CommandManager { get; init; }
-        private GameNetwork GameNetwork { get; init; }
-        private DataManager DataManager { get; init; }
-        public Configuration Configuration { get; init; }
-        public WindowSystem WindowSystem = new("IINACT");
-        public Label OverlayPluginStatus = new();
+        DalamudClient.GameNetwork = GameNetwork;
 
-        private ConfigWindow ConfigWindow { get; init; }
-        private MainWindow MainWindow { get; init; }
-
-        private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
-        private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
-
-        public Plugin(
-            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager,
-            [RequiredVersion("1.0")] GameNetwork gameNetwork,
-            [RequiredVersion("1.0")] DataManager dataManager
-        )
+        var fetchDeps = new FetchDependencies.FetchDependencies(
+            PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
+        try
         {
-            PluginInterface = pluginInterface;
-            CommandManager = commandManager;
-            GameNetwork = gameNetwork;
-            DataManager = dataManager;
-
-            Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
-
-            var fetchDeps = new FetchDependencies.FetchDependencies(
-                PluginInterface.AssemblyLocation.Directory!.FullName, Dalamud.Utility.Util.HttpClient);
-            try
-            {
-                fetchDeps.GetFfxivPlugin();
-            }
-            catch
-            {
-                return;
-            }
-
-            ActGlobals.oFormActMain = new FormActMain();
-
-            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            Configuration.Initialize(PluginInterface);
-
-            if (Directory.Exists(Configuration.LogFilePath))
-                ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
-
-            FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
-
-            Task.Run(InitOverlayPlugin);
-
-            ConfigWindow = new ConfigWindow(this);
-            MainWindow = new MainWindow(this);
-
-            WindowSystem.AddWindow(ConfigWindow);
-            WindowSystem.AddWindow(MainWindow);
-
-            CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
-            {
-                HelpMessage = "Displays the IINACT main window"
-            });
-
-            CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
-            {
-                HelpMessage = "Ends the current encounter IINACT is parsing"
-            });
-
-            PluginInterface.UiBuilder.Draw += DrawUI;
-            PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+            fetchDeps.GetFfxivPlugin();
+        }
+        catch
+        {
+            return;
         }
 
-        private void InitOverlayPlugin()
+        ActGlobals.oFormActMain = new FormActMain();
+
+        Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Configuration.Initialize(PluginInterface);
+
+        if (Directory.Exists(Configuration.LogFilePath))
+            ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
+
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
+
+        Task.Run(InitOverlayPlugin);
+
+        ConfigWindow = new ConfigWindow(this);
+        MainWindow = new MainWindow(this);
+
+        WindowSystem.AddWindow(ConfigWindow);
+        WindowSystem.AddWindow(MainWindow);
+
+        CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
         {
-            var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
-            var logger = new RainbowMage.OverlayPlugin.Logger();
-            container.Register(logger);
-            container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
+            HelpMessage = "Displays the IINACT main window"
+        });
 
-            OverlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
-                PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
-            container.Register(OverlayPlugin);
-            ActGlobals.oFormActMain.OverlayPluginContainer = container;
-
-            OverlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
-
-            var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
-            MainWindow.OverlayPresets = registry.OverlayPresets;
-            var overlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
-            MainWindow.OverlayPluginConfig = overlayPluginConfig;
-            ConfigWindow.OverlayPluginConfig = overlayPluginConfig;
-        }
-
-        public void Dispose()
+        CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
         {
-            FfxivActPluginWrapper.Dispose();
-            OverlayPlugin.DeInitPlugin();
+            HelpMessage = "Ends the current encounter IINACT is parsing"
+        });
 
-            WindowSystem.RemoveAllWindows();
+        PluginInterface.UiBuilder.Draw += DrawUI;
+        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+    }
 
-            ConfigWindow.Dispose();
-            MainWindow.Dispose();
+    private DalamudPluginInterface PluginInterface { get; init; }
+    private CommandManager CommandManager { get; init; }
+    private GameNetwork GameNetwork { get; init; }
+    private DataManager DataManager { get; init; }
+    public Configuration Configuration { get; init; }
 
-            CommandManager.RemoveHandler(MainWindowCommandName);
-            CommandManager.RemoveHandler(EndEncCommandName);
-        }
+    private ConfigWindow ConfigWindow { get; init; }
+    private MainWindow MainWindow { get; init; }
 
-        private void OnCommand(string command, string args)
-        {
-            MainWindow.IsOpen = true;
-        }
+    private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
+    private PluginMain OverlayPlugin { get; set; }
+    public string Name => "IINACT";
 
-        private void EndEncounter(string command, string args)
-        {
-            ActGlobals.oFormActMain.EndCombat(false);
-        }
+    public void Dispose()
+    {
+        FfxivActPluginWrapper.Dispose();
+        OverlayPlugin.DeInitPlugin();
 
-        private void DrawUI()
-        {
-            WindowSystem.Draw();
-        }
+        WindowSystem.RemoveAllWindows();
 
-        public void DrawConfigUI()
-        {
-            ConfigWindow.IsOpen = true;
-        }
+        ConfigWindow.Dispose();
+        MainWindow.Dispose();
+
+        CommandManager.RemoveHandler(MainWindowCommandName);
+        CommandManager.RemoveHandler(EndEncCommandName);
+    }
+
+    private void InitOverlayPlugin()
+    {
+        var container = new TinyIoCContainer();
+        var logger = new Logger();
+        container.Register(logger);
+        container.Register<ILogger>(logger);
+
+        OverlayPlugin = new PluginMain(
+            PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
+        container.Register(OverlayPlugin);
+        ActGlobals.oFormActMain.OverlayPluginContainer = container;
+
+        OverlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
+
+        var registry = container.Resolve<Registry>();
+        MainWindow.OverlayPresets = registry.OverlayPresets;
+        var overlayPluginConfig = container.Resolve<IPluginConfig>();
+        MainWindow.OverlayPluginConfig = overlayPluginConfig;
+        ConfigWindow.OverlayPluginConfig = overlayPluginConfig;
+    }
+
+    private void OnCommand(string command, string args)
+    {
+        MainWindow.IsOpen = true;
+    }
+
+    private void EndEncounter(string command, string args)
+    {
+        ActGlobals.oFormActMain.EndCombat(false);
+    }
+
+    private void DrawUI()
+    {
+        WindowSystem.Draw();
+    }
+
+    public void DrawConfigUI()
+    {
+        ConfigWindow.IsOpen = true;
     }
 }

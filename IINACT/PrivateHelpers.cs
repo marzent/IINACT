@@ -28,8 +28,11 @@ public static class PrivateHelpers
     {
         var t = obj.GetType();
         if (t.GetProperty(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) == null)
+        {
             throw new ArgumentOutOfRangeException(nameof(propName),
                                                   $@"Property {propName} was not found in Type {obj.GetType().FullName}");
+        }
+
         t.InvokeMember(propName,
                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance,
                        null, obj,

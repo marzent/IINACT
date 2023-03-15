@@ -1,32 +1,31 @@
-﻿namespace Advanced_Combat_Tracker
+﻿namespace Advanced_Combat_Tracker;
+
+public class LocalizationObject
 {
-    public class LocalizationObject
+    public LocalizationObject(string DisplayedText, string LocalizationDescription)
     {
-        public string DisplayedText { get; set; }
+        this.DisplayedText = DisplayedText;
+        this.LocalizationDescription = LocalizationDescription;
+    }
 
-        public string LocalizationDescription { get; }
+    public string DisplayedText { get; set; }
 
-        internal string S => DisplayedText;
+    public string LocalizationDescription { get; }
 
-        public LocalizationObject(string DisplayedText, string LocalizationDescription)
-        {
-            this.DisplayedText = DisplayedText;
-            this.LocalizationDescription = LocalizationDescription;
-        }
+    internal string S => DisplayedText;
 
-        public override string ToString()
-        {
-            return DisplayedText;
-        }
+    public override string ToString()
+    {
+        return DisplayedText;
+    }
 
-        public static implicit operator string(LocalizationObject val)
-        {
-            return val.DisplayedText;
-        }
+    public static implicit operator string(LocalizationObject val)
+    {
+        return val.DisplayedText;
+    }
 
-        public static implicit operator LocalizationObject(string val)
-        {
-            return new LocalizationObject(val, string.Empty);
-        }
+    public static implicit operator LocalizationObject(string val)
+    {
+        return new LocalizationObject(val, string.Empty);
     }
 }

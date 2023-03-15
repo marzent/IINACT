@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Advanced_Combat_Tracker;
+using Dalamud;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
@@ -17,28 +18,18 @@ namespace IINACT;
 
 public class FfxivActPluginWrapper : IDisposable
 {
-    public IDataSubscription Subscription;
-    public IDataRepository Repository;
-    public ParseSettings ParseSettings = null!;
-    public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
-    public readonly ProcessManager ProcessManager;
+    private readonly Configuration configuration;
+    private readonly ClientLanguage dalamudClientLanguage;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly ParseMediator parseMediator;
-    private readonly Configuration configuration;
-    private readonly Dalamud.ClientLanguage dalamudClientLanguage;
+    public readonly ProcessManager ProcessManager;
+    public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
+    public ParseSettings ParseSettings = null!;
+    public IDataRepository Repository;
+    public IDataSubscription Subscription;
 
-    private Language clientLanguage =>
-        dalamudClientLanguage switch
-        {
-            Dalamud.ClientLanguage.Japanese => Language.Japanese,
-            Dalamud.ClientLanguage.English => Language.English,
-            Dalamud.ClientLanguage.German => Language.German,
-            Dalamud.ClientLanguage.French => Language.French,
-            _ => Language.English
-        };
-
-    public FfxivActPluginWrapper(Configuration configuration, Dalamud.ClientLanguage dalamudClientLanguage)
+    public FfxivActPluginWrapper(Configuration configuration, ClientLanguage dalamudClientLanguage)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
@@ -74,6 +65,22 @@ public class FfxivActPluginWrapper : IDisposable
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
     }
 
+    private Language clientLanguage =>
+        dalamudClientLanguage switch
+        {
+            ClientLanguage.Japanese => Language.Japanese,
+            ClientLanguage.English => Language.English,
+            ClientLanguage.German => Language.German,
+            ClientLanguage.French => Language.French,
+            _ => Language.English
+        };
+
+    public void Dispose()
+    {
+        ffxivActPlugin.DeInitPlugin();
+        ffxivActPlugin.Dispose();
+    }
+
     private void SetupSettingsMediator()
     {
         var settingsMediator = ffxivActPlugin._dataCollection._settingsMediator;
@@ -91,7 +98,7 @@ public class FfxivActPluginWrapper : IDisposable
         var readProcesses = ProcessManager.GetField<ReadProcesses>("_readProcesses");
         readProcesses.Read64(true);
 
-        ParseSettings = new ParseSettings()
+        ParseSettings = new ParseSettings
         {
             DisableDamageShield = configuration.DisableDamageShield,
             DisableCombinePets = configuration.DisableCombinePets,
@@ -161,10 +168,4 @@ public class FfxivActPluginWrapper : IDisposable
     }
 
     private static void OnProcessException(DateTime timestamp, string text) { }
-
-    public void Dispose()
-    {
-        ffxivActPlugin.DeInitPlugin();
-        ffxivActPlugin.Dispose();
-    }
 }

@@ -1,6 +1,5 @@
 using Dalamud.Configuration;
 using Dalamud.Plugin;
-using FFXIV_ACT_Plugin.Config;
 
 namespace IINACT;
 
@@ -10,7 +9,7 @@ public class Configuration : IPluginConfiguration
     [NonSerialized]
     private DalamudPluginInterface? PluginInterface;
 
-    public ParseFilterMode ParseFilterMode { get; set; } = ParseFilterMode.None;
+    public int ParseFilterMode { get; set; }
 
     public bool DisableDamageShield { get; set; } = false;
 

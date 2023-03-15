@@ -27,12 +27,12 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        if (ImGui.BeginCombo("Parse Filter", Enum.GetName(Configuration.ParseFilterMode)))
+        if (ImGui.BeginCombo("Parse Filter", Enum.GetName(typeof(ParseFilterMode), Configuration.ParseFilterMode)))
         {
             foreach (var filter in Enum.GetValues<ParseFilterMode>())
-                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter), Configuration.ParseFilterMode == filter))
+                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter), (ParseFilterMode)Configuration.ParseFilterMode == filter))
                 {
-                    Configuration.ParseFilterMode = filter;
+                    Configuration.ParseFilterMode = (int)filter;
                     Configuration.Save();
                 }
 

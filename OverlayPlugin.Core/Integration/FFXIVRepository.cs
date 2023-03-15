@@ -170,7 +170,7 @@ namespace RainbowMage.OverlayPlugin
 
         public Version GetOverlayPluginVersion()
         {
-            return new Version(4, 2, 0);
+            return Assembly.GetExecutingAssembly().GetName().Version;
         }
 
         public Version GetPluginVersion()

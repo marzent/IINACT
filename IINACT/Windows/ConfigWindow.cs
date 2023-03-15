@@ -2,6 +2,7 @@ using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using RainbowMage.OverlayPlugin;
+using FFXIV_ACT_Plugin.Config;
 
 namespace IINACT.Windows;
 
@@ -9,13 +10,13 @@ public class ConfigWindow : Window, IDisposable
 {
     private readonly Configuration Configuration;
 
-    public ConfigWindow(Plugin plugin) : base(
-        "IINACT Configuration",
-        ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-        ImGuiWindowFlags.NoScrollWithMouse)
+    public ConfigWindow(Plugin plugin) : base("IINACT Configuration")
     {
-        Size = new Vector2(232, 75);
-        SizeCondition = ImGuiCond.Always;
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MinimumSize = new Vector2(307, 147),
+            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+        };
 
         Configuration = plugin.Configuration;
     }
@@ -26,12 +27,61 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        // can't ref a property, so use a local copy
-        var configValue = Configuration.ShowDebug;
-        if (ImGui.Checkbox("Show Debug", ref configValue))
+        if (ImGui.BeginCombo("Parse Filter", Enum.GetName(Configuration.ParseFilterMode)))
         {
-            Configuration.ShowDebug = configValue;
+            foreach (var filter in Enum.GetValues<ParseFilterMode>())
+                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter), Configuration.ParseFilterMode == filter))
+                {
+                    Configuration.ParseFilterMode = filter;
+                    Configuration.Save();
+                }
+
+            ImGui.EndCombo();
+        }
+
+        ImGui.Spacing();
+
+        var disableDamageShield = Configuration.DisableDamageShield;
+        if (ImGui.Checkbox("Disable Damage Shield Estimates", ref disableDamageShield))
+        {
+            Configuration.DisableDamageShield = disableDamageShield;
             Configuration.Save();
         }
+
+        var disableCombinePets = Configuration.DisableCombinePets;
+        if (ImGui.Checkbox("Disable Combine Pets with Owners", ref disableCombinePets))
+        {
+            Configuration.DisableCombinePets = disableCombinePets;
+            Configuration.Save();
+        }
+
+        var showDebug = Configuration.ShowDebug;
+        if (ImGui.Checkbox("Show Debug Options", ref showDebug))
+        {
+            Configuration.ShowDebug = showDebug;
+            Configuration.Save();
+        }
+
+        if (!showDebug)
+            return;
+
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        var simulateIndividualDoTCrits = Configuration.SimulateIndividualDoTCrits;
+        if (ImGui.Checkbox("Simulate Individual DoT Crits", ref simulateIndividualDoTCrits))
+        {
+            Configuration.SimulateIndividualDoTCrits = simulateIndividualDoTCrits;
+            Configuration.Save();
+        }
+
+        var showRealDoTTicks = Configuration.ShowRealDoTTicks;
+        if (ImGui.Checkbox("Also Show 'Real' DoT Ticks", ref showRealDoTTicks))
+        {
+            Configuration.ShowRealDoTTicks = showRealDoTTicks;
+            Configuration.Save();
+        }
+
     }
 }

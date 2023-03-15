@@ -2,12 +2,14 @@
     "Author": "Usagi",
     "Name": "IINACT",
     "Punchline": "A parsing plugin.",
-    "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a stripped-down port of Overlay Plugin for modern .NET",
+    "RepoUrl": "https://github.com/marzent/IINACT",
+    "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
     "InternalName": "IINACT",
     "ApplicableVersion": "any",
     "Tags": [
         "parsing",
         "plugin",
         "ACT"
-    ]
+    ],
+    "IconUrl": "https://raw.githubusercontent.com/marzent/IINACT/master/images/icon.png"
 }

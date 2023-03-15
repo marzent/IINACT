@@ -39,29 +39,29 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="..\FFXIVClientStructs\ida\data.yml"/>
-        <None Remove="resources\act-overlays\overlays.json"/>
-        <None Remove="resources\opcodes.jsonc"/>
-        <None Remove="resources\reserved_log_lines.json"/>
+        <None Remove="..\FFXIVClientStructs\ida\data.yml" />
+        <None Remove="resources\act-overlays\overlays.json" />
+        <None Remove="resources\opcodes.jsonc" />
+        <None Remove="resources\reserved_log_lines.json" />
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="..\FFXIVClientStructs\ida\data.yml"/>
-        <EmbeddedResource Include="resources\act-overlays\overlays.json"/>
+        <EmbeddedResource Include="..\FFXIVClientStructs\ida\data.yml" />
+        <EmbeddedResource Include="resources\act-overlays\overlays.json" />
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="resources\opcodes.jsonc"/>
-        <EmbeddedResource Include="resources\reserved_log_lines.json"/>
+        <EmbeddedResource Include="resources\opcodes.jsonc" />
+        <EmbeddedResource Include="resources\reserved_log_lines.json" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj"/>
-        <ProjectReference Include="..\machina\Machina\Machina.csproj"/>
-        <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj"/>
+        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
+        <ProjectReference Include="..\machina\Machina\Machina.csproj" />
+        <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
-        <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0"/>
-        <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1"/>
-        <PackageReference Include="YamlDotNet" Version="12.3.1"/>
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+        <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
+        <PackageReference Include="YamlDotNet" Version="12.3.1" />
     </ItemGroup>
     <PropertyGroup>
         <PlatformTarget>x64</PlatformTarget>

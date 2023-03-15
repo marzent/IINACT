@@ -36,11 +36,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="Icon-IINACT-512x512%402x.ico"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.10"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.10" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
@@ -72,11 +68,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj"/>
-        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj"/>
-        <ProjectReference Include="..\machina\Machina\Machina.csproj"/>
-        <ProjectReference Include="..\NotACT\NotACT.csproj"/>
-        <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj"/>
+        <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
+        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
+        <ProjectReference Include="..\machina\Machina\Machina.csproj" />
+        <ProjectReference Include="..\NotACT\NotACT.csproj" />
+        <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

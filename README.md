@@ -1,4 +1,4 @@
-![icon](https://github.com/marzent/IINACT/blob/main/IINACT/Icon-IINACT-512x512@2x.ico?raw=true)
+![icon](https://github.com/marzent/IINACT/blob/main/images/icon.ico?raw=true)
 
 # IINACT
 

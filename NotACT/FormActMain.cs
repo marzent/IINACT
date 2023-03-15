@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Media;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -385,6 +386,19 @@ namespace Advanced_Combat_Tracker {
                         }
                     }
                     return $"{Damage}";
+            }
+        }
+
+        public void PlaySound(string file)
+        {
+            try
+            {
+                var snd = new SoundPlayer( file);
+                snd.Play();
+            }
+            catch (Exception ex)
+            {
+                WriteExceptionLog(ex, $"sound file: {file}");
             }
         }
     }

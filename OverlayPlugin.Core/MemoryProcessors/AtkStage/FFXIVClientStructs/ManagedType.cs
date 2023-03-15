@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
@@ -22,6 +23,17 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
     public class ManagedType<T> : DynamicObject where T : unmanaged
     {
         /// <summary>
+        /// Wraps type <typeparamref name="type"/> as a ManagedType<<typeparamref name="type"/>>
+        /// </summary>
+        /// <param name="type">The type to wrap</param>
+        /// <returns>The wrapped type</returns>
+        public static Type ManagedTypify(Type type)
+        {
+            return typeof(ManagedType<>)
+                .MakeGenericType(type);
+        }
+
+        /// <summary>
         /// Get an instance of ManagedType via pointer when the <typeparamref name="T"/> is unknown at compile time.
         /// </summary>
         /// <param name="ptr">Pointer to FFXIV memory</param>
@@ -31,8 +43,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <returns><see cref="ManagedType{T}"/> with a <typeparamref name="T"/> of <paramref name="type"/></returns>
         public static dynamic GetDynamicManagedTypeFromIntPtr(IntPtr ptr, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
         {
-            return typeof(ManagedType<>).MakeGenericType(type)
-                .GetMethod("GetManagedTypeFromIntPtr").Invoke(null, new object[] { ptr, memory, readPtrMap });
+            return ManagedTypify(type)
+                .GetMethod("GetManagedTypeFromIntPtr")
+                .Invoke(null, new object[] { ptr, memory, readPtrMap });
         }
 
         /// <summary>
@@ -63,10 +76,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="type">The struct type to read from memory</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/> with a <typeparamref name="T"/> of <paramref name="type"/></returns>
-        public static dynamic GetDynamicManagedTypeFromBaseType(object baseObj, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
+        public static dynamic GetDynamicManagedTypeFromBaseType(IntPtr ptr, object baseObj, FFXIVMemory memory, Type type, Dictionary<IntPtr, object> readPtrMap = null)
         {
-            return typeof(ManagedType<>).MakeGenericType(type)
-                .GetMethod("GetManagedTypeFromBaseType").Invoke(null, new object[] { baseObj, memory, readPtrMap });
+            return ManagedTypify(type)
+                .GetMethod("GetManagedTypeFromBaseType")
+                .Invoke(null, new object[] { ptr, baseObj, memory, readPtrMap });
         }
 
         /// <summary>
@@ -76,44 +90,53 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="memory">FFXIVMemory instance which should be valid for the lifetime of this object</param>
         /// <param name="readPtrMap">Used internally to track already-read pointers</param>
         /// <returns><see cref="ManagedType{T}"/></returns>
-        public static ManagedType<T> GetManagedTypeFromBaseType(T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
+        public static ManagedType<T> GetManagedTypeFromBaseType(IntPtr ptr, T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap = null)
         {
             if (readPtrMap == null)
             {
                 readPtrMap = new Dictionary<IntPtr, object>();
             }
-            return new ManagedType<T>(baseObj, memory, readPtrMap);
+            return new ManagedType<T>(ptr, baseObj, memory, readPtrMap);
         }
 
         /// <summary>
         /// Pointer to this object in FFXIV memory
         /// </summary>
+        [IgnoreDataMember]
         public readonly IntPtr ptr;
+
+        [IgnoreDataMember]
         private readonly FFXIVMemory memory;
         /// <summary>
         /// Track if we've read the object from memory already, so we don't read multiple times
         /// </summary>
+        [IgnoreDataMember]
         private bool haveReadBaseObj = false;
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are pointers which need read from memory when accessed
         /// </summary>
+        [IgnoreDataMember]
         private Dictionary<string, IntPtr> ptrMap = new Dictionary<string, IntPtr>();
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are pointers and which have been read from memory
         /// </summary>
+        [IgnoreDataMember]
         private Dictionary<string, object> objMap = new Dictionary<string, object>();
         /// <summary>
         /// Map of fields in struct <typeparamref name="T"/> which are not pointers, and their read values
         /// </summary>
+        [IgnoreDataMember]
         private Dictionary<string, object> valMap = new Dictionary<string, object>();
         /// <summary>
         /// Map of pointers of objects read as part of the topmost object in this tree, to avoid reading objects multiple times
         /// </summary>
+        [IgnoreDataMember]
         private Dictionary<IntPtr, object> readPtrMap = new Dictionary<IntPtr, object>();
         /// <summary>
-        /// Cached JObject version of this instance
+        /// Cached raw version of this instance
         /// </summary>
-        private JObject jObject = null;
+        [IgnoreDataMember]
+        private T rawObject;
 
         /// <summary>
         /// Internal-only constructor from a pointer
@@ -143,13 +166,25 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <param name="baseObj">Base object to wrap</param>
         /// <param name="memory">Must be valid for the lifecycle of this object, unless <see cref="ToJObject"/> is called to fully read the object tree from memory</param>
         /// <param name="readPtrMap">Map of already read pointers. Must not be null</param>
-        private ManagedType(T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap)
+        private ManagedType(IntPtr ptr, T baseObj, FFXIVMemory memory, Dictionary<IntPtr, object> readPtrMap)
         {
-            haveReadBaseObj = true;
-            ReadBaseObj(baseObj);
-
+            this.ptr = ptr;
             this.memory = memory;
             this.readPtrMap = readPtrMap;
+            readPtrMap[ptr] = this;
+
+            haveReadBaseObj = true;
+            rawObject = baseObj;
+            ReadBaseObj();
+        }
+
+        public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
+        {
+            if (indexes.Length == 1 && indexes[0].GetType() == typeof(string))
+            {
+                return TryGetField((string)indexes[0], out result);
+            }
+            return base.TryGetIndex(binder, indexes, out result);
         }
 
         /// <summary>
@@ -178,7 +213,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             // Make sure we've read the base object from FFXIV memory
             if (!haveReadBaseObj)
             {
-                ReadBaseObj();
+                ReadBaseObjFromMemory();
             }
 
             // If the field is a pointer
@@ -226,68 +261,27 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
             return false;
         }
 
-        /// <summary>
-        /// Reads this entire object from memory recursively
-        /// </summary>
-        /// <returns>A JObject representation of this object</returns>
-        public JObject ToJObject()
+        public override IEnumerable<string> GetDynamicMemberNames()
         {
-            // Make sure we've read the base object from FFXIV memory
             if (!haveReadBaseObj)
             {
-                ReadBaseObj();
+                ReadBaseObjFromMemory();
             }
-
-            if (jObject != null)
-            {
-                return jObject;
-            }
-            jObject = new JObject();
-
-            // Loop over pointers and conver them to JObjects
-            foreach (var key in ptrMap.Keys)
-            {
-                var success = TryGetField(key, out object result);
-                if (success && result != null)
-                {
-                    jObject[key] = ((dynamic)result).ToJObject();
-                }
-            }
-
-            // Loop over non-pointers
-            foreach (var key in valMap.Keys)
-            {
-                var success = TryGetField(key, out object result);
-                if (success)
-                {
-                    if (result.GetType().IsPrimitive || result.GetType().IsArray)
-                    {
-                        // If it's a primitive or array, we can store it directly
-                        jObject[key] = JToken.FromObject(result);
-                    }
-                    else if (result.GetType().IsEnum)
-                    {
-                        // If it's an enum, we need to `ToString` it because of runtime issues with Newtonsoft JSON not accepting enums directly.
-                        // TODO: This probably needs further investigation/thought.
-                        // We may want to for instance cast to int instead, and have a dynamic `key + "__Name"` property?
-                        jObject[key] = JToken.FromObject(result.ToString());
-                    }
-                    else
-                    {
-                        // If it's a full-on object or struct, wrap it and then convert it to JObject
-                        dynamic obj = GetDynamicManagedTypeFromBaseType(result, memory, typeof(T).GetField(key).FieldType, readPtrMap);
-                        jObject[key] = obj.ToJObject();
-                    }
-                }
-            }
-
-            return jObject;
+            var members = new List<string>(ptrMap.Keys);
+            members.AddRange(valMap.Keys);
+            return members;
         }
+
+        [IgnoreDataMember]
+        private static readonly List<string> SkipIterators = new List<string>() {
+            "FFXIV.Component.GUI.AtkResNode",
+            "FFXIV.Client.Graphics.Render.Notifier",
+        };
 
         /// <summary>
         /// Reads the base object from FFXIV memory
         /// </summary>
-        private unsafe void ReadBaseObj()
+        private unsafe void ReadBaseObjFromMemory()
         {
             haveReadBaseObj = true;
             var objSize = Marshal.SizeOf(typeof(T));
@@ -301,35 +295,35 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
 
             fixed (byte* p = source)
             {
-                var memory = *(T*)&p[0];
-
-                ReadBaseObj(memory);
+                rawObject = *(T*)&p[0];
             }
+            ReadBaseObj();
         }
 
         /// <summary>
-        /// Takes an already-read object <paramref name="memory"/> and populates the fooMap fields with values
+        /// Populates the fooMap fields with values
         /// </summary>
-        /// <param name="memory">An instance of <see cref="T"/> which is used to populate fooMap fields with values</param>
-        private unsafe void ReadBaseObj(T memory)
+        private unsafe void ReadBaseObj()
         {
-            var p = (byte*)&memory;
             foreach (var field in typeof(T).GetFields())
             {
+                // Skip these types entirely, they chain way too deep and cause issues.
+                if (SkipIterators.Exists((iter) => field.FieldType.FullName.EndsWith(iter)))
+                {
+                    continue;
+                }
                 // Check to see if this field is a fixed native type buffer, e.g. `fixed byte foo[20]`
                 FixedBufferAttribute fixedBuffer = (FixedBufferAttribute)field.GetCustomAttribute(typeof(FixedBufferAttribute));
                 if (field.FieldType.IsPointer)
                 {
                     // `GetValue` returns an object of type `Pointer` when called against a pointer field, need to unbox it
-                    var value = Pointer.Unbox((Pointer)field.GetValue(memory));
+                    var value = Pointer.Unbox((Pointer)field.GetValue(rawObject));
                     // Treat some pointers differently by just returning the memory address
                     if (
                         // <*>** pointers are multidimensional arrays
                         field.FieldType.GetElementType().IsPointer ||
                         // void* pointers are unknown data types
-                        field.FieldType.GetElementType() == typeof(void) ||
-                        // <T>* pointers are linked lists, attempting to read them leads to a stack overflow exception
-                        field.FieldType.GetElementType() == typeof(T)
+                        field.FieldType.GetElementType() == typeof(void)
                     )
                     {
                         // Store this pointer off as a ulong in the value map instead
@@ -350,19 +344,44 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
                     var elementTypeSize = Marshal.SizeOf(fixedBuffer.ElementType);
                     var elementCount = fixedBuffer.Length / elementTypeSize;
                     // Read the fixed buffer to an array
+
                     var array = Array.CreateInstance(fixedBuffer.ElementType, elementCount);
-                    byte* fixedPtr = &p[offset];
-                    for (int i = 0; i < elementCount; ++i)
+                    fixed (void* tPtr = &rawObject)
                     {
-                        // Cast this pointer to the correct type and add it to the array at the correct position
-                        array.SetValue(DynamicCast(fixedBuffer.ElementType, &fixedPtr[i]), i);
+                        byte* fixedPtr = ((byte*)tPtr) + offset;
+                        for (int i = 0; i < elementCount; ++i)
+                        {
+                            // Cast this pointer to the correct type and add it to the array at the correct position
+                            array.SetValue(DynamicCast(fixedBuffer.ElementType, &fixedPtr[i]), i);
+                        }
                     }
                     valMap[field.Name] = array;
                 }
+                else if (field.FieldType.Name == "Utf8String")
+                {
+                    object str = field.GetValue(rawObject);
+                    long strPtr = (long)Pointer.Unbox(str.GetType().GetField("StringPtr").GetValue(str));
+                    long strLen = ((long)str.GetType().GetField("BufUsed").GetValue(str)) - 1;
+                    var bytes = memory.GetByteArray(new IntPtr(strPtr), (int)strLen);
+                    valMap[field.Name] = System.Text.Encoding.UTF8.GetString(bytes);
+                }
+                else if (IsConcreteGeneric(field.FieldType))
+                {
+                    valMap[field.Name] = ConcreteGenericToManaged(field, field.GetValue(rawObject));
+                }
+                else if (
+                    field.FieldType.IsPrimitive
+                    || field.FieldType.IsEnum
+                )
+                {
+                    // Primitives and enums get stored normally
+                    valMap[field.Name] = field.GetValue(rawObject);
+                }
                 else
                 {
-                    // This is a normal field, just store it normally
-                    valMap[field.Name] = field.GetValue(memory);
+                    // Objects get wrapped
+                    dynamic obj = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(typeof(T), field.Name), field.GetValue(rawObject), memory, field.FieldType, readPtrMap);
+                    valMap[field.Name] = obj;
                 }
             }
         }
@@ -414,7 +433,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         /// <summary>
         /// Same as <see cref="NetworkProcessors.NetworkParser.GetOffset(Type, string)"/>
         /// </summary>
-        private int GetOffset(Type type, string property)
+        public static int GetOffset(Type type, string property)
         {
             int offset = 0;
 
@@ -445,42 +464,185 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs
         }
 
         /// <summary>
-        /// Converts this <see cref="ManagedType{T}"/> to the underlying type <typeparamref name="T"/>
+        /// Converts this <see cref="ManagedType{T}"/> to the underlying type <typeparamref name="T"/>.
+        /// Note that any pointers on this object are pointing at FFXIV game memory addresses.
+        /// If you need to get the value of a pointer, use the ManagedType field accessor instead.
         /// </summary>
         /// <returns>Instance of type <typeparamref name="T"/></returns>
         public T ToType()
         {
-            T obj = default;
-
-            // Loop over the fields, reverse the logic in ReadBaseObj to assign it to the return object
-            foreach (var field in typeof(T).GetFields())
+            if (!haveReadBaseObj)
             {
-                if (field.FieldType.IsPointer)
+                ReadBaseObjFromMemory();
+            }
+
+            return (T)rawObject;
+        }
+
+        [IgnoreDataMember]
+        private static readonly string[] ConcreteGenerics = new[] {
+            "StdPair",
+            "StdSet",
+            "StdVector",
+            "StdMap",
+            "StdDeque",
+            "AtkLinkedList",
+            "CVector",
+        };
+
+        /// <summary>
+        /// Checks if the passed in type is a concrete-ified generic from StripFFXIVClientStructs
+        /// </summary>
+        private bool IsConcreteGeneric(Type type)
+        {
+            foreach (string prefix in ConcreteGenerics)
+            {
+                if (type.Name.StartsWith(prefix) && type.Name != prefix && type.FullName.StartsWith("FFXIVClientStructs."))
                 {
-                    // Treat some pointers differently by just returning the memory address
-                    if (
-                        // <*>** pointers are multidimensional arrays
-                        field.FieldType.GetElementType().IsPointer ||
-                        // void* pointers are unknown data types
-                        field.FieldType.GetElementType() == typeof(void) ||
-                        // <T>* pointers are linked lists, attempting to read them leads to a stack overflow exception
-                        field.FieldType.GetElementType() == typeof(T)
-                    )
-                    {
-                        field.SetValue(obj, valMap[field.Name]);
-                    }
-                    else
-                    {
-                        field.SetValue(obj, ptrMap[field.Name]);
-                    }
-                }
-                else
-                {
-                    field.SetValue(obj, valMap[field.Name]);
+                    return true;
                 }
             }
 
-            return obj;
+            return false;
+        }
+
+        private object ConcreteGenericToManaged(FieldInfo field, object generic)
+        {
+            dynamic cast = GetDynamicManagedTypeFromBaseType(ptr + GetOffset(field.FieldType, field.Name), generic, memory, generic.GetType(), readPtrMap);
+            if (generic.GetType().Name.StartsWith("StdPair"))
+            {
+                return ConcreteStdPairToManaged(cast, generic);
+            }
+            if (generic.GetType().Name.StartsWith("StdSet"))
+            {
+                return ConcreteStdSetToManaged(cast, generic);
+            }
+            if (generic.GetType().Name.StartsWith("StdVector"))
+            {
+                return ConcreteStdVectorToManaged(cast, generic);
+            }
+            if (generic.GetType().Name.StartsWith("StdMap"))
+            {
+                return ConcreteStdMapToManaged(cast, generic);
+            }
+            if (generic.GetType().Name.StartsWith("AtkLinkedList"))
+            {
+                return ConcreteAtkLinkedListToManaged(cast, generic);
+            }
+            return null;
+        }
+
+        private object ConcreteStdPairToManaged(dynamic cast, object generic)
+        {
+            Type keyType = ManagedTypify(generic.GetType().GetField("Item1").FieldType.GetElementType());
+            Type valType = ManagedTypify(generic.GetType().GetField("Item2").FieldType.GetElementType());
+
+            // @TODO: Should we check for pointer types here, or for a concrete-ified generic?
+            // Neither exists in the current version of FFXIVClientStructs.
+            dynamic key = cast.Item1;
+            dynamic value = cast.Item2;
+
+            return
+                typeof(KeyValuePair<,>)
+                .MakeGenericType(keyType, valType)
+                .GetConstructor(new Type[] { keyType, valType })
+                .Invoke(new object[] { key, value });
+        }
+
+        private unsafe object ConcreteStdSetToManaged(dynamic cast, object generic)
+        {
+            Type nodeType = generic.GetType().GetNestedType("Node");
+            Type objType = nodeType.GetField("Key").GetType();
+
+            dynamic set = typeof(HashSet<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+
+            IntPtr nodePtr = new IntPtr(cast.Head);
+
+            for (int i = 0; i < cast.Count; ++i)
+            {
+                dynamic node = ManagedType<int>.GetDynamicManagedTypeFromIntPtr(nodePtr, memory, nodeType, readPtrMap);
+                dynamic key = ManagedType<int>.GetDynamicManagedTypeFromIntPtr(new IntPtr(node.Key), memory, objType, readPtrMap);
+
+                set.Add(key.ToType());
+                nodePtr = new IntPtr(node.Right);
+            }
+
+            return set;
+        }
+
+        private unsafe object ConcreteStdVectorToManaged(dynamic cast, object generic)
+        {
+            Type objType = generic.GetType().GetField("First").GetType().GetElementType();
+            int objSize = Marshal.SizeOf(objType);
+
+            int count = (int)(((ulong)cast.Last - (ulong)cast.First) / (ulong)objSize);
+
+            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+
+            // This way is slower (reading from memory `count` times) as opposed to doing a large single read
+            // But it's less complex this way.
+            IntPtr firstPtr = new IntPtr(cast.First);
+
+            for (int i = 0; i < count; ++i)
+            {
+                IntPtr objPtr = new IntPtr(((long)firstPtr) + (objSize * i));
+                dynamic obj = ManagedType<int>.GetDynamicManagedTypeFromIntPtr(objPtr, memory, objType, readPtrMap);
+                list.Add(obj.ToType());
+            }
+
+            return list;
+        }
+
+        private unsafe object ConcreteStdMapToManaged(dynamic cast, object generic)
+        {
+            Type nodeType = generic.GetType().GetNestedType("Node");
+            Type pairType = nodeType.GetField("KeyValuePair").FieldType;
+            Type keyType = pairType.GetField("Item1").FieldType.GetElementType();
+            Type valType = pairType.GetField("Item2").FieldType.GetElementType();
+
+            dynamic dict = typeof(Dictionary<,>).MakeGenericType(ManagedTypify(keyType), ManagedTypify(valType)).GetConstructor(new Type[] { }).Invoke(new object[] { });
+
+            if (cast.Count > 0)
+            {
+                dynamic currNode = cast.Head.Left;
+
+                int count = (int)(ulong)cast.Count;
+
+                for (int i = 1; i < count; ++i)
+                {
+                    currNode = currNode.Right;
+                    if (currNode.IsNil)
+                    {
+                        continue;
+                    }
+                    var kvp = currNode.KeyValuePair;
+                    dict[kvp.Key] = kvp.Value;
+                }
+            }
+
+            return dict;
+        }
+
+        private object ConcreteAtkLinkedListToManaged(dynamic cast, object generic)
+        {
+            Type nodeType = generic.GetType().GetNestedType("Node");
+            Type objType = nodeType.GetField("Value").FieldType.GetElementType();
+
+            dynamic list = typeof(List<>).MakeGenericType(objType).GetConstructor(new Type[] { }).Invoke(new object[] { });
+
+            if (cast.Count > 0)
+            {
+                dynamic current = cast.Start;
+                list.Add(current.Value.ToType());
+
+                for (int i = 1; i < cast.Count; ++i)
+                {
+                    current = current.Next;
+                    list.Add(current.Value.ToType());
+                }
+            }
+
+            return list;
         }
     }
 }

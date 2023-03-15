@@ -2,9 +2,9 @@ name: IINACT build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "legacy-winforms" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "legacy-winforms" ]
 
 jobs:
   build:

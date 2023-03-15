@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -6,7 +7,7 @@ using System.Threading;
 
 namespace Advanced_Combat_Tracker {
 
-    public partial class FormActMain : Form {
+    public partial class FormActMain : Form, ISynchronizeInvoke {
         private volatile bool inCombat;
         private HistoryRecord lastZoneRecord;
         private DateTime lastSetEncounter;
@@ -50,6 +51,15 @@ namespace Advanced_Combat_Tracker {
             LastKnownTime = DateTime.Now;
             StartAfterCombatActionThread();
         }
+
+        // Don't run anything on the non existing WinForms UI thread
+        public new object? Invoke(Delegate method, object?[]? args) => method.DynamicInvoke(args);
+        public new IAsyncResult BeginInvoke(Delegate method, object?[]? args) => Task.FromResult(Invoke(method, args));
+
+        public new object? EndInvoke(IAsyncResult result) => ((Task<object?>)result).Result;
+        public new void Invoke(Action method) => _ = Invoke(method, null);
+        public new object? Invoke(Delegate method) => Invoke(method, null);
+
 
         public void WriteExceptionLog(Exception ex, string MoreInfo) {
             var value = $"***** {DateTime.Now.ToString("s")} - {MoreInfo}\n{ex}\n{Environment.StackTrace}\n*****";

@@ -5,16 +5,16 @@ namespace FetchDependencies;
 
 internal class Patcher
 {
-    private readonly string _workPath;
+    private string WorkPath { get; }
 
     public Patcher(string workPath)
     {
-        _workPath = workPath;
+        WorkPath = workPath;
     }
 
     public void MainPlugin()
     {
-        var plugin = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.dll"));
+        var plugin = new TargetAssembly(Path.Combine(WorkPath, "FFXIV_ACT_Plugin.dll"));
         var resources = plugin.Assembly.MainModule.Resources.ToArray();
 
         foreach (var resource in resources)
@@ -22,7 +22,7 @@ internal class Patcher
             if (Costura.CheckForPlugin(resource.Name))
             {
                 using var stream = (resource as EmbeddedResource)!.GetResourceStream();
-                var dllPath = Path.Combine(_workPath, Costura.Fix(resource.Name));
+                var dllPath = Path.Combine(WorkPath, Costura.Fix(resource.Name));
                 Costura.Decompress(stream, dllPath);
                 var resourceAssembly = new TargetAssembly(dllPath);
                 resourceAssembly.RemoveStrongNaming();
@@ -45,7 +45,7 @@ internal class Patcher
 
     public void LogFilePlugin()
     {
-        var logfile = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Logfile.dll"));
+        var logfile = new TargetAssembly(Path.Combine(WorkPath, "FFXIV_ACT_Plugin.Logfile.dll"));
         {
             var method = logfile.GetMethod(
                 "System.Void FFXIV_ACT_Plugin.Logfile.LogOutput::Run(System.Object)");
@@ -72,7 +72,7 @@ internal class Patcher
 
     public void MemoryPlugin()
     {
-        var memory = new TargetAssembly(Path.Combine(_workPath, "FFXIV_ACT_Plugin.Memory.dll"));
+        var memory = new TargetAssembly(Path.Combine(WorkPath, "FFXIV_ACT_Plugin.Memory.dll"));
 
         var dataSubscription = memory.Assembly.MainModule.Types.First(type => type.Name == "DataSubscription");
         var delegates = dataSubscription.Methods.Where(method => method.Name.StartsWith("On"));
@@ -100,6 +100,14 @@ internal class Patcher
 
         foreach (var method in delegates)
             BeginInvokeFix(method);
+
+        {
+            var method = memory.GetMethod(
+                "System.Void FFXIV_ACT_Plugin.Memory.CurrentProcess::set_Handle(System.IntPtr)");
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4, 1));
+            ilProcessor.InsertAfter(1, Instruction.Create(OpCodes.Neg));
+        }
 
         memory.WriteOut();
     }

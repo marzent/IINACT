@@ -24,7 +24,17 @@ public class FetchDependencies
         if (!File.Exists(pluginZipPath))
             DownloadPlugin(pluginZipPath);
 
-        ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        try
+        {
+            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        }
+        catch (InvalidDataException ex) 
+        {
+            File.Delete(pluginZipPath);
+            DownloadPlugin(pluginZipPath);
+            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        }
+
         File.Delete(pluginZipPath);
 
         var patcher = new Patcher(DependenciesDir);

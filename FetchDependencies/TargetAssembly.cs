@@ -95,9 +95,27 @@ internal class TargetAssembly : IDisposable
                 types.Enqueue(nestedType);
         }
     }
+    
+    public bool ApiVersionMatches()
+    {
+        foreach (var type in Assembly.MainModule.Types)
+            if (type.Namespace == ApiVersion.NamespaceIdentifier && type.Name == "WasHere")
+                return true;
+        
+        return false;
+    }
 
     public void WriteOut()
     {
+        if (!ApiVersionMatches())
+        {
+            // Log.WriteLine($"[PatchWasHere] Adding type {ApiVersion.NamespaceIdentifier}.WasHere");
+            var wasHere = new TypeDefinition(ApiVersion.NamespaceIdentifier, "WasHere", TypeAttributes.Public | TypeAttributes.Class) {
+                BaseType = Assembly.MainModule.TypeSystem.Object
+            };
+            Assembly.MainModule.Types.Add(wasHere);
+        }
+
         var patchedPath = AssemblyPath + ".patched";
         Assembly.Write(patchedPath);
         Assembly.Dispose();

@@ -1,12 +1,9 @@
-using System.Diagnostics;
 using System.IO.Compression;
-using Mono.Cecil;
 
 namespace FetchDependencies;
 
 public class FetchDependencies
 {
-    private Version IinactApiVersion => new(1,0, 0);
     private string DependenciesDir { get; }
     private HttpClient HttpClient { get; }
 
@@ -43,7 +40,7 @@ public class FetchDependencies
         {
             using var plugin = new TargetAssembly(dllPath);
 
-            if (!IinactApiVersionMatches(plugin))
+            if (!plugin.ApiVersionMatches())
                 return true;
             
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
@@ -57,22 +54,6 @@ public class FetchDependencies
         {
             return false;
         }
-    }
-
-    private bool IinactApiVersionMatches(TargetAssembly targetAssembly)
-    {
-        var namespaceIdentifier = $"IINACT_V{IinactApiVersion.ToString().Replace(".", "_")}";
-        
-        foreach (var type in targetAssembly.Assembly.MainModule.Types)
-            if (type.Namespace == namespaceIdentifier && type.Name == "WasHere")
-                return true;
-
-        Trace.WriteLine($"[PatchWasHere] Adding type {namespaceIdentifier}.WasHere");
-        var wasHere = new TypeDefinition(namespaceIdentifier, "WasHere", TypeAttributes.Public | TypeAttributes.Class) {
-            BaseType = targetAssembly.Assembly.MainModule.TypeSystem.Object
-        };
-        targetAssembly.Assembly.MainModule.Types.Add(wasHere);
-        return false;
     }
 
     private void DownloadPlugin(string path)

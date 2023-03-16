@@ -1,18 +1,19 @@
+using System.Diagnostics;
 using System.IO.Compression;
+using Mono.Cecil;
 
 namespace FetchDependencies;
 
 public class FetchDependencies
 {
+    private Version IinactApiVersion => new(1,0, 0);
     private string DependenciesDir { get; }
     private HttpClient HttpClient { get; }
-    private Version IinactVersion { get; }
 
-    public FetchDependencies(string assemblyDir, HttpClient httpClient, Version iinactVersion)
+    public FetchDependencies(string assemblyDir, HttpClient httpClient)
     {
         DependenciesDir = assemblyDir;
         HttpClient = httpClient;
-        IinactVersion = iinactVersion;
     }
 
     public void GetFfxivPlugin()
@@ -41,6 +42,10 @@ public class FetchDependencies
         try
         {
             using var plugin = new TargetAssembly(dllPath);
+
+            if (!IinactApiVersionMatches(plugin))
+                return true;
+            
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             var remoteVersionString = HttpClient
                                       .GetStringAsync("https://www.iinact.com/updater/version",
@@ -52,6 +57,22 @@ public class FetchDependencies
         {
             return false;
         }
+    }
+
+    private bool IinactApiVersionMatches(TargetAssembly targetAssembly)
+    {
+        var namespaceIdentifier = $"IINACT_V{IinactApiVersion.ToString().Replace(".", "_")}";
+        
+        foreach (var type in targetAssembly.Assembly.MainModule.Types)
+            if (type.Namespace == namespaceIdentifier && type.Name == "WasHere")
+                return true;
+
+        Trace.WriteLine($"[PatchWasHere] Adding type {namespaceIdentifier}.WasHere");
+        var wasHere = new TypeDefinition(namespaceIdentifier, "WasHere", TypeAttributes.Public | TypeAttributes.Class) {
+            BaseType = targetAssembly.Assembly.MainModule.TypeSystem.Object
+        };
+        targetAssembly.Assembly.MainModule.Types.Add(wasHere);
+        return false;
     }
 
     private void DownloadPlugin(string path)

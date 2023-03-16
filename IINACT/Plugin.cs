@@ -1,4 +1,3 @@
-using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game.Command;
 using Dalamud.Game.Network;
@@ -18,12 +17,12 @@ public sealed class Plugin : IDalamudPlugin
     public WindowSystem WindowSystem = new("IINACT");
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
-    [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; }
-    [PluginService] public static CommandManager CommandManager { get; private set; }
-    [PluginService] public static GameNetwork GameNetwork { get; private set; }
-    [PluginService] public static DataManager DataManager { get; private set; }
+    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; }
+    [PluginService] internal static CommandManager CommandManager { get; private set; }
+    [PluginService] internal static GameNetwork GameNetwork { get; private set; }
+    [PluginService] internal static DataManager DataManager { get; private set; }
     // ReSharper restore UnusedAutoPropertyAccessor.Local
-    public Configuration Configuration { get; init; }
+    internal Configuration Configuration { get; init; }
 
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
@@ -37,9 +36,7 @@ public sealed class Plugin : IDalamudPlugin
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
         
         var fetchDeps = new FetchDependencies.FetchDependencies(
-            assemblyDir: PluginInterface.AssemblyLocation.Directory!.FullName, 
-            httpClient: Util.HttpClient,
-            iinactVersion: Assembly.GetExecutingAssembly().GetName().Version);
+            PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
         
         try
         {
@@ -123,7 +120,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.IsOpen = true;
     }
 
-    private void EndEncounter(string command, string args)
+    private static void EndEncounter(string command, string args)
     {
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
     }

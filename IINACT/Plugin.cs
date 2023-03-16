@@ -1,4 +1,4 @@
-using Advanced_Combat_Tracker;
+using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game.Command;
 using Dalamud.Game.Network;
@@ -7,8 +7,6 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Utility;
 using IINACT.Windows;
-using Machina.FFXIV.Dalamud;
-using RainbowMage.OverlayPlugin;
 
 namespace IINACT;
 
@@ -18,39 +16,48 @@ public sealed class Plugin : IDalamudPlugin
     private const string EndEncCommandName = "/endenc";
     public Label OverlayPluginStatus = new();
     public WindowSystem WindowSystem = new("IINACT");
+    
+    // ReSharper disable UnusedAutoPropertyAccessor.Local
+    [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; }
+    [PluginService] public static CommandManager CommandManager { get; private set; }
+    [PluginService] public static GameNetwork GameNetwork { get; private set; }
+    [PluginService] public static DataManager DataManager { get; private set; }
+    // ReSharper restore UnusedAutoPropertyAccessor.Local
+    public Configuration Configuration { get; init; }
 
-    public Plugin(
-        [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-        [RequiredVersion("1.0")] CommandManager commandManager,
-        [RequiredVersion("1.0")] GameNetwork gameNetwork,
-        [RequiredVersion("1.0")] DataManager dataManager
-    )
+    private ConfigWindow ConfigWindow { get; init; }
+    private MainWindow MainWindow { get; init; }
+
+    private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
+    private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
+    public string Name => "IINACT";
+
+    public Plugin()
     {
-        PluginInterface = pluginInterface;
-        CommandManager = commandManager;
-        GameNetwork = gameNetwork;
-        DataManager = dataManager;
-
-        DalamudClient.GameNetwork = GameNetwork;
-
+        Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
+        
         var fetchDeps = new FetchDependencies.FetchDependencies(
-            PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
+            assemblyDir: PluginInterface.AssemblyLocation.Directory!.FullName, 
+            httpClient: Util.HttpClient,
+            iinactVersion: Assembly.GetExecutingAssembly().GetName().Version);
+        
         try
         {
             fetchDeps.GetFfxivPlugin();
         }
         catch
         {
+            // TODO: log and handle errors here
             return;
         }
 
-        ActGlobals.oFormActMain = new FormActMain();
+        Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
 
         if (Directory.Exists(Configuration.LogFilePath))
-            ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
+            Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
 
@@ -76,19 +83,6 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
     }
 
-    private DalamudPluginInterface PluginInterface { get; init; }
-    private CommandManager CommandManager { get; init; }
-    private GameNetwork GameNetwork { get; init; }
-    private DataManager DataManager { get; init; }
-    public Configuration Configuration { get; init; }
-
-    private ConfigWindow ConfigWindow { get; init; }
-    private MainWindow MainWindow { get; init; }
-
-    private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
-    private PluginMain OverlayPlugin { get; set; }
-    public string Name => "IINACT";
-
     public void Dispose()
     {
         FfxivActPluginWrapper.Dispose();
@@ -105,21 +99,21 @@ public sealed class Plugin : IDalamudPlugin
 
     private void InitOverlayPlugin()
     {
-        var container = new TinyIoCContainer();
-        var logger = new Logger();
+        var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
+        var logger = new RainbowMage.OverlayPlugin.Logger();
         container.Register(logger);
-        container.Register<ILogger>(logger);
+        container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
-        OverlayPlugin = new PluginMain(
+        OverlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
         container.Register(OverlayPlugin);
-        ActGlobals.oFormActMain.OverlayPluginContainer = container;
+        Advanced_Combat_Tracker.ActGlobals.oFormActMain.OverlayPluginContainer = container;
 
         OverlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
 
-        var registry = container.Resolve<Registry>();
+        var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
         MainWindow.OverlayPresets = registry.OverlayPresets;
-        var overlayPluginConfig = container.Resolve<IPluginConfig>();
+        var overlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         MainWindow.OverlayPluginConfig = overlayPluginConfig;
         ConfigWindow.OverlayPluginConfig = overlayPluginConfig;
     }
@@ -131,7 +125,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void EndEncounter(string command, string args)
     {
-        ActGlobals.oFormActMain.EndCombat(false);
+        Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
     }
 
     private void DrawUI()

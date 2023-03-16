@@ -1,18 +1,19 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 
 namespace FetchDependencies;
 
 public class FetchDependencies
 {
-    private readonly HttpClient HttpClient;
+    private string DependenciesDir { get; }
+    private HttpClient HttpClient { get; }
+    private Version IinactVersion { get; }
 
-    public FetchDependencies(string assemblyDir, HttpClient httpClient)
+    public FetchDependencies(string assemblyDir, HttpClient httpClient, Version iinactVersion)
     {
         DependenciesDir = assemblyDir;
         HttpClient = httpClient;
+        IinactVersion = iinactVersion;
     }
-
-    public string DependenciesDir { get; }
 
     public void GetFfxivPlugin()
     {

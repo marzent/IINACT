@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
+using RainbowMage.OverlayPlugin.WebSocket;
 
 namespace RainbowMage.OverlayPlugin.EventSources
 {
@@ -115,7 +116,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     return result;
                 }
 
-                var wsServer = container.Resolve<WSServer>();
+                var wsServer = container.Resolve<WSServerController>();
 
                 if (!wsServer.IsRunning())
                 {

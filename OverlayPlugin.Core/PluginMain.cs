@@ -12,6 +12,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
 using RainbowMage.OverlayPlugin.Overlays;
+using RainbowMage.OverlayPlugin.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -106,7 +107,7 @@ namespace RainbowMage.OverlayPlugin
                 SaveConfig();
 
                 this._label.Text = @"Init Phase 1: WSServer";
-                _container.Register(new WSServer(_container));
+                _container.Register(new WSServerController(_container));
 
 #if DEBUG
                 _logger.Log(LogLevel.Debug, "Component init and config load took {0}s.", watch.Elapsed.TotalSeconds);
@@ -243,7 +244,7 @@ namespace RainbowMage.OverlayPlugin
                         if (Config.WSServerRunning)
                         {
                             this._label.Text = @"Init Phase 2: WSServer";
-                            _container.Resolve<WSServer>().Start();
+                            _container.Resolve<WSServerController>().Start();
                         }
 
                         this._label.Text = @"Init Phase 2: Save timer";
@@ -345,7 +346,7 @@ namespace RainbowMage.OverlayPlugin
 
             try
             {
-                _container.Resolve<WSServer>().Stop();
+                _container.Resolve<WSServerController>().Stop();
             }
             catch (Exception) { }
 

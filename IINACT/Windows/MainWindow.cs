@@ -1,4 +1,6 @@
 using System.Numerics;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -8,13 +10,16 @@ public class MainWindow : Window, IDisposable
 {
     private readonly Plugin Plugin;
     private int selectedOverlayIndex;
+    
+    private const float MinWidth = 420;
+    private const float Height = 170;
 
     public MainWindow(Plugin plugin) : base("IINACT")
     {
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(430, 170),
-            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+            MinimumSize = new Vector2(MinWidth, Height),
+            MaximumSize = new Vector2(float.MaxValue, Height)
         };
         SizeCondition = ImGuiCond.Always;
 
@@ -29,13 +34,15 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Text("OverlayPlugin Status:");
-        ImGui.SameLine(165);
+        ImGui.TextColored(ImGuiColors.DalamudGrey, "OverlayPlugin Status:");
+        ImGuiHelpers.ScaledRelativeSameLine(155);
         ImGui.Text(Plugin.OverlayPluginStatus.Text);
         ImGui.Spacing();
 
+        var comboWidth = ImGui.GetWindowWidth() * 0.8f;
+
         var selectedOverlayName = OverlayNames?[selectedOverlayIndex] ?? "";
-        ImGui.SetNextItemWidth(340);
+        ImGui.SetNextItemWidth(comboWidth);
         if (ImGui.BeginCombo("Overlay", selectedOverlayName))
         {
             for (var i = 0; i < OverlayNames?.Length; i++)
@@ -60,7 +67,7 @@ public class MainWindow : Window, IDisposable
                 overlayURL += selectedOverlay?.Options;
         }
 
-        ImGui.SetNextItemWidth(340);
+        ImGui.SetNextItemWidth(comboWidth);
         ImGui.InputText("URL", ref overlayURL, 1000, ImGuiInputTextFlags.ReadOnly);
 
         ImGui.Spacing();
@@ -75,9 +82,10 @@ public class MainWindow : Window, IDisposable
         if (Server?.Failed ?? false)
             serverStatus = Server.LastException.Message;
         
-        ImGui.Text($"WebSocket Server:");
-        ImGui.SameLine(165);
+        ImGui.TextColored(ImGuiColors.DalamudGrey,$"WebSocket Server:");
+        ImGuiHelpers.ScaledRelativeSameLine(155);
         ImGui.Text(serverStatus);
+        ImGui.GetWindowDpiScale();
 
         if (Server?.Running ?? false)
         {

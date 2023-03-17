@@ -1,24 +1,28 @@
 #nullable enable
-using Advanced_Combat_Tracker;
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
-using RainbowMage.OverlayPlugin.WebSocket.Handlers;
-
+using Advanced_Combat_Tracker;
 
 namespace RainbowMage.OverlayPlugin.WebSocket;
 
 public class WSServerController
 {
-    private TinyIoCContainer Container{ get; }
+    public EventHandler<StateChangedArgs>? OnStateChanged;
+
+    public WSServerController(TinyIoCContainer container)
+    {
+        Container = container;
+        Logger = container.Resolve<ILogger>();
+        Config = container.Resolve<IPluginConfig>();
+    }
+
+    private TinyIoCContainer Container { get; }
     private ILogger Logger { get; }
     private OverlayServer? Server { get; set; }
     private IPluginConfig Config { get; }
     public bool Failed { get; private set; }
-    private ConcurrentDictionary<Guid, IHandler> ConnectionHandler { get; } = new();
-
-    public EventHandler<StateChangedArgs>? OnStateChanged;
+    public bool Running => Server?.IsAccepting ?? false;
 
     public void Stop()
     {
@@ -33,12 +37,28 @@ public class WSServerController
         }
         catch (Exception e)
         {
-            Log(LogLevel.Error, Resources.WSShutdownError, e);
+            Logger.Log(LogLevel.Error, Resources.WSShutdownError, e);
         }
 
         Failed = false;
 
         OnStateChanged?.Invoke(null, new StateChangedArgs(false, false));
+    }
+
+    public void Restart()
+    {
+        try
+        {
+            Server?.Restart();
+        }
+        catch (Exception e)
+        {
+            Logger.Log(LogLevel.Error, Resources.WSStartFailed, e);
+        }
+
+        Failed = false;
+
+        OnStateChanged?.Invoke(null, new StateChangedArgs(true, false));
     }
 
     public bool IsRunning()
@@ -49,13 +69,6 @@ public class WSServerController
     public bool IsSSLPossible()
     {
         return File.Exists(GetCertPath());
-    }
-
-    public WSServerController(TinyIoCContainer container)
-    {
-        Container = container;
-        Logger = container.Resolve<ILogger>();
-        Config = container.Resolve<IPluginConfig>();
     }
 
     public void Start()
@@ -72,13 +85,13 @@ public class WSServerController
 
             Server = new OverlayServer(address, Config.WSServerPort, Container);
             Server.Start();
-            
+
             OnStateChanged?.Invoke(this, new StateChangedArgs(true, false));
         }
         catch (Exception e)
         {
             Failed = true;
-            Log(LogLevel.Error, Resources.WSStartFailed, e);
+            Logger.Log(LogLevel.Error, Resources.WSStartFailed, e);
             OnStateChanged?.Invoke(this, new StateChangedArgs(false, true));
         }
     }
@@ -86,13 +99,9 @@ public class WSServerController
     public string GetModernUrl(string url)
     {
         if (url.Contains("?"))
-        {
             url += "&";
-        }
         else
-        {
             url += "?";
-        }
 
         url += "OVERLAY_WS=ws";
         if (Config.WSServerSSL) url += "s";
@@ -116,20 +125,15 @@ public class WSServerController
         return path;
     }
 
-    private void Log(LogLevel level, string msg, params object[] args)
-    {
-        Logger.Log(level, msg, args);
-    }
-
     public class StateChangedArgs : EventArgs
     {
-        public bool Running { get; private set; }
-        public bool Failed { get; private set; }
-
         public StateChangedArgs(bool Running, bool Failed)
         {
             this.Running = Running;
             this.Failed = Failed;
         }
+
+        public bool Running { get; private set; }
+        public bool Failed { get; private set; }
     }
 }

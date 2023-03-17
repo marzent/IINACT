@@ -44,18 +44,18 @@ jobs:
         $repo.DownloadLinkUpdate = $repo.DownloadLinkInstall
         $repo | ConvertTo-Json | % { "[`n" + $_ + "`n]" } | Set-Content 'repo.json'
     - name: Create Release
-      if: ${{ vars.RELEASE_VERSION != '0.0.0.0' }}
+      if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ vars.RELEASE_VERSION }}
-        release_name: IINACT ${{ vars.RELEASE_VERSION }}
+        tag_name: v${{ env.RELEASE_VERSION }}
+        release_name: IINACT ${{ env.RELEASE_VERSION }}
         draft: false
         prerelease: false
     - name: Upload Release Asset
-      if: ${{ vars.RELEASE_VERSION != '0.0.0.0' }}
+      if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
       env:
@@ -66,14 +66,14 @@ jobs:
         asset_name: IINACT.zip
         asset_content_type: application/zip
     - name: Commit repo.json
-      if: ${{ vars.RELEASE_VERSION != '0.0.0.0' }}
+      if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       run: |
         git config --global user.name "Actions User"
         git config --global user.email "actions@github.com"
         git fetch origin main
         git checkout main
         git add repo.json
-        git commit -m "[CI] Updating repo.json for ${{ vars.RELEASE_VERSION }}" || true
+        git commit -m "[CI] updating repo.json for ${{ env.RELEASE_VERSION }}" || true
         git push origin main   
     
     

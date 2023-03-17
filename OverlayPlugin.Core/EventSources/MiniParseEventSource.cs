@@ -118,7 +118,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
                 var wsServer = container.Resolve<ServerController>();
 
-                if (!wsServer.IsRunning())
+                if (!wsServer.Running)
                 {
                     result["$error"] = "WSServer is not running";
                     return result;

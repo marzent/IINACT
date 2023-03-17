@@ -50,11 +50,6 @@ public class ServerController
         Start();
     }
 
-    public bool IsRunning()
-    {
-        return Server?.IsAccepting ?? false;
-    }
-
     public bool IsSSLPossible()
     {
         return File.Exists(GetCertPath());

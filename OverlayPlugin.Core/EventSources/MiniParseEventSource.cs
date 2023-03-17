@@ -116,7 +116,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     return result;
                 }
 
-                var wsServer = container.Resolve<WSServerController>();
+                var wsServer = container.Resolve<ServerController>();
 
                 if (!wsServer.IsRunning())
                 {

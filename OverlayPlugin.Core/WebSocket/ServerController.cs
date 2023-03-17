@@ -6,11 +6,11 @@ using Advanced_Combat_Tracker;
 
 namespace RainbowMage.OverlayPlugin.WebSocket;
 
-public class WSServerController
+public class ServerController
 {
     public EventHandler<StateChangedArgs>? OnStateChanged;
 
-    public WSServerController(TinyIoCContainer container)
+    public ServerController(TinyIoCContainer container)
     {
         Container = container;
         Logger = container.Resolve<ILogger>();
@@ -22,17 +22,20 @@ public class WSServerController
     private OverlayServer? Server { get; set; }
     private IPluginConfig Config { get; }
     public bool Failed { get; private set; }
+    public Exception? LastException { get; private set; }
     public bool Running => Server?.IsAccepting ?? false;
+    public string? Address => Server?.Address;
+    public int? Port => Server?.Port;
 
     public void Stop()
     {
         try
         {
             Server?.Stop();
-            Server?.Dispose();
         }
         catch (Exception e)
         {
+            LastException = e;
             Logger.Log(LogLevel.Error, Resources.WSShutdownError, e);
         }
 
@@ -43,19 +46,8 @@ public class WSServerController
 
     public void Restart()
     {
-        try
-        {
-            Server?.Restart();
-        }
-        catch (Exception e)
-        {
-            Failed = true;
-            Logger.Log(LogLevel.Error, Resources.WSStartFailed, e);
-        }
-
-        Failed = false;
-
-        OnStateChanged?.Invoke(null, new StateChangedArgs(true, false));
+        Stop();
+        Start();
     }
 
     public bool IsRunning()
@@ -88,6 +80,7 @@ public class WSServerController
         catch (Exception e)
         {
             Failed = true;
+            LastException = e;
             Logger.Log(LogLevel.Error, Resources.WSStartFailed, e);
             OnStateChanged?.Invoke(this, new StateChangedArgs(false, true));
         }

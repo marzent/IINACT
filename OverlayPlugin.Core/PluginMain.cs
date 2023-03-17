@@ -107,7 +107,7 @@ namespace RainbowMage.OverlayPlugin
                 SaveConfig();
 
                 this._label.Text = @"Init Phase 1: WSServer";
-                _container.Register(new WSServerController(_container));
+                _container.Register(new ServerController(_container));
 
 #if DEBUG
                 _logger.Log(LogLevel.Debug, "Component init and config load took {0}s.", watch.Elapsed.TotalSeconds);
@@ -244,7 +244,7 @@ namespace RainbowMage.OverlayPlugin
                         if (Config.WSServerRunning)
                         {
                             this._label.Text = @"Init Phase 2: WSServer";
-                            _container.Resolve<WSServerController>().Start();
+                            _container.Resolve<ServerController>().Start();
                         }
 
                         this._label.Text = @"Init Phase 2: Save timer";
@@ -346,7 +346,7 @@ namespace RainbowMage.OverlayPlugin
 
             try
             {
-                _container.Resolve<WSServerController>().Stop();
+                _container.Resolve<ServerController>().Stop();
             }
             catch (Exception) { }
 

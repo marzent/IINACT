@@ -54,13 +54,13 @@ internal class SocketHandler : IHandler, IEventReceiver
 
         if (!data.ContainsKey("call")) return;
 
-        var msgType = data["call"].ToString();
+        var msgType = data["call"]?.ToString();
         switch (msgType)
         {
             case "subscribe":
                 try
                 {
-                    foreach (var item in data["events"].ToList())
+                    foreach (var item in data["events"]?.ToList()!)
                     {
                         Dispatcher.Subscribe(item.ToString(), this);
                     }

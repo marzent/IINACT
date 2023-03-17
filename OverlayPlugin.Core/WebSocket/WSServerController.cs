@@ -28,12 +28,8 @@ public class WSServerController
     {
         try
         {
-            if (Server is not null)
-            {
-                Server.Stop();
-                Server.Dispose();
-                Server = null;
-            }
+            Server?.Stop();
+            Server?.Dispose();
         }
         catch (Exception e)
         {
@@ -53,6 +49,7 @@ public class WSServerController
         }
         catch (Exception e)
         {
+            Failed = true;
             Logger.Log(LogLevel.Error, Resources.WSStartFailed, e);
         }
 

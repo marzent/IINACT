@@ -58,7 +58,7 @@ internal class LegacyHandler : IHandler, IEventReceiver
                 return;
             case "LogLine":
                 Session.SendTextAsync("{\"type\":\"broadcast\",\"msgtype\":\"Chat\",\"msg\":" +
-                                  SerializeObject(e["rawLine"].ToString()) + "}");
+                                  SerializeObject(e["rawLine"]?.ToString()) + "}");
                 return;
             case "ChangeZone":
                 Session.SendTextAsync("{\"type\":\"broadcast\",\"msgtype\":\"ChangeZone\",\"msg\":" +
@@ -93,7 +93,7 @@ internal class LegacyHandler : IHandler, IEventReceiver
 
         if (!data.ContainsKey("type") || !data.ContainsKey("msgtype")) return;
 
-        switch (data["msgtype"].ToString())
+        switch (data["msgtype"]?.ToString())
         {
             case "Capture":
                 Logger.Log(LogLevel.Warning, "ACTWS Capture is not supported outside of overlays.");

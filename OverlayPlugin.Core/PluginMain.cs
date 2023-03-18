@@ -30,7 +30,7 @@ namespace RainbowMage.OverlayPlugin
         private ILogger _logger;
         private Label _label;
 
-        private string _configPath;
+        internal string ConfigPath { get; private set; }
         private Timer _configSaveTimer;
 
         internal PluginConfig Config { get; private set; }
@@ -64,7 +64,7 @@ namespace RainbowMage.OverlayPlugin
                 this._label = pluginStatusText;
                 this._label.Text = @"Init Phase 1: Infrastructure";
 
-                this._configPath = configPath;
+                this.ConfigPath = configPath;
 
 #if DEBUG
                 _logger.Log(LogLevel.Warning, "##################################");
@@ -442,8 +442,8 @@ namespace RainbowMage.OverlayPlugin
         /// <returns></returns>
         private string GetConfigPath(bool xml = false)
         {
-            Directory.CreateDirectory(_configPath);
-            var path = Path.Combine(_configPath, "RainbowMage.OverlayPlugin.config." + (xml ? "xml" : "json"));
+            Directory.CreateDirectory(ConfigPath);
+            var path = Path.Combine(ConfigPath, "RainbowMage.OverlayPlugin.config." + (xml ? "xml" : "json"));
 
             return path;
         }

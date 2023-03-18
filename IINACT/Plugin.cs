@@ -1,6 +1,7 @@
 using Dalamud.Data;
 using Dalamud.Game.Command;
 using Dalamud.Game.Network;
+using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -27,6 +28,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    private FileDialogManager FileDialogManager { get; init; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
@@ -34,6 +36,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
+        FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
         
         var fetchDeps = new FetchDependencies.FetchDependencies(
@@ -89,15 +92,17 @@ public sealed class Plugin : IDalamudPlugin
     private RainbowMage.OverlayPlugin.PluginMain InitOverlayPlugin()
     {
         var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
+        
         var logger = new RainbowMage.OverlayPlugin.Logger();
         container.Register(logger);
         container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
         container.Register(Util.HttpClient);
+        container.Register(FileDialogManager);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
-        container.Register(OverlayPlugin);
+        container.Register(overlayPlugin);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.OverlayPluginContainer = container;
         
         Task.Run(() =>
@@ -126,6 +131,7 @@ public sealed class Plugin : IDalamudPlugin
     private void DrawUI()
     {
         WindowSystem.Draw();
+        FileDialogManager.Draw();
     }
 
     public void DrawConfigUI()

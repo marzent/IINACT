@@ -9,18 +9,19 @@ using IINACT.Windows;
 
 namespace IINACT;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin
 {
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
-    public Label OverlayPluginStatus = new();
-    public WindowSystem WindowSystem = new("IINACT");
+    public readonly Label OverlayPluginStatus = new();
+    public readonly WindowSystem WindowSystem = new("IINACT");
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
-    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; }
-    [PluginService] internal static CommandManager CommandManager { get; private set; }
-    [PluginService] internal static GameNetwork GameNetwork { get; private set; }
-    [PluginService] internal static DataManager DataManager { get; private set; }
+    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] internal static CommandManager CommandManager { get; private set; } = null!;
+    [PluginService] internal static GameNetwork GameNetwork { get; private set; } = null!;
+    [PluginService] internal static DataManager DataManager { get; private set; } = null!;
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; init; }
 
@@ -38,15 +39,7 @@ public sealed class Plugin : IDalamudPlugin
         var fetchDeps = new FetchDependencies.FetchDependencies(
             PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
         
-        try
-        {
-            fetchDeps.GetFfxivPlugin();
-        }
-        catch
-        {
-            // TODO: log and handle errors here
-            return;
-        }
+        fetchDeps.GetFfxivPlugin();
 
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
 
@@ -57,8 +50,7 @@ public sealed class Plugin : IDalamudPlugin
             Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
-
-        Task.Run(InitOverlayPlugin);
+        OverlayPlugin = InitOverlayPlugin();
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
@@ -94,24 +86,31 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(EndEncCommandName);
     }
 
-    private void InitOverlayPlugin()
+    private RainbowMage.OverlayPlugin.PluginMain InitOverlayPlugin()
     {
         var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
         var logger = new RainbowMage.OverlayPlugin.Logger();
         container.Register(logger);
         container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
-        OverlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
+        container.Register(Util.HttpClient);
+
+        var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
         container.Register(OverlayPlugin);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.OverlayPluginContainer = container;
+        
+        Task.Run(() =>
+        {
+            overlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
 
-        OverlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
+            var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
+            MainWindow.OverlayPresets = registry.OverlayPresets;
+            MainWindow.Server = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+        });
 
-        var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
-        MainWindow.OverlayPresets = registry.OverlayPresets;
-        MainWindow.Server = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
-        ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+        return overlayPlugin;
     }
 
     private void OnCommand(string command, string args)

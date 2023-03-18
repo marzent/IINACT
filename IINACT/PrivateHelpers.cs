@@ -8,7 +8,7 @@ public static class PrivateHelpers
     {
         var pi = obj.GetType()
                     .GetProperty(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        return (T)pi.GetValue(obj, null)!;
+        return (T)pi?.GetValue(obj, null)!;
     }
 
     public static T GetField<T>(this object obj, string propName)
@@ -21,7 +21,7 @@ public static class PrivateHelpers
             t = t.BaseType;
         }
 
-        return (T)fi.GetValue(obj)!;
+        return (T)fi?.GetValue(obj)!;
     }
 
     public static void SetProperty<T>(this object obj, string propName, T val)
@@ -49,7 +49,7 @@ public static class PrivateHelpers
             t = t.BaseType;
         }
 
-        fi.SetValue(obj, val);
+        fi?.SetValue(obj, val);
     }
 
     public static MethodInfo? GetMethod(this object obj, string methodName)
@@ -62,6 +62,6 @@ public static class PrivateHelpers
     public static object? CallMethod(this object obj, string methodName, object?[]? parameters)
     {
         var method = GetMethod(obj, methodName);
-        return method.Invoke(obj, parameters);
+        return method?.Invoke(obj, parameters);
     }
 }

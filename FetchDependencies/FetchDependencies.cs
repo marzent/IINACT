@@ -28,7 +28,7 @@ public class FetchDependencies
         {
             ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
-        catch (InvalidDataException ex) 
+        catch (InvalidDataException) 
         {
             File.Delete(pluginZipPath);
             DownloadPlugin(pluginZipPath);

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -60,7 +61,7 @@ internal class SocketHandler : IHandler, IEventReceiver
             case "subscribe":
                 try
                 {
-                    foreach (var item in data["events"]?.ToList()!)
+                    foreach (var item in data["events"]?.ToList() ?? new List<JToken>())
                     {
                         Dispatcher.Subscribe(item.ToString(), this);
                     }
@@ -74,7 +75,7 @@ internal class SocketHandler : IHandler, IEventReceiver
             case "unsubscribe":
                 try
                 {
-                    foreach (var item in data["events"].ToList())
+                    foreach (var item in data["events"]?.ToList() ?? new List<JToken>())
                     {
                         Dispatcher.Unsubscribe(item.ToString(), this);
                     }

@@ -143,11 +143,13 @@ namespace RainbowMage.OverlayPlugin.EventSources
         private string ChooseDirectory()
         {
             return null;
+            /* TODO reimplement in dalamud
             var dialog = new FolderBrowserDialog();
             var result = dialog.ShowDialog(ActGlobals.oFormActMain);
             if (result != DialogResult.OK)
                 return null;
             return dialog.SelectedPath;
+            */
         }
 
         public override void LoadConfig(IPluginConfig config)
@@ -468,16 +470,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
                                                               System.Net.SecurityProtocolType.Tls11 |
                                                               System.Net.SecurityProtocolType.Tls12;
 
-            var data_file_paths = new List<string>();
+            var dataFilePaths = new List<string>();
             try
             {
-                var data_dir_manifest = new Uri(new Uri(url), "data/manifest.txt");
-                var manifest_reader = new StringReader(web.DownloadString(data_dir_manifest));
-                for (var line = manifest_reader.ReadLine(); line != null; line = manifest_reader.ReadLine())
+                var dataDirManifest = new Uri(new Uri(url), "data/manifest.txt");
+                var manifestReader = new StringReader(web.DownloadString(dataDirManifest));
+                for (var line = manifestReader.ReadLine(); line != null; line = manifestReader.ReadLine())
                 {
                     line = line.Trim();
                     if (line.Length > 0)
-                        data_file_paths.Add(line);
+                        dataFilePaths.Add(line);
                 }
             }
             catch (System.Net.WebException e)
@@ -509,16 +511,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 LogError("Unable to read manifest file: " + e.Message);
             }
 
-            if (data_file_paths.Count > 0)
+            if (dataFilePaths.Count > 0)
             {
-                var file_data = new Dictionary<string, string>();
-                foreach (var data_filename in data_file_paths)
+                var fileData = new Dictionary<string, string>();
+                foreach (var dataFilename in dataFilePaths)
                 {
                     try
                     {
-                        var file_path = new Uri(new Uri(url), "data/" + data_filename);
-                        file_data[data_filename] = web.DownloadString(file_path);
-                        LogInfo("Read file " + data_filename);
+                        var filePath = new Uri(new Uri(url), "data/" + dataFilename);
+                        fileData[dataFilename] = web.DownloadString(filePath);
+                        LogInfo("Read file " + dataFilename);
                     }
                     catch (Exception e)
                     {
@@ -526,7 +528,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     }
                 }
 
-                return file_data;
+                return fileData;
             }
 
             return null;

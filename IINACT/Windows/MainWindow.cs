@@ -80,7 +80,7 @@ public class MainWindow : Window, IDisposable
             serverStatus = $"Listening on {Server?.Address}:{Server?.Port}";
 
         if (Server?.Failed ?? false)
-            serverStatus = Server.LastException.Message;
+            serverStatus = Server.LastException?.Message ?? "Failed";
         
         ImGui.TextColored(ImGuiColors.DalamudGrey,$"WebSocket Server:");
         ImGuiHelpers.ScaledRelativeSameLine(155);

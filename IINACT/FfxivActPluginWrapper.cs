@@ -26,8 +26,8 @@ public class FfxivActPluginWrapper : IDisposable
     public readonly ProcessManager ProcessManager;
     public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
     public ParseSettings ParseSettings = null!;
-    public IDataRepository Repository;
-    public IDataSubscription Subscription;
+    public readonly IDataRepository Repository;
+    public readonly IDataSubscription Subscription;
 
     public FfxivActPluginWrapper(Configuration configuration, ClientLanguage dalamudClientLanguage)
     {
@@ -65,13 +65,13 @@ public class FfxivActPluginWrapper : IDisposable
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
     }
 
-    private Language clientLanguage =>
+    private Language ClientLanguage =>
         dalamudClientLanguage switch
         {
-            ClientLanguage.Japanese => Language.Japanese,
-            ClientLanguage.English => Language.English,
-            ClientLanguage.German => Language.German,
-            ClientLanguage.French => Language.French,
+            Dalamud.ClientLanguage.Japanese => Language.Japanese,
+            Dalamud.ClientLanguage.English => Language.English,
+            Dalamud.ClientLanguage.German => Language.German,
+            Dalamud.ClientLanguage.French => Language.French,
             _ => Language.English
         };
 
@@ -102,7 +102,7 @@ public class FfxivActPluginWrapper : IDisposable
         {
             DisableDamageShield = configuration.DisableDamageShield,
             DisableCombinePets = configuration.DisableCombinePets,
-            LanguageID = clientLanguage,
+            LanguageID = ClientLanguage,
             ParseFilter = (ParseFilterMode)configuration.ParseFilterMode,
             SimulateIndividualDoTCrits = configuration.SimulateIndividualDoTCrits,
             ShowRealDoTTicks = configuration.ShowRealDoTTicks,
@@ -162,9 +162,9 @@ public class FfxivActPluginWrapper : IDisposable
         ffxivActPlugin.DataSubscription.ZoneChanged += OnZoneChanged;
     }
 
-    private static void OnZoneChanged(uint ZoneID, string ZoneName)
+    private static void OnZoneChanged(uint zoneId, string zoneName)
     {
-        ActGlobals.oFormActMain.ChangeZone(ZoneName);
+        ActGlobals.oFormActMain.ChangeZone(zoneName);
     }
 
     private static void OnProcessException(DateTime timestamp, string text) { }

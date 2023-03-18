@@ -118,7 +118,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public void WriteExceptionLog(Exception ex, string MoreInfo)
     {
-        var value = $"***** {DateTime.Now.ToString("s")} - {MoreInfo}\n{ex}\n{Environment.StackTrace}\n*****";
+        var value = $"***** {DateTime.Now:s} - {MoreInfo}\n{ex}\n{Environment.StackTrace}\n*****";
         Trace.WriteLine(value);
     }
 
@@ -231,7 +231,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
                 if (!flag2)
                 {
-                    var start = !(lastZoneRecord.Label == CurrentZone) ? Time : lastZoneRecord.StartTime;
+                    var start = lastZoneRecord.Label != CurrentZone ? Time : lastZoneRecord.StartTime;
                     ActiveZone = new ZoneData(start, CurrentZone, true, false, false);
                     var index = ZoneList.Count;
                     for (var j = 1; j < ZoneList.Count; j++)

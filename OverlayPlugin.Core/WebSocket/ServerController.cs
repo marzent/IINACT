@@ -112,10 +112,10 @@ public class ServerController
 
     public class StateChangedArgs : EventArgs
     {
-        public StateChangedArgs(bool Running, bool Failed)
+        public StateChangedArgs(bool running, bool failed)
         {
-            this.Running = Running;
-            this.Failed = Failed;
+            this.Running = running;
+            this.Failed = failed;
         }
 
         public bool Running { get; private set; }

@@ -1,25 +1,26 @@
 using Dalamud.Configuration;
 using Dalamud.Plugin;
+using Newtonsoft.Json;
 
 namespace IINACT;
 
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
-    [NonSerialized]
-    private DalamudPluginInterface? PluginInterface;
+    [JsonIgnore]
+    private DalamudPluginInterface? PluginInterface { get; set; }
 
     public int ParseFilterMode { get; set; }
 
-    public bool DisableDamageShield { get; set; } = false;
+    public bool DisableDamageShield { get; set; }
 
-    public bool DisableCombinePets { get; set; } = false;
+    public bool DisableCombinePets { get; set; }
 
-    public bool SimulateIndividualDoTCrits { get; set; } = false;
+    public bool SimulateIndividualDoTCrits { get; set; }
 
-    public bool ShowRealDoTTicks { get; set; } = false;
+    public bool ShowRealDoTTicks { get; set; }
 
-    public bool ShowDebug { get; set; } = false;
+    public bool ShowDebug { get; set; }
 
     public string? LogFilePath { get; set; }
 
@@ -32,6 +33,6 @@ public class Configuration : IPluginConfiguration
 
     public void Save()
     {
-        PluginInterface!.SavePluginConfig(this);
+        PluginInterface?.SavePluginConfig(this);
     }
 }

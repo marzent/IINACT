@@ -60,7 +60,7 @@ namespace RainbowMage.OverlayPlugin
         {
             var container = GetContainer();
             var logger = container.Resolve<ILogger>();
-            var obj = (T)typeof(T).GetConstructor(new Type[] { typeof(ILogger) }).Invoke(new object[] { logger });
+            var obj = (T)typeof(T).GetConstructor(new Type[] { typeof(ILogger) })?.Invoke(new object[] { logger });
             container.Resolve<Registry>().StartEventSource(obj);
         }
 

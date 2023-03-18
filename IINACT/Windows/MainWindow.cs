@@ -8,7 +8,8 @@ namespace IINACT.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private readonly Plugin Plugin;
+    private Plugin Plugin { get; init; }
+
     private int selectedOverlayIndex;
     
     private const float MinWidth = 420;
@@ -47,7 +48,7 @@ public class MainWindow : Window, IDisposable
         {
             for (var i = 0; i < OverlayNames?.Length; i++)
             {
-                var currentOverlayName = OverlayNames[i] ?? "";
+                var currentOverlayName = OverlayNames?[i] ?? "";
                 if (ImGui.Selectable(currentOverlayName, currentOverlayName == selectedOverlayName))
                     selectedOverlayIndex = i;
             }
@@ -64,7 +65,7 @@ public class MainWindow : Window, IDisposable
             else
                 overlayURL += $"?HOST_PORT=ws://{Server?.Address}:{Server?.Port}";
             if (!string.IsNullOrEmpty(selectedOverlay?.Options))
-                overlayURL += selectedOverlay?.Options;
+                overlayURL += selectedOverlay.Options;
         }
 
         ImGui.SetNextItemWidth(comboWidth);

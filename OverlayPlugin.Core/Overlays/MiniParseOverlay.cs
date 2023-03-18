@@ -9,7 +9,6 @@ namespace RainbowMage.OverlayPlugin.Overlays
         protected DateTime lastUrlChange;
         protected string lastLoadedUrl;
         protected System.Threading.Timer previewTimer;
-        private readonly FFXIVRepository repository;
 
         public bool Preview = false;
 

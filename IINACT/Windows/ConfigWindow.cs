@@ -8,7 +8,7 @@ namespace IINACT.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
-    private readonly Configuration Configuration;
+    private Configuration Configuration { get; init; }
 
     public ConfigWindow(Plugin plugin) : base("IINACT Configuration")
     {

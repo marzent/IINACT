@@ -1,13 +1,12 @@
 ﻿using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
-using RainbowMage.OverlayPlugin.NetworkProcessors;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace RainbowMage.OverlayPlugin.EventSources
 {
@@ -15,31 +14,31 @@ namespace RainbowMage.OverlayPlugin.EventSources
     {
         public CactbotEventSourceConfig Config { get; private set; }
 
-        private static int kFastTimerMilli = 16;
-        private static int kSlowTimerMilli = 300;
-        private static int kUberSlowTimerMilli = 3000;
+        private const int KFastTimerMilli = 16;
+        private const int KSlowTimerMilli = 300;
+        private const int KUberSlowTimerMilli = 3000;
 
-        private SemaphoreSlim log_lines_semaphore_ = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim logLinesSemaphore = new(1);
 
         // Not thread-safe, as OnLogLineRead may happen at any time. Use |log_lines_semaphore_| to access it.
-        private List<string> log_lines_ = new List<string>(40);
+        private List<string> logLines = new(40);
 
-        private List<string> import_log_lines_ = new List<string>(40);
+        private List<string> importLogLines = new(40);
 
-        // Used on the fast timer to avoid allocing List every time.
-        private List<string> last_log_lines_ = new List<string>(40);
-        private List<string> last_import_log_lines_ = new List<string>(40);
+        // Used on the fast timer to avoid allocating List every time.
+        private List<string> lastLogLines = new(40);
+        private List<string> lastImportLogLines = new(40);
 
         // When true, the update function should reset notify state back to defaults.
-        private bool reset_notify_state_ = false;
+        private bool resetNotifyState;
 
-        private System.Timers.Timer fast_update_timer_;
+        private System.Timers.Timer fastUpdateTimer;
 
         // Held while the |fast_update_timer_| is running.
-        private FFXIVProcess ffxiv_;
+        private FFXIVProcess ffxiv;
 
-        private string language_ = null;
-        private string pc_locale_ = null;
+        private string language;
+        private string pcLocale;
         private List<FileSystemWatcher> watchers;
 
         public const string ForceReloadEvent = "onForceReload";
@@ -58,7 +57,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         public void Wipe()
         {
-            DispatchToJS(new JSEvents.PartyWipeEvent());
+            DispatchToJs(new JSEvents.PartyWipeEvent());
         }
 
         public CactbotEventSource(TinyIoCContainer container)
@@ -82,21 +81,21 @@ namespace RainbowMage.OverlayPlugin.EventSources
             });
 
             // Broadcast onConfigChanged when a cactbotNotifyConfigChanged message occurs.
-            RegisterEventHandler("cactbotReloadOverlays", (msg) =>
+            RegisterEventHandler("cactbotReloadOverlays", (_) =>
             {
-                DispatchToJS(new JSEvents.ForceReloadEvent());
+                DispatchToJs(new JSEvents.ForceReloadEvent());
                 return null;
             });
             RegisterEventHandler("cactbotLoadUser", FetchUserFiles);
             RegisterEventHandler("cactbotReadDataFiles", FetchDataFiles);
-            RegisterEventHandler("cactbotRequestPlayerUpdate", (msg) =>
+            RegisterEventHandler("cactbotRequestPlayerUpdate", (_) =>
             {
-                notify_state_.player = null;
+                notifyState.Player = null;
                 return null;
             });
-            RegisterEventHandler("cactbotRequestState", (msg) =>
+            RegisterEventHandler("cactbotRequestState", (_) =>
             {
-                reset_notify_state_ = true;
+                resetNotifyState = true;
                 return null;
             });
             RegisterEventHandler("cactbotSay", (msg) =>
@@ -114,8 +113,10 @@ namespace RainbowMage.OverlayPlugin.EventSources
             {
                 if (Config.OverlayData.ContainsKey(msg["overlay"].ToString()))
                 {
-                    var ret = new JObject();
-                    ret["data"] = Config.OverlayData[msg["overlay"].ToString()];
+                    var ret = new JObject
+                    {
+                        ["data"] = Config.OverlayData[msg["overlay"].ToString()]
+                    };
                     return ret;
                 }
                 else
@@ -123,7 +124,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     return null;
                 }
             });
-            RegisterEventHandler("cactbotChooseDirectory", (msg) =>
+            RegisterEventHandler("cactbotChooseDirectory", (_) =>
             {
                 var ret = new JObject();
                 var data = ChooseDirectory();
@@ -175,17 +176,17 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // Our own timer with a higher frequency than OverlayPlugin since we want to see
             // the effect of log messages quickly.
             // TODO: Cleanup; Log messages are distributed through events and skip the update
-            //   loop. Memory scanning needs a high frequencey but that's handled by the
+            //   loop. Memory scanning needs a high frequency but that's handled by the
             //   MemoryProcessor classes which raise events.
             //   Everything else should be handled through events to avoid unnecessary polling.
             //   -- ngld
-            fast_update_timer_ = new System.Timers.Timer();
-            fast_update_timer_.Elapsed += (o, args) =>
+            fastUpdateTimer = new System.Timers.Timer();
+            fastUpdateTimer.Elapsed += (_, _) =>
             {
-                var timer_interval = kSlowTimerMilli;
+                var timerInterval = KSlowTimerMilli;
                 try
                 {
-                    timer_interval = SendFastRateEvents();
+                    timerInterval = SendFastRateEvents();
                 }
                 catch (Exception e)
                 {
@@ -195,65 +196,51 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     LogError("Source: " + e.Source);
                 }
 
-                fast_update_timer_.Interval = timer_interval;
+                fastUpdateTimer.Interval = timerInterval;
             };
-            fast_update_timer_.AutoReset = false;
+            fastUpdateTimer.AutoReset = false;
 
-            language_ = ffxiv.GetLocaleString();
-            pc_locale_ = System.Globalization.CultureInfo.CurrentUICulture.Name;
+            language = ffxiv.GetLocaleString();
+            pcLocale = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
-            var overlay = typeof(IOverlay).Assembly.GetName().Version;
+            var overlay = typeof(IOverlay).Assembly.GetName().Version!;
             var ffxivPluginVersion = ffxiv.GetPluginVersion();
-            var act = typeof(ActGlobals).Assembly.GetName().Version;
+            var act = typeof(ActGlobals).Assembly.GetName().Version!;
 
             // Print out version strings and locations to help users debug.
             LogInfo("OverlayPlugin: {0} {1}", overlay.ToString(), typeof(IOverlay).Assembly.Location);
             LogInfo("FFXIV Plugin: {0} {1}", ffxivPluginVersion.ToString(), ffxiv.GetPluginPath());
             LogInfo("ACT: {0} {1}", act.ToString(), typeof(ActGlobals).Assembly.Location);
 
-            if (language_ == null)
-            {
-                LogInfo("Parsing Plugin Language: {0}", "(unknown)");
-            }
-            else
-            {
-                LogInfo("Parsing Plugin Language: {0}", language_);
-            }
+            LogInfo("Parsing Plugin Language: {0}", language ?? "(unknown)");
 
-            if (pc_locale_ == null)
-            {
-                LogInfo("System Locale: {0}", "(unknown)");
-            }
-            else
-            {
-                LogInfo("System Locale: {0}", pc_locale_);
-            }
+            LogInfo("System Locale: {0}", pcLocale ?? "(unknown)");
 
             // Temporarily target cn if plugin is old v2.0.4.0
-            if (language_ == "cn" || ffxivPluginVersion.ToString() == "2.0.4.0")
+            if (language == "cn" || ffxivPluginVersion.ToString() == "2.0.4.0")
             {
-                ffxiv_ = new FFXIVProcessCn(container);
+                this.ffxiv = new FFXIVProcessCn(container);
                 LogInfo("Version: cn");
             }
-            else if (language_ == "ko")
+            else if (language == "ko")
             {
-                ffxiv_ = new FFXIVProcessKo(container);
+                this.ffxiv = new FFXIVProcessKo(container);
                 LogInfo("Version: ko");
             }
             else
             {
-                ffxiv_ = new FFXIVProcessIntl(container);
+                this.ffxiv = new FFXIVProcessIntl(container);
                 LogInfo("Version: intl");
             }
 
             // Incoming events.
             ActGlobals.oFormActMain.OnLogLineRead += OnLogLineRead;
 
-            fast_update_timer_.Interval = kFastTimerMilli;
-            fast_update_timer_.Start();
+            fastUpdateTimer.Interval = KFastTimerMilli;
+            fastUpdateTimer.Start();
 
             // Start watching files after the update check.
-            Config.WatchFileChangesChanged += (o, e) =>
+            Config.WatchFileChangesChanged += (_, _) =>
             {
                 if (Config.WatchFileChanges)
                 {
@@ -273,8 +260,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         public override void Stop()
         {
-            if (fast_update_timer_ != null)
-                fast_update_timer_.Stop();
+            fastUpdateTimer?.Stop();
 
             ActGlobals.oFormActMain.OnLogLineRead -= OnLogLineRead;
         }
@@ -286,84 +272,85 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private void OnLogLineRead(bool isImport, LogLineEventArgs args)
         {
-            log_lines_semaphore_.Wait();
+            logLinesSemaphore.Wait();
             if (isImport)
-                import_log_lines_.Add(args.logLine);
+                importLogLines.Add(args.logLine);
             else
-                log_lines_.Add(args.logLine);
-            log_lines_semaphore_.Release();
+                logLines.Add(args.logLine);
+            logLinesSemaphore.Release();
         }
 
         // Sends an event called |event_name| to javascript, with an event.detail that contains
         // the fields and values of the |detail| structure.
-        public void DispatchToJS(JSEvent detail)
+        public void DispatchToJs(JSEvent detail)
         {
-            var ev = new JObject();
-            ev["type"] = detail.EventName();
-            ev["detail"] = JObject.FromObject(detail);
+            var ev = new JObject
+            {
+                ["type"] = detail.EventName(),
+                ["detail"] = JObject.FromObject(detail)
+            };
             DispatchEvent(ev);
         }
 
         // Events that we want to update as soon as possible.  Return next time this should be called.
         private int SendFastRateEvents()
         {
-            if (reset_notify_state_)
-                notify_state_ = new NotifyState();
-            reset_notify_state_ = false;
+            if (resetNotifyState)
+                notifyState = new NotifyState();
+            resetNotifyState = false;
 
-            var game_exists = ffxiv_.FindProcess();
-            if (game_exists != notify_state_.game_exists)
+            var gameExists = ffxiv.FindProcess();
+            if (gameExists != notifyState.GameExists)
             {
-                notify_state_.game_exists = game_exists;
-                DispatchToJS(new JSEvents.GameExistsEvent(game_exists));
+                notifyState.GameExists = gameExists;
+                DispatchToJs(new JSEvents.GameExistsEvent(gameExists));
             }
 
-            bool game_active = game_active = ffxiv_.IsActive();
-            if (game_active != notify_state_.game_active)
+            var gameActive = ffxiv.IsActive();
+            if (gameActive != notifyState.GameActive)
             {
-                notify_state_.game_active = game_active;
-                DispatchToJS(new JSEvents.GameActiveChangedEvent(game_active));
+                notifyState.GameActive = gameActive;
+                DispatchToJs(new JSEvents.GameActiveChangedEvent(gameActive));
             }
 
             // Silently stop sending other messages if the ffxiv process isn't around.
-            if (!game_exists)
+            if (!gameExists)
             {
-                return kUberSlowTimerMilli;
+                return KUberSlowTimerMilli;
             }
 
             // onInCombatChangedEvent: Fires when entering or leaving combat.
-            var in_act_combat = ActGlobals.oFormActMain.InCombat;
-            var in_game_combat = ffxiv_.GetInGameCombat();
-            if (!notify_state_.in_act_combat.HasValue || in_act_combat != notify_state_.in_act_combat ||
-                !notify_state_.in_game_combat.HasValue || in_game_combat != notify_state_.in_game_combat)
+            var inActCombat = ActGlobals.oFormActMain.InCombat;
+            var inGameCombat = ffxiv.GetInGameCombat();
+            if (!notifyState.InActCombat.HasValue || inActCombat != notifyState.InActCombat ||
+                !notifyState.InGameCombat.HasValue || inGameCombat != notifyState.InGameCombat)
             {
-                notify_state_.in_act_combat = in_act_combat;
-                notify_state_.in_game_combat = in_game_combat;
-                DispatchToJS(new JSEvents.InCombatChangedEvent(in_act_combat, in_game_combat));
+                notifyState.InActCombat = inActCombat;
+                notifyState.InGameCombat = inGameCombat;
+                DispatchToJs(new JSEvents.InCombatChangedEvent(inActCombat, inGameCombat));
             }
 
             // onZoneChangedEvent: Fires when the player changes their current zone.
-            var zone_name = ActGlobals.oFormActMain.CurrentZone;
-            if (notify_state_.zone_name == null || !zone_name.Equals(notify_state_.zone_name))
+            var zoneName = ActGlobals.oFormActMain.CurrentZone;
+            if (notifyState.ZoneName == null || !zoneName.Equals(notifyState.ZoneName))
             {
-                notify_state_.zone_name = zone_name;
-                DispatchToJS(new JSEvents.ZoneChangedEvent(zone_name));
+                notifyState.ZoneName = zoneName;
+                DispatchToJs(new JSEvents.ZoneChangedEvent(zoneName));
             }
 
-            var now = DateTime.Now;
             // The |player| can be null, such as during a zone change.
-            var player = ffxiv_.GetSelfData();
+            var player = ffxiv.GetSelfData();
 
             // onPlayerDiedEvent: Fires when the player dies. All buffs/debuffs are
             // lost.
             if (player != null)
             {
                 var dead = player.hp == 0;
-                if (dead != notify_state_.dead)
+                if (dead != notifyState.Dead)
                 {
-                    notify_state_.dead = dead;
+                    notifyState.Dead = dead;
                     if (dead)
-                        DispatchToJS(new JSEvents.PlayerDiedEvent());
+                        DispatchToJs(new JSEvents.PlayerDiedEvent());
                 }
             }
 
@@ -371,52 +358,52 @@ namespace RainbowMage.OverlayPlugin.EventSources
             if (player != null)
             {
                 var send = false;
-                if (!player.Equals(notify_state_.player))
+                if (!player.Equals(notifyState.Player))
                 {
-                    notify_state_.player = player;
+                    notifyState.Player = player;
                     send = true;
                 }
 
-                var job = ffxiv_.GetJobSpecificData(player.job);
+                var job = ffxiv.GetJobSpecificData(player.job);
                 if (job != null)
                 {
-                    if (send || !JObject.DeepEquals(job, notify_state_.job_data))
+                    if (send || !JToken.DeepEquals(job, notifyState.JobData))
                     {
-                        notify_state_.job_data = job;
-                        var ev = new JSEvents.PlayerChangedEvent(player);
-                        ev.jobDetail = job;
-                        DispatchToJS(ev);
+                        notifyState.JobData = job;
+                        var ev = new JSEvents.PlayerChangedEvent(player)
+                        {
+                            jobDetail = job
+                        };
+                        DispatchToJs(ev);
                     }
                 }
                 else if (send)
                 {
                     // No job-specific data.
-                    DispatchToJS(new JSEvents.PlayerChangedEvent(player));
+                    DispatchToJs(new JSEvents.PlayerChangedEvent(player));
                 }
             }
 
             // onLogEvent: Fires when new combat log events from FFXIV are available. This fires after any
             // more specific events, some of which may involve parsing the logs as well.
-            List<string> logs;
-            List<string> import_logs;
-            log_lines_semaphore_.Wait();
-            logs = log_lines_;
-            log_lines_ = last_log_lines_;
-            import_logs = import_log_lines_;
-            import_log_lines_ = last_import_log_lines_;
+            logLinesSemaphore.Wait();
+            var logs = logLines;
+            logLines = lastLogLines;
+            var importLogs = importLogLines;
+            importLogLines = lastImportLogLines;
 
-            log_lines_semaphore_.Release();
+            logLinesSemaphore.Release();
 
             if (logs.Count > 0)
             {
-                DispatchToJS(new JSEvents.LogEvent(logs));
+                DispatchToJs(new JSEvents.LogEvent(logs));
                 logs.Clear();
             }
 
-            last_log_lines_ = logs;
-            last_import_log_lines_ = import_logs;
+            lastLogLines = logs;
+            lastImportLogLines = importLogs;
 
-            return game_active ? kFastTimerMilli : kSlowTimerMilli;
+            return gameActive ? KFastTimerMilli : KSlowTimerMilli;
         }
 
         // ILogger implementation.
@@ -463,18 +450,13 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // TODO: Reimplement
             // return new Dictionary<string, string>();
 
-            var web = new System.Net.WebClient();
-            web.Encoding = System.Text.Encoding.UTF8;
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.SystemDefault |
-                                                              System.Net.SecurityProtocolType.Tls |
-                                                              System.Net.SecurityProtocolType.Tls11 |
-                                                              System.Net.SecurityProtocolType.Tls12;
+            var client = container.Resolve<HttpClient>();
 
             var dataFilePaths = new List<string>();
             try
             {
                 var dataDirManifest = new Uri(new Uri(url), "data/manifest.txt");
-                var manifestReader = new StringReader(web.DownloadString(dataDirManifest));
+                var manifestReader = new StringReader(client.GetStringAsync(dataDirManifest).Result);
                 for (var line = manifestReader.ReadLine(); line != null; line = manifestReader.ReadLine())
                 {
                     line = line.Trim();
@@ -519,7 +501,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     try
                     {
                         var filePath = new Uri(new Uri(url), "data/" + dataFilename);
-                        fileData[dataFilename] = web.DownloadString(filePath);
+                        fileData[dataFilename] = client.GetStringAsync(filePath).Result;
                         LogInfo("Read file " + dataFilename);
                     }
                     catch (Exception e)
@@ -538,23 +520,24 @@ namespace RainbowMage.OverlayPlugin.EventSources
         {
             var result = GetDataFiles(msg["source"].ToString());
 
-            var container = new JObject();
-            container["files"] = result == null ? null : JObject.FromObject(result);
-
-            var output = new JObject();
-            output["detail"] = container;
+            var output = new JObject
+            {
+                ["detail"] = new JObject
+                {
+                    ["files"] = result == null ? null : JObject.FromObject(result)
+                }
+            };
 
             return output;
         }
 
-        private static string GetRelativePath(string top_dir, string filename)
+        private static string GetRelativePath(string topDir, string filename)
         {
             // TODO: .net 5.0 / .net core 2.0 has Path.GetRelativePath.
             // There's also a win api function we could call, but that's a bit gross.
             // However, this is an easy case where filename is known to be rooted in top_dir,
             // so use this hacky solution for now.  Hi, ngld.
-            string initial = filename;
-            filename = filename.Replace(top_dir, "");
+            filename = filename.Replace(topDir, "");
             // top_dir may or may not have a trailing slash, so remove that as well.
             // user_config.js expects filenames to not have a beginning slash.
             while (filename[0] == '\\' || filename[0] == '/')
@@ -562,21 +545,21 @@ namespace RainbowMage.OverlayPlugin.EventSources
             return filename;
         }
 
-        private Dictionary<string, string> GetLocalUserFiles(string config_dir, string overlay_name)
+        private Dictionary<string, string> GetLocalUserFiles(string configDir, string overlayName)
         {
-            if (string.IsNullOrEmpty(config_dir))
+            if (string.IsNullOrEmpty(configDir))
                 return null;
 
             // TODO: It's not great to have to load every js and css file in the user dir.
             // But most of the time they'll be short and there won't be many.  JS
             // could attempt to send an overlay name to C# code (and race with the
             // document ready event), but that's probably overkill.
-            var user_files = new Dictionary<string, string>();
-            string top_dir;
-            string sub_dir = null;
+            var userFiles = new Dictionary<string, string>();
+            string topDir;
+            string subDir = null;
             try
             {
-                top_dir = new Uri(config_dir).LocalPath;
+                topDir = new Uri(configDir).LocalPath;
             }
             catch (UriFormatException)
             {
@@ -589,16 +572,16 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // This is how remote user directories work.
             try
             {
-                if (!Directory.Exists(top_dir))
+                if (!Directory.Exists(topDir))
                 {
                     return null;
                 }
 
-                if (overlay_name != null)
+                if (overlayName != null)
                 {
-                    sub_dir = Path.Combine(top_dir, overlay_name);
-                    if (!Directory.Exists(sub_dir))
-                        sub_dir = null;
+                    subDir = Path.Combine(topDir, overlayName);
+                    if (!Directory.Exists(subDir))
+                        subDir = null;
                 }
             }
             catch (Exception e)
@@ -609,35 +592,34 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             try
             {
-                if (overlay_name == null)
-                    overlay_name = "*";
-                var filenames = Directory.EnumerateFiles(top_dir, $"{overlay_name}.js").Concat(
-                    Directory.EnumerateFiles(top_dir, $"{overlay_name}.css"));
-                if (sub_dir != null)
+                overlayName ??= "*";
+                var filenames = Directory.EnumerateFiles(topDir, $"{overlayName}.js").Concat(
+                    Directory.EnumerateFiles(topDir, $"{overlayName}.css"));
+                if (subDir != null)
                 {
                     filenames = filenames.Concat(
-                        Directory.EnumerateFiles(sub_dir, "*.js", SearchOption.AllDirectories)).Concat(
-                        Directory.EnumerateFiles(sub_dir, "*.css", SearchOption.AllDirectories));
+                        Directory.EnumerateFiles(subDir, "*.js", SearchOption.AllDirectories)).Concat(
+                        Directory.EnumerateFiles(subDir, "*.css", SearchOption.AllDirectories));
                 }
 
                 foreach (var filename in filenames)
                 {
                     //if (filename.Contains("-example."))
                     //    continue;
-                    user_files[GetRelativePath(top_dir, filename)] = File.ReadAllText(filename) +
+                    userFiles[GetRelativePath(topDir, filename)] = File.ReadAllText(filename) +
                                                                      $"\n//# sourceURL={filename}";
                 }
 
-                var textFilenames = Directory.EnumerateFiles(top_dir, "*.txt");
-                if (sub_dir != null)
+                var textFilenames = Directory.EnumerateFiles(topDir, "*.txt");
+                if (subDir != null)
                 {
                     textFilenames =
-                        textFilenames.Concat(Directory.EnumerateFiles(sub_dir, "*.txt", SearchOption.AllDirectories));
+                        textFilenames.Concat(Directory.EnumerateFiles(subDir, "*.txt", SearchOption.AllDirectories));
                 }
 
                 foreach (string filename in textFilenames)
                 {
-                    user_files[GetRelativePath(top_dir, filename)] = File.ReadAllText(filename);
+                    userFiles[GetRelativePath(topDir, filename)] = File.ReadAllText(filename);
                 }
             }
             catch (Exception e)
@@ -645,40 +627,40 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 LogError("User error file exception: {0}", e.ToString());
             }
 
-            return user_files;
+            return userFiles;
         }
 
 
         private void GetUserConfigDirAndFiles(
-            string source, string overlay_name, out string config_dir, out Dictionary<string, string> local_files)
+            string source, string overlayName, out string configDir, out Dictionary<string, string> localFiles)
         {
-            local_files = null;
-            config_dir = null;
+            localFiles = null;
+            configDir = null;
 
-            if (Config.UserConfigFile != null && Config.UserConfigFile != "")
+            if (!string.IsNullOrEmpty(Config.UserConfigFile))
             {
                 // Explicit user config directory specified.
-                config_dir = Config.UserConfigFile;
-                local_files = GetLocalUserFiles(config_dir, overlay_name);
+                configDir = Config.UserConfigFile;
+                localFiles = GetLocalUserFiles(configDir, overlayName);
             }
             else
             {
-                if (source != null && source != "")
+                if (!string.IsNullOrEmpty(source))
                 {
                     // First try a user directory relative to the html.
                     try
                     {
                         // TODO: this is wrong for ui/dps/overlays
                         // TODO: maybe replace this with the version checker get cactbot root
-                        var url_dir = Path.GetDirectoryName(new Uri(source).LocalPath);
-                        config_dir = Path.GetFullPath(url_dir + "\\..\\..\\user\\");
-                        local_files = GetLocalUserFiles(config_dir, overlay_name);
+                        var urlDir = Path.GetDirectoryName(new Uri(source).LocalPath);
+                        configDir = Path.GetFullPath(urlDir + "\\..\\..\\user\\");
+                        localFiles = GetLocalUserFiles(configDir, overlayName);
                     }
                     catch (Exception e)
                     {
                         LogError("Error checking html rel dir: {0}: {1}", source, e.ToString());
-                        config_dir = null;
-                        local_files = null;
+                        configDir = null;
+                        localFiles = null;
                     }
                 }
             }
@@ -686,42 +668,40 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private JObject FetchUserFiles(JObject msg)
         {
-            Dictionary<string, string> user_files;
-            var overlay_name = msg.ContainsKey("overlayName") ? msg["overlayName"].ToString() : null;
-            GetUserConfigDirAndFiles(msg["source"].ToString(), overlay_name, out var config_dir, out user_files);
+            var overlayName = msg.ContainsKey("overlayName") ? msg["overlayName"].ToString() : null;
+            GetUserConfigDirAndFiles(msg["source"].ToString(), overlayName, out var configDir, out var userFiles);
 
-            var result = new JObject();
-            result["userLocation"] = config_dir;
-            result["localUserFiles"] = user_files == null ? null : JObject.FromObject(user_files);
-
-            result["parserLanguage"] = language_;
-            result["systemLocale"] = pc_locale_;
-            result["displayLanguage"] = Config.DisplayLanguage;
-            // For backwards compatibility:
-            result["language"] = language_;
-
-            var response = new JObject();
-            response["detail"] = result;
+            var response = new JObject
+            {
+                ["detail"] = new JObject
+                {
+                    ["userLocation"] = configDir,
+                    ["localUserFiles"] = userFiles == null ? null : JObject.FromObject(userFiles),
+                    ["parserLanguage"] = language,
+                    ["systemLocale"] = pcLocale,
+                    ["displayLanguage"] = Config.DisplayLanguage,
+                    // For backwards compatibility:
+                    ["language"] = language
+                }
+            };
             return response;
         }
 
         private void StartFileWatcher()
         {
             watchers = new List<FileSystemWatcher>();
-            var paths = new List<string>();
-
-            paths.Add(Config.UserConfigFile);
+            var paths = new List<string> { Config.UserConfigFile };
 
             foreach (var path in paths)
             {
-                if (String.IsNullOrEmpty(path))
+                if (string.IsNullOrEmpty(path))
                     continue;
 
-                var watchDir = "";
+                string watchDir;
                 try
                 {
                     // Get canonical url for paths so that Directory.Exists will work properly.
-                    watchDir = Path.GetFullPath(Path.GetDirectoryName(new Uri(path).LocalPath));
+                    watchDir = Path.GetFullPath(Path.GetDirectoryName(new Uri(path).LocalPath)!);
                 }
                 catch
                 {
@@ -740,7 +720,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
                 // We only care about file changes. New or renamed files don't matter if we don't have a reference to them
                 // and adding a new reference causes an existing file to change.
-                watcher.Changed += (o, e) =>
+                watcher.Changed += (_, e) =>
                 {
                     DispatchEvent(JObject.FromObject(new
                     {
@@ -770,19 +750,19 @@ namespace RainbowMage.OverlayPlugin.EventSources
         // State that is tracked and sent to JS when it changes.
         private class NotifyState
         {
-            public bool added_dom_content_listener = false;
-            public bool dom_content_loaded = false;
-            public bool sent_data_dir = false;
-            public bool game_exists = false;
-            public bool game_active = false;
-            public bool? in_act_combat;
-            public bool? in_game_combat;
-            public bool dead = false;
-            public string zone_name = null;
-            public JObject job_data = new JObject();
-            public FFXIVProcess.EntityData player = null;
+            public bool AddedDomContentListener = false;
+            public bool DomContentLoaded = false;
+            public bool SentDataDir = false;
+            public bool GameExists;
+            public bool GameActive;
+            public bool? InActCombat;
+            public bool? InGameCombat;
+            public bool Dead;
+            public string ZoneName;
+            public JObject JobData = new();
+            public FFXIVProcess.EntityData Player;
         }
 
-        private NotifyState notify_state_ = new NotifyState();
+        private NotifyState notifyState = new();
     }
 } // namespace Cactbot

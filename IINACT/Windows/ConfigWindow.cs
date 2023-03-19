@@ -1,4 +1,6 @@
+using System.Net;
 using System.Numerics;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using RainbowMage.OverlayPlugin;
@@ -14,7 +16,7 @@ public class ConfigWindow : Window, IDisposable
     {
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(307, 147),
+            MinimumSize = new Vector2(307, 247),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -27,6 +29,45 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImGui.TextColored(ImGuiColors.DalamudGrey, "WebSocket Server");
+
+        var wsServerIp = OverlayPluginConfig?.WSServerIP ?? "";
+        ImGui.InputText("IP", ref wsServerIp, 100, ImGuiInputTextFlags.None);
+
+        if (IPAddress.TryParse(wsServerIp, out var address))
+        {
+            if (OverlayPluginConfig is not null)
+            {
+                OverlayPluginConfig.WSServerIP = address.ToString();
+                OverlayPluginConfig.Save();
+            }
+                
+        }
+        else if (wsServerIp == "*")
+            if (OverlayPluginConfig is not null)
+            {
+                OverlayPluginConfig.WSServerIP = "*";
+                OverlayPluginConfig.Save();
+            }
+
+        var wsServerPort = OverlayPluginConfig?.WSServerPort.ToString() ?? "";
+        ImGui.InputText("Port", ref wsServerPort, 100, ImGuiInputTextFlags.None);
+
+        if (int.TryParse(wsServerPort, out var port))
+        {
+            if (OverlayPluginConfig is not null)
+            {
+                OverlayPluginConfig.WSServerPort = port;
+                OverlayPluginConfig.Save();
+            }
+        }
+        
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        
+        ImGui.TextColored(ImGuiColors.DalamudGrey, "Parse Options");
+
         if (ImGui.BeginCombo("Parse Filter", Enum.GetName(typeof(ParseFilterMode), Configuration.ParseFilterMode)))
         {
             foreach (var filter in Enum.GetValues<ParseFilterMode>())

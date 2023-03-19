@@ -5,8 +5,10 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
+    env:
+      DALAMUD_HOME: /tmp/dalamud
+      DOTNET_NOLOGO: true
     steps:
     - uses: actions/checkout@v3
       with:
@@ -16,13 +18,19 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Download Dalamud
+      shell: pwsh
       run: |
         Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
-        Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
+        Expand-Archive -Force latest.zip /tmp/dalamud
     - name: Build
       run: dotnet build -c release
+    - name: Prepare Build Artifact
+      shell: pwsh
+      run: |
+        Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT.zip"
+        Expand-Archive -Force latest.zip Artifact
     - name: Upload IINACT
       uses: actions/upload-artifact@v3
       with:
         name: IINACT
-        path: IINACT/bin/Release/win-x64/IINACT/latest.zip
+        path: Artifact/*

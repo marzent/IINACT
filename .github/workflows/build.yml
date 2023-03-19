@@ -6,9 +6,11 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: '0.0.0.0'
+      DALAMUD_HOME: /tmp/dalamud
+      DOTNET_NOLOGO: true
     steps:
     - uses: actions/checkout@v3
       with:
@@ -18,17 +20,24 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Download Dalamud
+      shell: pwsh
       run: |
         Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
-        Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
+        Expand-Archive -Force latest.zip /tmp/dalamud
     - name: Build
       run: dotnet build -c release
+    - name: Prepare Build Artifact
+      shell: pwsh
+      run: |
+        Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT.zip"
+        Expand-Archive -Force latest.zip Artifact
     - name: Upload IINACT
       uses: actions/upload-artifact@v3
       with:
         name: IINACT
-        path: IINACT/bin/Release/win-x64/IINACT/latest.zip
+        path: Artifact/*
     - name: Update repo.json if needed
+      shell: pwsh
       run: |
         $repo = Get-Content 'repo.json' -raw | ConvertFrom-Json
         $build = Get-Content 'IINACT/bin/Release/win-x64/IINACT/IINACT.json' -raw | ConvertFrom-Json
@@ -43,26 +52,16 @@ jobs:
         $repo | ConvertTo-Json | % { "[`n" + $_ + "`n]" } | Set-Content 'repo.json'
     - name: Create Release
       if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
+        files: IINACT.zip
+        name: IINACT ${{ env.RELEASE_VERSION }}
         tag_name: v${{ env.RELEASE_VERSION }}
-        release_name: IINACT ${{ env.RELEASE_VERSION }}
-        draft: false
         prerelease: false
-    - name: Upload Release Asset
-      if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./IINACT/bin/Release/win-x64/IINACT/latest.zip
-        asset_name: IINACT.zip
-        asset_content_type: application/zip
+        append_body: true
+        body_path: .github/release-notices.md
+        generate_release_notes: true
+        fail_on_unmatched_files: true
     - name: Commit repo.json
       if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       run: |

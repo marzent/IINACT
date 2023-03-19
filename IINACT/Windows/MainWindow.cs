@@ -37,7 +37,7 @@ public class MainWindow : Window, IDisposable
     {
         ImGui.TextColored(ImGuiColors.DalamudGrey, "OverlayPlugin Status:");
         ImGuiHelpers.ScaledRelativeSameLine(155);
-        ImGui.Text(Plugin.OverlayPluginStatus.Text);
+        ImGui.Text(Plugin.OverlayPluginStatus);
         ImGui.Spacing();
 
         var comboWidth = ImGui.GetWindowWidth() * 0.8f;

@@ -1,4 +1,3 @@
-using Advanced_Combat_Tracker;
 using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
 using RainbowMage.OverlayPlugin.Integration;
@@ -28,7 +27,7 @@ namespace RainbowMage.OverlayPlugin
     {
         private TinyIoCContainer _container;
         private ILogger _logger;
-        private Label _label;
+        public string Status { get; private set; }
 
         internal string ConfigPath { get; private set; }
         private Timer _configSaveTimer;
@@ -55,14 +54,12 @@ namespace RainbowMage.OverlayPlugin
         /// <summary>
         /// プラグインが有効化されたときに呼び出されます。
         /// </summary>
-        /// <param name="pluginScreenSpace"></param>
-        /// <param name="pluginStatusText"></param>
-        public void InitPlugin(Label pluginStatusText, string configPath)
+        /// <param name="configPath"></param>
+        public void InitPlugin(string configPath)
         {
             try
             {
-                this._label = pluginStatusText;
-                this._label.Text = @"Init Phase 1: Infrastructure";
+                Status = @"Init Phase 1: Infrastructure";
 
                 this.ConfigPath = configPath;
 
@@ -91,7 +88,7 @@ namespace RainbowMage.OverlayPlugin
                 _container.Register(new Registry(_container));
                 _container.Register(new KeyboardHook(_container));
 
-                this._label.Text = @"Init Phase 1: Config";
+                Status = @"Init Phase 1: Config";
                 if (!LoadConfig())
                 {
                     _logger.Log(LogLevel.Error,
@@ -106,7 +103,7 @@ namespace RainbowMage.OverlayPlugin
 
                 SaveConfig();
 
-                this._label.Text = @"Init Phase 1: WSServer";
+                Status = @"Init Phase 1: WSServer";
                 _container.Register(new ServerController(_container));
 
 #if DEBUG
@@ -114,7 +111,7 @@ namespace RainbowMage.OverlayPlugin
                 watch.Reset();
 #endif
 
-                this._label.Text = @"Init Phase 1: Legacy message bus";
+                Status = @"Init Phase 1: Legacy message bus";
                 // プラグイン間のメッセージ関連
                 OverlayApi.BroadcastMessage += (o, e) =>
                 {
@@ -154,7 +151,7 @@ namespace RainbowMage.OverlayPlugin
 #endif
 
 
-                this._label.Text = @"Init Phase 1: Presets";
+                Status = @"Init Phase 1: Presets";
                 // Load our presets
                 try
                 {
@@ -192,7 +189,7 @@ namespace RainbowMage.OverlayPlugin
                 try
                 {
                     // ** Init phase 2
-                    this._label.Text = @"Init Phase 2: Integrations";
+                    Status = @"Init Phase 2: Integrations";
 
                     // Initialize the parser in the second phase since it needs the FFXIV plugin.
                     // If OverlayPlugin is placed above the FFXIV plugin, it won't be available in the first
@@ -223,34 +220,34 @@ namespace RainbowMage.OverlayPlugin
                     // addons. Plugins below OverlayPlugin wouldn't have been loaded in the first init phase.
                     // However, in the second phase all plugins have been loaded which means we can look for addons
                     // in that list.
-                    this._label.Text = @"Init Phase 2: Addons";
+                    Status = @"Init Phase 2: Addons";
                     LoadAddons();
 
-                    this._label.Text = @"Init Phase 2: Unstable new stuff";
+                    Status = @"Init Phase 2: Unstable new stuff";
                     _container.Register(new UnstableNewLogLines(_container));
 
-                    this._label.Text = @"Init Phase 2: UI";
+                    Status = @"Init Phase 2: UI";
                     try
                     {
                         // Now that addons have been loaded, we can finish the overlay setup.
-                        this._label.Text = @"Init Phase 2: Overlays";
+                        Status = @"Init Phase 2: Overlays";
 
                         InitializeOverlays();
 
-                        this._label.Text = @"Init Phase 2: Overlay tasks";
+                        Status = @"Init Phase 2: Overlay tasks";
 
                         // WSServer has to start after the LoadAddons() call because clients can connect immediately
                         // after it's initialized and that requires the event sources to be initialized.
                         if (Config.WSServerRunning)
                         {
-                            this._label.Text = @"Init Phase 2: WSServer";
+                            Status = @"Init Phase 2: WSServer";
                             _container.Resolve<ServerController>().Start();
                         }
 
-                        this._label.Text = @"Init Phase 2: Save timer";
+                        Status = @"Init Phase 2: Save timer";
                         _configSaveTimer.Start();
 
-                        this._label.Text = @"Initialised";
+                        Status = @"Initialised";
                         // Make the log small; startup was successful and there shouldn't be any error message to show.
                     }
                     catch (Exception ex)
@@ -351,7 +348,7 @@ namespace RainbowMage.OverlayPlugin
             catch (Exception) { }
 
             _logger.Log(LogLevel.Info, "DeInitPlugin: Finalized.");
-            if (this._label != null) this._label.Text = "Finalized.";
+            Status = "Finalized.";
         }
 
         private void LoadAddons()

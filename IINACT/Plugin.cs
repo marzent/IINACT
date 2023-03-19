@@ -13,9 +13,10 @@ namespace IINACT;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin
 {
+    public string Name => "IINACT";
+    
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
-    public readonly Label OverlayPluginStatus = new();
     public readonly WindowSystem WindowSystem = new("IINACT");
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -32,7 +33,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
-    public string Name => "IINACT";
+    internal string OverlayPluginStatus => OverlayPlugin.Status;
 
     public Plugin()
     {
@@ -107,7 +108,7 @@ public sealed class Plugin : IDalamudPlugin
         
         Task.Run(() =>
         {
-            overlayPlugin.InitPlugin(OverlayPluginStatus, PluginInterface.ConfigDirectory.FullName);
+            overlayPlugin.InitPlugin(PluginInterface.ConfigDirectory.FullName);
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
             MainWindow.OverlayPresets = registry.OverlayPresets;

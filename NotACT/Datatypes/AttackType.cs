@@ -663,7 +663,7 @@ public class AttackType : IComparable, IEquatable<AttackType>, IComparable<Attac
 
     public string GetColumnByName(string name)
     {
-        return ColumnDefs.ContainsKey(name) ? ColumnDefs[name].GetCellData(this) : string.Empty;
+        return ColumnDefs.TryGetValue(name, out var value) ? value.GetCellData(this) : string.Empty;
     }
 
     public Dictionary<int, int> GetSwingTypeCounts()
@@ -797,9 +797,9 @@ public class AttackType : IComparable, IEquatable<AttackType>, IComparable<Attac
             var num = 0;
             Debug.Assert(Left != null, nameof(Left) + " != null");
             Debug.Assert(Right != null, nameof(Right) + " != null");
-            if (ColumnDefs.ContainsKey(sort1)) num = ColumnDefs[sort1].SortComparer(Left, Right);
+            if (ColumnDefs.TryGetValue(sort1, out var value1)) num = value1.SortComparer(Left, Right);
 
-            if (num == 0 && ColumnDefs.ContainsKey(sort2)) num = ColumnDefs[sort2].SortComparer(Left, Right);
+            if (num == 0 && ColumnDefs.TryGetValue(sort2, out var value2)) num = value2.SortComparer(Left, Right);
 
             if (num == 0) num = Left.Damage.CompareTo(Right.Damage);
 

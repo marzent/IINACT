@@ -1,6 +1,7 @@
 using System.Net;
 using System.Numerics;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using RainbowMage.OverlayPlugin;
@@ -29,49 +30,24 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "WebSocket Server");
+        using var bar = ImRaii.TabBar("settingsTabs");
+        if (!bar) return;
 
-        var wsServerIp = OverlayPluginConfig?.WSServerIP ?? "";
-        ImGui.InputText("IP", ref wsServerIp, 100, ImGuiInputTextFlags.None);
-
-        if (IPAddress.TryParse(wsServerIp, out var address))
-        {
-            if (OverlayPluginConfig is not null)
-            {
-                OverlayPluginConfig.WSServerIP = address.ToString();
-                OverlayPluginConfig.Save();
-            }
-                
-        }
-        else if (wsServerIp == "*")
-            if (OverlayPluginConfig is not null)
-            {
-                OverlayPluginConfig.WSServerIP = "*";
-                OverlayPluginConfig.Save();
-            }
-
-        var wsServerPort = OverlayPluginConfig?.WSServerPort.ToString() ?? "";
-        ImGui.InputText("Port", ref wsServerPort, 100, ImGuiInputTextFlags.None);
-
-        if (int.TryParse(wsServerPort, out var port))
-        {
-            if (OverlayPluginConfig is not null)
-            {
-                OverlayPluginConfig.WSServerPort = port;
-                OverlayPluginConfig.Save();
-            }
-        }
+        DrawParseSettings();
+        DrawWebSocketSettings();
+    }
+    
+     private void DrawParseSettings()
+    {
+        using var tab = ImRaii.TabItem("Parser");
+        if (!tab) return;
         
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-        
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Parse Options");
-
-        if (ImGui.BeginCombo("Parse Filter", Enum.GetName(typeof(ParseFilterMode), Configuration.ParseFilterMode)))
+        if (ImGui.BeginCombo("Parse Filter",
+                             Enum.GetName(typeof(ParseFilterMode), Configuration.ParseFilterMode)))
         {
             foreach (var filter in Enum.GetValues<ParseFilterMode>())
-                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter), (ParseFilterMode)Configuration.ParseFilterMode == filter))
+                if (ImGui.Selectable(Enum.GetName(typeof(ParseFilterMode), filter),
+                                     (ParseFilterMode)Configuration.ParseFilterMode == filter))
                 {
                     Configuration.ParseFilterMode = (int)filter;
                     Configuration.Save();
@@ -123,6 +99,37 @@ public class ConfigWindow : Window, IDisposable
             Configuration.ShowRealDoTTicks = showRealDoTTicks;
             Configuration.Save();
         }
-
     }
+
+    private void DrawWebSocketSettings()
+    {
+        using var tab = ImRaii.TabItem("WebSocket Server");
+        if (!tab) return;
+        
+        var wsServerIp = OverlayPluginConfig?.WSServerIP ?? "";
+        ImGui.InputText("IP", ref wsServerIp, 100, ImGuiInputTextFlags.None);
+
+        if (IPAddress.TryParse(wsServerIp, out var address))
+        {
+            if (OverlayPluginConfig is not null)
+                OverlayPluginConfig.WSServerIP = address.ToString();
+        }
+        else if (wsServerIp == "*")
+        {
+            if (OverlayPluginConfig is not null)
+                OverlayPluginConfig.WSServerIP = "*";
+        }
+
+        var wsServerPort = OverlayPluginConfig?.WSServerPort.ToString() ?? "";
+        ImGui.InputText("Port", ref wsServerPort, 100, ImGuiInputTextFlags.None);
+
+        if (int.TryParse(wsServerPort, out var port))
+        {
+            if (OverlayPluginConfig is not null)
+                OverlayPluginConfig.WSServerPort = port;
+        }
+
+        OverlayPluginConfig?.Save();
+    }
+    
 }

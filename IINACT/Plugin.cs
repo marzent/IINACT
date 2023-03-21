@@ -29,7 +29,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
-    private FileDialogManager FileDialogManager { get; init; }
+    internal FileDialogManager FileDialogManager { get; init; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
@@ -49,9 +49,8 @@ public sealed class Plugin : IDalamudPlugin
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
-
-        if (Directory.Exists(Configuration.LogFilePath))
-            Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
+        
+        Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
         OverlayPlugin = InitOverlayPlugin();

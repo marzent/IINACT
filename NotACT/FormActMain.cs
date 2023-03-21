@@ -29,7 +29,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public FormActMain()
     {
         InitializeComponent();
-        AppDataFolder = new DirectoryInfo(Path.Combine(LogFilePath, "Data"));
+        AppDataFolder = new DirectoryInfo(".");
         ActGlobals.ActLocalization.Init();
         ActGlobals.ActLocalization.AddPrebuild();
         NotActMainFormatter.SetupEnvironment();
@@ -42,8 +42,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public List<ZoneData> ZoneList { get; set; } = new();
     public string LogFileFilter { get; set; } = "notact*.txt";
 
-    public string LogFilePath { get; set; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "IINACT");
+    public string LogFilePath { get; set; }
 
     public DirectoryInfo AppDataFolder { get; private set; }
     public ConcurrentQueue<string> LogQueue { get; private set; } = new();

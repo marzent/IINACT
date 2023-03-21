@@ -7,6 +7,9 @@ namespace IINACT;
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
+    public string DefaultLogFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "IINACT");
+    private string? logFilePath;
+
     [JsonIgnore]
     private DalamudPluginInterface? PluginInterface { get; set; }
 
@@ -22,7 +25,11 @@ public class Configuration : IPluginConfiguration
 
     public bool ShowDebug { get; set; }
 
-    public string? LogFilePath { get; set; }
+    public string LogFilePath
+    {
+        get => Directory.Exists(logFilePath) ? logFilePath : DefaultLogFilePath;
+        set => logFilePath = value;
+    }
 
     public int Version { get; set; } = 0;
 

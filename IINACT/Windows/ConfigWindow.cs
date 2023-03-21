@@ -1,6 +1,8 @@
 using System.Net;
 using System.Numerics;
-using Dalamud.Interface.Colors;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
+using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -12,16 +14,18 @@ namespace IINACT.Windows;
 public class ConfigWindow : Window, IDisposable
 {
     private Configuration Configuration { get; init; }
+    private FileDialogManager FileDialogManager { get; init; }
 
     public ConfigWindow(Plugin plugin) : base("IINACT Configuration")
     {
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(307, 247),
+            MinimumSize = new Vector2(307, 207),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
         Configuration = plugin.Configuration;
+        FileDialogManager = plugin.FileDialogManager;
     }
 
     public IPluginConfig? OverlayPluginConfig { get; set; }
@@ -42,6 +46,22 @@ public class ConfigWindow : Window, IDisposable
         using var tab = ImRaii.TabItem("Parser");
         if (!tab) return;
         
+        ImGui.Spacing();
+        var elementWidth = ImGui.GetWindowWidth() - (150 * ImGuiHelpers.GlobalScale);
+        var logFilePath = Configuration.LogFilePath;
+        ImGui.SetNextItemWidth(elementWidth);
+        ImGui.InputText("Log File Path", ref logFilePath, 200, ImGuiInputTextFlags.ReadOnly);
+        ImGui.SameLine();
+        if (ImGuiComponents.DisabledButton(FontAwesomeIcon.Folder))
+        {
+            FileDialogManager.OpenFolderDialog("Pick a folder to save logs to", (success, path) =>
+            {
+                if (!success) return;
+                Configuration.LogFilePath = path;
+            }, Configuration.LogFilePath);
+        }
+        ImGui.Spacing();
+        ImGui.SetNextItemWidth(elementWidth);
         if (ImGui.BeginCombo("Parse Filter",
                              Enum.GetName(typeof(ParseFilterMode), Configuration.ParseFilterMode)))
         {
@@ -79,8 +99,7 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
 
-        if (!showDebug)
-            return;
+        if (!showDebug) return;
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -106,6 +125,7 @@ public class ConfigWindow : Window, IDisposable
         using var tab = ImRaii.TabItem("WebSocket Server");
         if (!tab) return;
         
+        ImGui.Spacing();
         var wsServerIp = OverlayPluginConfig?.WSServerIP ?? "";
         ImGui.InputText("IP", ref wsServerIp, 100, ImGuiInputTextFlags.None);
 
@@ -131,5 +151,5 @@ public class ConfigWindow : Window, IDisposable
 
         OverlayPluginConfig?.Save();
     }
-    
+
 }

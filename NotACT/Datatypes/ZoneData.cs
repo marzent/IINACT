@@ -14,7 +14,6 @@ public class ZoneData : IComparable<ZoneData>
                 : new EncounterData(ActGlobals.charName, ActGlobals.Trans["mergedEncounterTerm-all"], this)
         };
         this.PopulateAll = PopulateAll;
-        if (!this.PopulateAll) return;
     }
 
     public bool PopulateAll { get; set; }

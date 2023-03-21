@@ -204,6 +204,13 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public void EndCombat(bool export)
     {
         if (inCombat) inCombat = false;
+        if (ActiveZone.ActiveEncounter.Active)
+        {
+            if (ActiveZone.PopulateAll)
+                ActiveZone.Items[0].EndCombat(Finalize: false);
+
+            ActiveZone.ActiveEncounter.EndCombat(Finalize: true);
+        }
     }
 
     public bool SelectiveListGetSelected(string Player)

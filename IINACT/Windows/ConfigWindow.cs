@@ -58,6 +58,7 @@ public class ConfigWindow : Window, IDisposable
             {
                 if (!success) return;
                 Configuration.LogFilePath = path;
+                Configuration.Save();
             }, Configuration.LogFilePath);
         }
         ImGui.Spacing();

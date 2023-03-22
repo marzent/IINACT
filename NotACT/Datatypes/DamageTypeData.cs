@@ -10,7 +10,7 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
 
     private readonly string tag;
 
-    private TimeSpan cDuration;
+    private TimeSpan cachedDuration;
 
     private bool durationCached;
 
@@ -31,15 +31,15 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colTypeCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.SqlDataType;
-                num++;
+                colTypeCollection[i] = columnDef.Value.SqlDataType;
+                i++;
             }
 
-            return array;
+            return colTypeCollection;
         }
     }
 
@@ -47,15 +47,15 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colHeaderCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.SqlDataName;
-                num++;
+                colHeaderCollection[i] = columnDef.Value.SqlDataName;
+                i++;
             }
 
-            return array;
+            return colHeaderCollection;
         }
     }
 
@@ -65,15 +65,15 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.GetSqlData(this);
-                num++;
+                colCollection[i] = columnDef.Value.GetSqlData(this);
+                i++;
             }
 
-            return array;
+            return colCollection;
         }
     }
 
@@ -89,96 +89,95 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
     {
         get
         {
-            if (Parent != null && Parent.Parent.StartTimes.Count > 1)
+            if (Parent == null || Parent.Parent.StartTimes.Count <= 1)
             {
-                if (durationCached) return cDuration;
+                if (EndTime > StartTime)
+                    return EndTime - StartTime;
 
-                Items.TryGetValue(ActGlobals.Trans["attackTypeTerm-all"], out var value);
-                if (value == null) return TimeSpan.Zero;
-
-                value.Items.Sort(MasterSwing.CompareTime);
-                var list = new List<DateTime>();
-                var list2 = new List<DateTime>();
-                var num = 0;
-                for (var i = 0; i < Parent.Parent.StartTimes.Count; i++)
-                {
-                    if (num < 0) num = 0;
-
-                    if (i < Parent.Parent.EndTimes.Count && Parent.Parent.EndTimes[i] < value.Items[num].Time) continue;
-
-                    for (var j = num; j < value.Items.Count; j++)
-                    {
-                        if (list.Count == list2.Count)
-                        {
-                            if (i == Parent.Parent.StartTimes.Count - 1 && Parent.Parent.EndTimes.Count + 1 ==
-                                Parent.Parent.StartTimes.Count)
-                            {
-                                if (value.Items[j].Time >= Parent.Parent.StartTimes[i] &&
-                                    value.Items[j].Time <= Parent.Parent.EndTime)
-                                {
-                                    list.Add(value.Items[j].Time);
-                                    num = j;
-                                }
-                            }
-                            else if (value.Items[j].Time >= Parent.Parent.StartTimes[i] &&
-                                     value.Items[j].Time <= Parent.Parent.EndTimes[i])
-                            {
-                                list.Add(value.Items[j].Time);
-                                num = j;
-                            }
-                        }
-
-                        if (list.Count - 1 == list2.Count)
-                        {
-                            MasterSwing masterSwing = null!;
-                            for (var k = j; k < value.Items.Count; k++)
-                            {
-                                masterSwing = value.Items[k];
-                                if (k + 1 == value.Items.Count)
-                                {
-                                    num = k - 1;
-                                    break;
-                                }
-
-                                if (Parent.Parent.StartTimes.Count > i + 1 &&
-                                    value.Items[k + 1].Time >= Parent.Parent.StartTimes[i + 1])
-                                {
-                                    num = k - 1;
-                                    break;
-                                }
-                            }
-
-                            list2.Add(masterSwing.Time);
-                            break;
-                        }
-
-                        if (i < Parent.Parent.EndTimes.Count && value.Items[j].Time > Parent.Parent.EndTimes[i]) break;
-                    }
-                }
-
-                if (list.Count - 1 == list2.Count) list2.Add(value.Items[^1].Time);
-
-                if (list.Count != list2.Count)
-                {
-                    throw new Exception(string.Format(
-                                            "Personal Duration failure.  StartTimes: {0}/{2} EndTimes: {1}/{3}",
-                                            list.Count, list2.Count, Parent.Parent.StartTimes.Count,
-                                            Parent.Parent.EndTimes.Count));
-                }
-
-                var timeSpan = default(TimeSpan);
-                for (var l = 0; l < list.Count; l++) timeSpan += list2[l] - list[l];
-
-                cDuration = timeSpan;
-                durationCached = true;
-                return cDuration;
+                return TimeSpan.Zero;
             }
 
-            if (EndTime > StartTime) return EndTime - StartTime;
+            if (durationCached)
+                return cachedDuration;
 
-            return TimeSpan.Zero;
+            Items.TryGetValue(ActGlobals.Trans["attackTypeTerm-all"], out var value);
+            if (value == null)
+                return TimeSpan.Zero;
+
+            value.Items.Sort(MasterSwing.CompareTime);
+
+            var startTimes = Parent.Parent.StartTimes;
+            var endTimes = Parent.Parent.EndTimes;
+            var masterSwings = value.Items;
+            var swingIndex = 0;
+            var swingCount = masterSwings.Count;
+
+            var startTimesCount = startTimes.Count;
+            var endTimesCount = endTimes.Count;
+            var list = new List<DateTime>();
+            var list2 = new List<DateTime>();
+            for (var i = 0; i < startTimesCount; i++)
+            {
+                if (swingIndex < 0)
+                    swingIndex = 0;
+
+                if (i < endTimesCount && endTimes[i] < masterSwings[swingIndex].Time)
+                    continue;
+
+                for (var j = swingIndex; j < swingCount; j++)
+                {
+                    var swing = masterSwings[j];
+                    if (list.Count == list2.Count)
+                    {
+                        var isLastStart = i == startTimesCount - 1 && endTimesCount + 1 == startTimesCount;
+                        if ((isLastStart && swing.Time >= startTimes[i] && swing.Time <= EndTime)
+                            || (!isLastStart && swing.Time >= startTimes[i] && swing.Time <= endTimes[i]))
+                        {
+                            list.Add(swing.Time);
+                            swingIndex = j;
+                        }
+                    }
+
+                    if (list.Count - 1 == list2.Count)
+                    {
+                        MasterSwing lastSwing = swing;
+                        for (var k = j; k < swingCount; k++)
+                        {
+                            lastSwing = masterSwings[k];
+                            if (k + 1 == swingCount
+                                || (startTimesCount > i + 1 && masterSwings[k + 1].Time >= startTimes[i + 1]))
+                            {
+                                swingIndex = k - 1;
+                                break;
+                            }
+                        }
+
+                        list2.Add(lastSwing.Time);
+                        break;
+                    }
+
+                    if (i < endTimesCount && swing.Time > endTimes[i])
+                        break;
+                }
+            }
+
+            if (list.Count - 1 == list2.Count)
+                list2.Add(masterSwings[^1].Time);
+
+            if (list.Count != list2.Count)
+                throw new Exception($"Personal Duration failure. StartTimes: {list.Count}/{startTimesCount} "
+                                    + $"EndTimes: {list2.Count}/{endTimesCount}");
+
+            var duration = TimeSpan.Zero;
+            for (var l = 0; l < list.Count; l++)
+                duration += list2[l] - list[l];
+
+            cachedDuration = duration;
+            durationCached = true;
+            return cachedDuration;
         }
     }
+
 
     public string DurationS => Duration.Hours == 0
                                    ? $"{Duration.Minutes:00}:{Duration.Seconds:00}"
@@ -214,9 +213,7 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
         {
             try
             {
-                float num = Hits;
-                float num2 = Swings;
-                return num / num2 * 100f;
+                return Hits / Swings * 100f;
             }
             catch
             {
@@ -253,20 +250,11 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
 
     public Dictionary<string, object> Tags { get; set; } = new();
 
-    public int CompareTo(DamageTypeData? other)
-    {
-        return Damage.CompareTo(other!.Damage);
-    }
+    public int CompareTo(DamageTypeData? other) => Damage.CompareTo(other!.Damage);
 
-    public bool Equals(DamageTypeData? other)
-    {
-        return Type.Equals(other!.Type);
-    }
+    public bool Equals(DamageTypeData? other) => Type.Equals(other!.Type);
 
-    public void InvalidateCachedValues()
-    {
-        durationCached = false;
-    }
+    public void InvalidateCachedValues() => durationCached = false;
 
     public void InvalidateCachedValues(bool Recursive)
     {
@@ -300,15 +288,10 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
         return col.GetCellData(this);
     }
 
-    public override string ToString()
-    {
-        return tag;
-    }
+    public override string ToString() => tag;
 
-    public override int GetHashCode()
-    {
-        return Items.Values.Aggregate(0L, (current, t) => current + t.GetHashCode()).GetHashCode();
-    }
+    public override int GetHashCode() => 
+        Items.Values.Aggregate(0L, (current, t) => current + t.GetHashCode()).GetHashCode();
 
     public class ColumnDef
     {

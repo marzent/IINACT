@@ -92,15 +92,15 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colTypeCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.SqlDataType;
-                num++;
+                colTypeCollection[i] = columnDef.Value.SqlDataType;
+                i++;
             }
 
-            return array;
+            return colTypeCollection;
         }
     }
 
@@ -108,15 +108,15 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colHeaderCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.SqlDataName;
-                num++;
+                colHeaderCollection[i] = columnDef.Value.SqlDataName;
+                i++;
             }
 
-            return array;
+            return colHeaderCollection;
         }
     }
 
@@ -126,15 +126,15 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
     {
         get
         {
-            var array = new string[ColumnDefs.Count];
-            var num = 0;
+            var colCollection = new string[ColumnDefs.Count];
+            var i = 0;
             foreach (var columnDef in ColumnDefs)
             {
-                array[num] = columnDef.Value.GetSqlData(this);
-                num++;
+                colCollection[i] = columnDef.Value.GetSqlData(this);
+                i++;
             }
 
-            return array;
+            return colCollection;
         }
     }
 
@@ -147,32 +147,36 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
 
     public int CompareTo(MasterSwing? other)
     {
-        var num = 0;
         Debug.Assert(other != null, nameof(other) + " != null");
-        if (ColumnDefs.ContainsKey(ActGlobals.aTSort)) num = ColumnDefs[ActGlobals.aTSort].SortComparer(this, other);
 
-        if (num == 0 && ColumnDefs.ContainsKey(ActGlobals.aTSort2))
-            num = ColumnDefs[ActGlobals.aTSort2].SortComparer(this, other);
-
-        if (num == 0)
+        // Compare based on the sort column defined in ActGlobals.aTSort.
+        if (ColumnDefs.TryGetValue(ActGlobals.aTSort, out var sortColumn))
         {
-            num = TimeSorter == other.TimeSorter
-                      ? Time.CompareTo(other.Time)
-                      : TimeSorter.CompareTo(other.TimeSorter);
+            var result = sortColumn.SortComparer(this, other);
+            if (result != 0) return result;
         }
 
-        return num;
+        // Compare based on the secondary sort column defined in ActGlobals.aTSort2.
+        if (ColumnDefs.TryGetValue(ActGlobals.aTSort2, out var secondarySortColumn))
+        {
+            var result = secondarySortColumn.SortComparer(this, other);
+            if (result != 0) return result;
+        }
+
+        // Compare based on the time sorter.
+        var timeSorterResult = TimeSorter.CompareTo(other.TimeSorter);
+        if (timeSorterResult != 0) return timeSorterResult;
+
+        // If all else fails, compare based on the time of the swings.
+        return Time.CompareTo(other.Time);
     }
 
-    public string GetColumnByName(string name)
-    {
-        return ColumnDefs.ContainsKey(name) ? ColumnDefs[name].GetCellData(this) : string.Empty;
-    }
 
-    public override string ToString()
-    {
-        return $"{Time:s}|{Damage}|{Attacker}|{Special}|{AttackType}|{DamageType}|{Victim}";
-    }
+    public string GetColumnByName(string name) => 
+        ColumnDefs.ContainsKey(name) ? ColumnDefs[name].GetCellData(this) : string.Empty;
+
+    public override string ToString() => 
+        $"{Time:s}|{Damage}|{Attacker}|{Special}|{AttackType}|{DamageType}|{Victim}";
 
     public override bool Equals(object? obj)
     {
@@ -182,18 +186,15 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
         return text.Equals(value);
     }
 
-    public override int GetHashCode()
-    {
-        return ToString().GetHashCode();
-    }
+    public override int GetHashCode() => 
+        ToString().GetHashCode();
 
     internal static int CompareTime(MasterSwing Left, MasterSwing Right)
     {
-        var num = Left.TimeSorter.CompareTo(Right.TimeSorter);
-        if (num == 0) num = Left.Time.CompareTo(Right.Time);
-
-        return num;
+        var timeSorterComparison = Left.TimeSorter.CompareTo(Right.TimeSorter);
+        return timeSorterComparison != 0 ? timeSorterComparison : Left.Time.CompareTo(Right.Time);
     }
+
 
     public class ColumnDef
     {
@@ -243,21 +244,25 @@ public class MasterSwing : IComparable, IComparable<MasterSwing>
 
         public int Compare(MasterSwing? Left, MasterSwing? Right)
         {
-            var num = 0;
             Debug.Assert(Left != null, nameof(Left) + " != null");
             Debug.Assert(Right != null, nameof(Right) + " != null");
-            if (ColumnDefs.ContainsKey(sort1)) num = ColumnDefs[sort1].SortComparer(Left, Right);
 
-            if (num == 0 && ColumnDefs.ContainsKey(sort2)) num = ColumnDefs[sort2].SortComparer(Left, Right);
-
-            if (num == 0)
+            if (ColumnDefs.TryGetValue(sort1, out var comparer1))
             {
-                num = Left.TimeSorter == Right.TimeSorter
-                          ? Left.Time.CompareTo(Right.Time)
-                          : Left.TimeSorter.CompareTo(Right.TimeSorter);
+                var result = comparer1.SortComparer(Left, Right);
+                if (result != 0) return result;
             }
 
-            return num;
+            if (ColumnDefs.TryGetValue(sort2, out var comparer2))
+            {
+                var result = comparer2.SortComparer(Left, Right);
+                if (result != 0) return result;
+            }
+
+            return Left.TimeSorter == Right.TimeSorter
+                       ? Left.Time.CompareTo(Right.Time)
+                       : Left.TimeSorter.CompareTo(Right.TimeSorter);
         }
+
     }
 }

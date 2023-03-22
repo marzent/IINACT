@@ -92,7 +92,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     {
         return ((Task<object?>)result).Result;
     }
-    
+
     public new void Invoke(Action method)
     {
         _ = Invoke(method, null);
@@ -221,54 +221,70 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public bool SetEncounter(DateTime Time, string Attacker, string Victim)
     {
+        // Check if not already in combat
         if (!inCombat)
         {
+            // Check if a new zone or session has started
             if (lastZoneRecord.Label != ActiveZone.ZoneName || CurrentZone != ActiveZone.ZoneName ||
                 lastZoneRecord.StartTime != ActiveZone.StartTime)
             {
-                var flag2 = false;
-                foreach (var t in ZoneList)
+                // Look for the last active zone
+                var zoneFound = false;
+                foreach (var zone in ZoneList)
                 {
-                    if (t.StartTime != lastZoneRecord.StartTime || lastZoneRecord.Label != t.ZoneName) continue;
-                    flag2 = true;
-                    ActiveZone = t;
+                    if (zone.StartTime != lastZoneRecord.StartTime || lastZoneRecord.Label != zone.ZoneName)
+                        continue;
+
+                    // Found the active zone
+                    zoneFound = true;
+                    ActiveZone = zone;
                     break;
                 }
 
-                if (!flag2)
+                // If the last active zone is not found, create a new zone
+                if (!zoneFound)
                 {
                     var start = lastZoneRecord.Label != CurrentZone ? Time : lastZoneRecord.StartTime;
                     ActiveZone = new ZoneData(start, CurrentZone, true, false, false);
+
+                    // Insert the new zone into the list of zones
                     var index = ZoneList.Count;
-                    for (var j = 1; j < ZoneList.Count; j++)
-                        if (ZoneList[j].StartTime > Time)
+                    for (var i = 1; i < ZoneList.Count; i++)
+                    {
+                        if (ZoneList[i].StartTime > Time)
                         {
-                            index = j;
+                            index = i;
                             break;
                         }
+                    }
 
                     ZoneList.Insert(index, ActiveZone);
                 }
             }
 
+            // Set the active encounter
             ActiveZone.ActiveEncounter = new EncounterData(ActGlobals.charName, CurrentZone, ActiveZone);
             ActiveZone.Items.Add(ActiveZone.ActiveEncounter);
             lastSetEncounter = LastKnownTime;
         }
 
+        // Check if the encounter is selective
         if (ActiveZone.ActiveEncounter.GetIsSelective())
         {
             if (SelectiveListGetSelected(Attacker) || SelectiveListGetSelected(Victim))
             {
+                // The encounter is selective and either the attacker or the victim is selected
                 refreshTree = true;
                 LastHostileTime = Time;
                 inCombat = true;
                 return true;
             }
 
+            // The encounter is selective and neither the attacker nor the victim is selected
             return false;
         }
 
+        // The encounter is not selective
         refreshTree = true;
         LastHostileTime = Time;
         inCombat = true;
@@ -430,6 +446,11 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public string CreateDamageString(long Damage, bool UseSuffix, bool UseDecimals)
     {
+        const long trillion = 1000000000000L;
+        const long billion = 1000000000;
+        const long million = 1000000;
+        const long thousand = 1000;
+    
         switch (Damage)
         {
             case long.MinValue:
@@ -441,30 +462,33 @@ public partial class FormActMain : Form, ISynchronizeInvoke
                 {
                     if (UseDecimals)
                     {
-                        if (Damage >= 1000000000000000L) return $"{Damage / 1E+15:0.00}Q";
-
-                        if (Damage >= 1000000000000L) return $"{Damage / 1000000000000.0:0.00}T";
-
-                        if (Damage >= 1000000000) return $"{Damage / 1000000000.0:0.00}B";
-
-                        if (Damage >= 1000000) return $"{Damage / 1000000.0:0.00}M";
-
-                        if (Damage >= 1000) return $"{Damage / 1000.0:0.00}K";
+                        switch (Damage)
+                        {
+                            case >= trillion:
+                                return $"{Damage / 1E+15:0.00}Q";
+                            case >= billion:
+                                return $"{Damage / billion:0.00}B";
+                            case >= million:
+                                return $"{Damage / million:0.00}M";
+                            case >= thousand:
+                                return $"{Damage / thousand:0.00}K";
+                        }
                     }
                     else
                     {
-                        if (Damage >= 10000000000000000L) return $"{Damage / 1000000000000000L}Q";
-
-                        if (Damage >= 10000000000000L) return $"{Damage / 1000000000000L}T";
-
-                        if (Damage >= 10000000000L) return $"{Damage / 1000000000}B";
-
-                        if (Damage >= 10000000) return $"{Damage / 1000000}M";
-
-                        if (Damage >= 10000) return $"{Damage / 1000}K";
+                        switch (Damage)
+                        {
+                            case >= trillion:
+                                return $"{Damage / trillion}T";
+                            case >= billion:
+                                return $"{Damage / billion}B";
+                            case >= million:
+                                return $"{Damage / million}M";
+                            case >= thousand:
+                                return $"{Damage / thousand}K";
+                        }
                     }
                 }
-
                 return $"{Damage}";
         }
     }

@@ -49,19 +49,15 @@ public class HistoryRecord : IComparable<HistoryRecord>, IEquatable<HistoryRecor
 
     public override string ToString()
     {
-        var timeSpan = EndTime - StartTime;
-        var text = !(timeSpan.TotalHours > 1.0)
-                       ? $"{timeSpan.Minutes:00}:{timeSpan.Seconds:00}"
-                       : $"{(int)timeSpan.TotalHours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
-        var text2 = Type != 1 ? string.Empty : "     ";
-        var text3 = ActGlobals.oFormActMain.LogFilePath.ToLower() != FolderHint.ToLower()
-                        ? FolderHint
-                        : string.Empty;
-        return $"{text2}{Label} - {StartTime.ToShortDateString()} {StartTime.ToLongTimeString()} [{text}]  {text3}";
+        var duration = EndTime - StartTime;
+        var durationString = duration.ToString(duration.TotalHours >= 1 ? @"hh\:mm\:ss" : @"mm\:ss");
+        var folderHint = ActGlobals.oFormActMain.LogFilePath.Equals(FolderHint, StringComparison.OrdinalIgnoreCase)
+                             ? string.Empty
+                             : FolderHint.ToLower();
+        var labelPrefix = Type == 1 ? "     " : string.Empty;
+        return $"{labelPrefix}{Label} - {StartTime:MM/dd/yyyy h:mm:ss tt} [{durationString}] {folderHint}";
     }
 
-    public override int GetHashCode()
-    {
-        return ToString().GetHashCode();
-    }
+
+    public override int GetHashCode() => ToString().GetHashCode();
 }

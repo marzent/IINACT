@@ -17,13 +17,9 @@ public class Dnum : IComparable
     }
 
     public static Dnum NoDamage => 0L;
-
     public static Dnum Miss => -1L;
-
     public static Dnum Unknown => -9L;
-
     public static Dnum Death => -10L;
-
     public static Dnum ThreatPosition => -11L;
 
     public long Number { get; }
@@ -38,18 +34,18 @@ public class Dnum : IComparable
 
     public int CompareTo(object? obj)
     {
-        var dnum = (Dnum)obj!;
-        var num = Number;
-        var num2 = dnum.Number;
-        if (num == -9 && num2 == -9) return damageString.CompareTo(dnum.damageString);
+        var otherDnum = (Dnum)obj!;
+        var thisNum = Number;
+        var otherNum = otherDnum.Number;
+        if (thisNum == -9 && otherNum == -9)
+        {
+            return damageString.CompareTo(otherDnum.damageString);
+        }
 
-        return num.CompareTo(num2);
+        return thisNum.CompareTo(otherNum);
     }
 
-    public static implicit operator long(Dnum val)
-    {
-        return val.Number;
-    }
+    public static implicit operator long(Dnum val) => val.Number;
 
     public static implicit operator Dnum(long val)
     {
@@ -67,25 +63,18 @@ public class Dnum : IComparable
         return new Dnum(0L);
     }
 
-    public static bool operator ==(Dnum a, Dnum b)
-    {
-        return a.Equals(b);
-    }
+    public static bool operator ==(Dnum a, Dnum b) => a.Equals(b);
 
-    public static bool operator !=(Dnum a, Dnum b)
-    {
-        return !a.Equals(b);
-    }
+    public static bool operator !=(Dnum a, Dnum b) => !a.Equals(b);
 
     public override string ToString()
     {
         if (Number > 0 && string.IsNullOrEmpty(damageString))
             return Number.ToString(ActGlobals.mainTableShowCommas ? "#,0" : "0");
-
-        var num = Number;
-        var num2 = num - -10;
-        if ((ulong)num2 > 10uL) return damageString + DamageString2;
-        return num2 switch
+        
+        var number2 = Number + 10;
+        if ((ulong)number2 > 10uL) return damageString + DamageString2;
+        return number2 switch
         {
             10L => "data-dnumNoDamage",
             9L => "data-dnumMiss",
@@ -125,15 +114,10 @@ public class Dnum : IComparable
 
     public override bool Equals(object? obj)
     {
-        var dnum = (Dnum)obj!;
-        if (dnum.Number != Number) return false;
-        var text = DamageString;
-        var value = dnum.DamageString;
-        return text.Equals(value);
+        if (obj is not Dnum dnum)
+            return false;
+        return dnum.Number == Number && DamageString.Equals(dnum.DamageString);
     }
 
-    public override int GetHashCode()
-    {
-        return ToString(false).GetHashCode();
-    }
+    public override int GetHashCode() => ToString(false).GetHashCode();
 }

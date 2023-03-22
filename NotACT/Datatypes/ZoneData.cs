@@ -28,10 +28,7 @@ public class ZoneData : IComparable<ZoneData>
 
     public Dictionary<string, object> Tags { get; set; } = new();
 
-    public int CompareTo(ZoneData? other)
-    {
-        return StartTime.CompareTo(other?.StartTime);
-    }
+    public int CompareTo(ZoneData? other) => StartTime.CompareTo(other?.StartTime);
 
     public void AddCombatAction(MasterSwing action)
     {

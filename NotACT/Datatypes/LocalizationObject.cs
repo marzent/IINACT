@@ -14,18 +14,10 @@ public class LocalizationObject
 
     internal string S => DisplayedText;
 
-    public override string ToString()
-    {
-        return DisplayedText;
-    }
+    public override string ToString() => DisplayedText;
 
-    public static implicit operator string(LocalizationObject val)
-    {
-        return val.DisplayedText;
-    }
+    public static implicit operator string(LocalizationObject val) => val.DisplayedText;
 
-    public static implicit operator LocalizationObject(string val)
-    {
-        return new LocalizationObject(val, string.Empty);
-    }
+    public static implicit operator LocalizationObject(string val) => 
+        new LocalizationObject(val, string.Empty);
 }

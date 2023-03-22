@@ -14,11 +14,12 @@ public class StrDouble : IComparable, IEquatable<StrDouble>
 
     public int CompareTo(object? obj)
     {
-        var obj2 = (StrDouble)obj!;
-        var num = Val;
-        var value = obj2.Val;
-        return num.CompareTo(value);
+        if (obj is not StrDouble other)
+            throw new ArgumentException("Object is not a StrDouble.");
+
+        return Val.CompareTo(other.Val);
     }
+
 
     public bool Equals(StrDouble? other)
     {

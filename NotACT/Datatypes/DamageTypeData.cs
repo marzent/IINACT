@@ -1,4 +1,4 @@
-﻿namespace Advanced_Combat_Tracker;
+namespace Advanced_Combat_Tracker;
 
 public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageTypeData>
 {
@@ -211,14 +211,9 @@ public class DamageTypeData : IEquatable<DamageTypeData>, IComparable<DamageType
     {
         get
         {
-            try
-            {
+            if (Swings > 0)
                 return Hits / Swings * 100f;
-            }
-            catch
-            {
-                return 0f;
-            }
+            return 0f;
         }
     }
 

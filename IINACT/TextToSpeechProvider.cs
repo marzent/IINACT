@@ -9,11 +9,20 @@ internal class TextToSpeechProvider
     private string binary = "/usr/bin/say";
     private string args = "";
     private readonly object speechLock = new();
-    private readonly SpeechSynthesizer speechSynthesizer = new();  
+    private readonly SpeechSynthesizer? speechSynthesizer;  
     
     public TextToSpeechProvider()
     {
-        speechSynthesizer.SetOutputToDefaultAudioDevice();
+        try
+        {
+            speechSynthesizer = new SpeechSynthesizer();
+            speechSynthesizer?.SetOutputToDefaultAudioDevice();
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex, $"Failed to initialize SAPI TTS engine {ex.Message}");
+        }
+        
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
     
@@ -54,7 +63,7 @@ internal class TextToSpeechProvider
         try
         {
             lock (speechLock)
-                speechSynthesizer.Speak(message);
+                speechSynthesizer?.Speak(message);
         }
         catch (Exception ex)
         {

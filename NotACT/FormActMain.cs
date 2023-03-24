@@ -14,7 +14,6 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public delegate DateTime DateTimeLogParser(string logLine);
 
     private readonly ConcurrentQueue<MasterSwing> afterActionsQueue = new();
-    private readonly object ttsLock = new();
     private Thread afterActionQueueThread;
     public DateTimeLogParser GetDateTimeFromLog;
     private volatile bool inCombat;
@@ -114,6 +113,10 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public event CombatActionDelegate AfterCombatAction;
 
+    public delegate void TextToSpeechDelegate(string text);
+
+    public event TextToSpeechDelegate TextToSpeech;
+
 
     public void WriteExceptionLog(Exception ex, string MoreInfo)
     {
@@ -140,39 +143,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     }
 
 
-    public void TTS(string message, string binary = "/usr/bin/say", string args = "")
-    {
-        lock (ttsLock)
-        {
-            if (new FileInfo(binary).Exists)
-            {
-                try
-                {
-                    var ttsProcess = new Process
-                    {
-                        StartInfo =
-                        {
-                            FileName = binary,
-                            CreateNoWindow = true,
-                            UseShellExecute = false,
-                            Arguments = args + " \"" +
-                                        Regex.Replace(Regex.Replace(message, @"(\\*)" + "\"", @"$1$1\" + "\""),
-                                                      @"(\\+)$", @"$1$1") + "\""
-                        }
-                    };
-                    ttsProcess.Start();
-                }
-                catch (Exception ex)
-                {
-                    WriteExceptionLog(ex, $"TTS failed to play back {message}");
-                }
-            }
-            else
-                Trace.WriteLine($"TTS binary {binary} not found");
-
-            Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
-        }
-    }
+    public void TTS(string message) => TextToSpeech(message);
 
     public void ChangeZone(string ZoneName)
     {

@@ -28,7 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ChatGui ChatGui { get; private set; } = null!;
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; init; }
-
+    private TextToSpeechProvider TextToSpeechProvider { get; init; }
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     internal FileDialogManager FileDialogManager { get; init; }
@@ -51,7 +51,8 @@ public sealed class Plugin : IDalamudPlugin
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
-        
+
+        this.TextToSpeechProvider = new TextToSpeechProvider();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);

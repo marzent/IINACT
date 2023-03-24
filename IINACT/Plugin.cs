@@ -1,5 +1,6 @@
 using Dalamud.Data;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.Game.Network;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
@@ -24,6 +25,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static CommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static GameNetwork GameNetwork { get; private set; } = null!;
     [PluginService] internal static DataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static ChatGui ChatGui { get; private set; } = null!;
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; init; }
 
@@ -52,7 +54,7 @@ public sealed class Plugin : IDalamudPlugin
         
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);
         OverlayPlugin = InitOverlayPlugin();
 
         ConfigWindow = new ConfigWindow(this);

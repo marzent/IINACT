@@ -1,6 +1,9 @@
 ﻿using System.Globalization;
 using Advanced_Combat_Tracker;
 using Dalamud;
+using Dalamud.Game.Gui;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
@@ -20,19 +23,23 @@ public class FfxivActPluginWrapper : IDisposable
 {
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
+    private readonly ChatGui chatGui;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly ParseMediator parseMediator;
+    private readonly ILogOutput logOutput;
+    private readonly ILogFormat logFormat;
     public readonly ProcessManager ProcessManager;
     public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
     public ParseSettings ParseSettings = null!;
     public readonly IDataRepository Repository;
     public readonly IDataSubscription Subscription;
 
-    public FfxivActPluginWrapper(Configuration configuration, ClientLanguage dalamudClientLanguage)
+    public FfxivActPluginWrapper(Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
+        this.chatGui = chatGui;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -50,6 +57,9 @@ public class FfxivActPluginWrapper : IDisposable
 
         var scanPackets = ffxivActPlugin._dataCollection._scanPackets;
         ProcessManager = scanPackets.GetField<ProcessManager>("_processManager");
+        
+        logOutput = ffxivActPlugin._dataCollection._logOutput;
+        logFormat = ffxivActPlugin._dataCollection._logFormat;
 
         SetupActWrapper();
 
@@ -62,6 +72,7 @@ public class FfxivActPluginWrapper : IDisposable
 
         ffxivActPlugin._dataCollection.StartMemory();
 
+        chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
     }
 
@@ -77,6 +88,8 @@ public class FfxivActPluginWrapper : IDisposable
 
     public void Dispose()
     {
+        chatGui.ChatMessage -= OnChatMessage;
+        ActGlobals.oFormActMain.BeforeLogLineRead -= OFormActMain_BeforeLogLineRead;
         ffxivActPlugin.DeInitPlugin();
         ffxivActPlugin.Dispose();
     }
@@ -113,9 +126,6 @@ public class FfxivActPluginWrapper : IDisposable
 
         settingsMediator.ProcessException = OnProcessException;
 
-        var logOutput = ffxivActPlugin._dataCollection._logOutput;
-        var logFormat = ffxivActPlugin._dataCollection._logFormat;
-
         var line = logFormat.FormatParseSettings(ParseSettings.DisableDamageShield, ParseSettings.DisableCombinePets,
                                                  ParseSettings.LanguageID, ParseSettings.ParseFilter,
                                                  ParseSettings.SimulateIndividualDoTCrits,
@@ -137,9 +147,20 @@ public class FfxivActPluginWrapper : IDisposable
         ProcessManager.Verify();
     }
 
+    private void OnChatMessage(
+        XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+    {
+        var evenType = (uint)type;
+        var player = sender.TextValue;
+        var text = message.TextValue.Replace('\r', ' ').Replace('\n', ' ')
+                                    .Replace('|', '❘');
+        var line = logFormat.FormatChatMessage(evenType, player, text);
+        
+        logOutput.WriteLine(LogMessageType.ChatLog, DateTime.Now, line);
+    }
+
     private void SetupActWrapper()
     {
-        var logOutput = ffxivActPlugin._dataCollection._logOutput;
         var actWrapper = logOutput.GetField<ACTWrapper>("_actWrapper");
 
         actWrapper.TimeStampLen = DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture).Length + 3;

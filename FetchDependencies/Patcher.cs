@@ -109,6 +109,13 @@ internal class Patcher
             ilProcessor.InsertAfter(1, Instruction.Create(OpCodes.Neg));
         }
 
+        {
+            var method = memory.GetMethod(
+                "System.Void FFXIV_ACT_Plugin.Memory.MemoryProcessors.LogProcessor::Refresh()");
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
+        }
+
         memory.WriteOut();
     }
 }

@@ -14,6 +14,7 @@ using RainbowMage.OverlayPlugin.Overlays;
 using RainbowMage.OverlayPlugin.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;

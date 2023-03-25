@@ -291,7 +291,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
 #if DEBUG
             stopwatch.Stop();
-            PluginLog.Verbose("CreateUpdateScript: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
+            Log(LogLevel.Trace, "CreateUpdateScript: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
 #endif
             return obj;
         }

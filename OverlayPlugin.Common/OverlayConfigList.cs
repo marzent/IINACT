@@ -54,7 +54,6 @@ namespace RainbowMage.OverlayPlugin
                     }
                     catch (Exception e)
                     {
-                        System.Diagnostics.Trace.WriteLine(e);
                         _logger.Log(LogLevel.Error, e.ToString());
                     }
                 }

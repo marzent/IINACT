@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.WebSocket;
@@ -292,7 +291,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
 #if DEBUG
             stopwatch.Stop();
-            Log(LogLevel.Trace, "CreateUpdateScript: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
+            PluginLog.Verbose("CreateUpdateScript: {0} msec", stopwatch.Elapsed.TotalMilliseconds);
 #endif
             return obj;
         }

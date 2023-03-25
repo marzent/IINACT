@@ -209,35 +209,32 @@ public class CactbotEventSource : EventSourceBase
 
         language = ffxivRepository.GetLocaleString();
         pcLocale = System.Globalization.CultureInfo.CurrentUICulture.Name;
-
-        var overlay = typeof(IOverlay).Assembly.GetName().Version!;
-        var ffxivPluginVersion = ffxivRepository.GetPluginVersion();
-        var act = typeof(ActGlobals).Assembly.GetName().Version!;
+        
+        var actVersion = typeof(ActGlobals).Assembly.GetName().Version!;
 
         // Print out version strings and locations to help users debug.
-        LogInfo("OverlayPlugin: {0} {1}", overlay.ToString(), typeof(IOverlay).Assembly.Location);
-        LogInfo("FFXIV Plugin: {0} {1}", ffxivPluginVersion.ToString(), ffxivRepository.GetPluginPath());
-        LogInfo("ACT: {0} {1}", act.ToString(), typeof(ActGlobals).Assembly.Location);
+        LogInfo("OverlayPlugin Version: {0}", ffxivRepository.GetOverlayPluginVersion().ToString());
+        LogInfo("FFXIV Plugin Version: {0}", ffxivRepository.GetPluginVersion().ToString());
+        LogInfo("ACT Version: {0}", actVersion.ToString());
 
         LogInfo("Parsing Plugin Language: {0}", language ?? "(unknown)");
 
         LogInfo("System Locale: {0}", pcLocale ?? "(unknown)");
 
-        // Temporarily target cn if plugin is old v2.0.4.0
-        if (language == "cn" || ffxivPluginVersion.ToString() == "2.0.4.0")
+        switch (language)
         {
-            this.ffxiv = new FFXIVProcessCn(container);
-            LogInfo("Version: cn");
-        }
-        else if (language == "ko")
-        {
-            this.ffxiv = new FFXIVProcessKo(container);
-            LogInfo("Version: ko");
-        }
-        else
-        {
-            this.ffxiv = new FFXIVProcessIntl(container);
-            LogInfo("Version: intl");
+            case "cn":
+                this.ffxiv = new FFXIVProcessCn(container);
+                LogInfo("Version: cn");
+                break;
+            case "ko":
+                this.ffxiv = new FFXIVProcessKo(container);
+                LogInfo("Version: ko");
+                break;
+            default:
+                this.ffxiv = new FFXIVProcessIntl(container);
+                LogInfo("Version: intl");
+                break;
         }
 
         // Incoming events.

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Dalamud.Data;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
@@ -36,9 +37,13 @@ public sealed class Plugin : IDalamudPlugin
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
+    private PluginLogTraceListener PluginLogTraceListener { get; init; }
 
     public Plugin()
     {
+        PluginLogTraceListener = new PluginLogTraceListener();
+        Trace.Listeners.Add(PluginLogTraceListener);
+        
         FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
         
@@ -82,6 +87,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         FfxivActPluginWrapper.Dispose();
         OverlayPlugin.DeInitPlugin();
+        Trace.Listeners.Remove(PluginLogTraceListener);
 
         WindowSystem.RemoveAllWindows();
 
@@ -124,6 +130,7 @@ public sealed class Plugin : IDalamudPlugin
     private void OnCommand(string command, string args)
     {
         MainWindow.IsOpen = true;
+        FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.GetServerTime();
     }
 
     private static void EndEncounter(string command, string args)

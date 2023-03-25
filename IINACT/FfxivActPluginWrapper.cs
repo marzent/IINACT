@@ -4,12 +4,12 @@ using Dalamud;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Logging;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
 using FFXIV_ACT_Plugin.Logfile;
 using FFXIV_ACT_Plugin.Memory;
-using FFXIV_ACT_Plugin.Memory.MemoryReader;
 using FFXIV_ACT_Plugin.Parse;
 using FFXIV_ACT_Plugin.Resource;
 using Machina.FFXIV;
@@ -108,9 +108,6 @@ public class FfxivActPluginWrapper : IDisposable
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
 
-        var readProcesses = ProcessManager.GetField<ReadProcesses>("_readProcesses");
-        readProcesses.Read64(true);
-
         ParseSettings = new ParseSettings
         {
             DisableDamageShield = configuration.DisableDamageShield,
@@ -188,5 +185,8 @@ public class FfxivActPluginWrapper : IDisposable
         ActGlobals.oFormActMain.ChangeZone(zoneName);
     }
 
-    private static void OnProcessException(DateTime timestamp, string text) { }
+    private static void OnProcessException(DateTime timestamp, string text)
+    {
+        PluginLog.Error($"[FFXIV_ACT_PLUGIN] Exception: {text}");
+    }
 }

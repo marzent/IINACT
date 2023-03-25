@@ -1,7 +1,6 @@
 using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Logfile;
-using Machina;
 using Machina.FFXIV;
 using System;
 using System.Collections.Generic;
@@ -175,7 +174,7 @@ namespace RainbowMage.OverlayPlugin
 
         public Version GetPluginVersion()
         {
-            return typeof(IDataRepository).Assembly.GetName().Version;
+            return typeof(FFXIV_ACT_Plugin.FFXIV_ACT_Plugin).Assembly.GetName().Version;
         }
 
         public string GetPluginPath()

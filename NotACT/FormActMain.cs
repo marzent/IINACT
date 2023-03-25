@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Media;
 using System.Text.RegularExpressions;
 using Advanced_Combat_Tracker.Resources;
+using Dalamud.Logging;
 using FFXIV_ACT_Plugin.Logfile;
 
 namespace Advanced_Combat_Tracker;
@@ -118,11 +118,8 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public event TextToSpeechDelegate TextToSpeech;
 
 
-    public void WriteExceptionLog(Exception ex, string MoreInfo)
-    {
-        var value = $"***** {DateTime.Now:s} - {MoreInfo}\n{ex}\n{Environment.StackTrace}\n*****";
-        Trace.WriteLine(value);
-    }
+    public void WriteExceptionLog(Exception ex, string MoreInfo) => 
+        PluginLog.Error(ex, MoreInfo);
 
     public void OpenLog(bool GetCurrentZone, bool GetCharNameFromFile) { }
 

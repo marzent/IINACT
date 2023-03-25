@@ -14,7 +14,6 @@ using RainbowMage.OverlayPlugin.Overlays;
 using RainbowMage.OverlayPlugin.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -162,11 +161,9 @@ namespace RainbowMage.OverlayPlugin
                         var assembly = Assembly.GetExecutingAssembly();
                         var resourceName = assembly.GetManifestResourceNames()
                                                    .Single(str => str.EndsWith("overlays.json"));
-                        using (var stream = assembly.GetManifestResourceStream(resourceName))
-                        using (var reader = new StreamReader(stream))
-                        {
-                            presetData = reader.ReadToEnd();
-                        }
+                        using var stream = assembly.GetManifestResourceStream(resourceName);
+                        using var reader = new StreamReader(stream);
+                        presetData = reader.ReadToEnd();
                     }
                     catch (Exception ex)
                     {
@@ -343,9 +340,26 @@ namespace RainbowMage.OverlayPlugin
 
             try
             {
+                var registry = _container.Resolve<Registry>();
+                foreach (var source in registry.EventSources)
+                {
+                    source.Stop();
+                    source.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, $"DeInitPlugin: Failed to stop event sources {ex.Message}");
+            }
+
+            try
+            {
                 _container.Resolve<ServerController>().Stop();
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, $"DeInitPlugin: Failed to stop WebSocket server {ex.Message}");
+            }
 
             _logger.Log(LogLevel.Info, "DeInitPlugin: Finalized.");
             Status = "Finalized.";
@@ -377,7 +391,6 @@ namespace RainbowMage.OverlayPlugin
             catch (Exception e)
             {
                 _logger.Log(LogLevel.Error, "LoadAddons: {0}", e);
-                Trace.WriteLine("LoadAddons: " + e.ToString());
             }
         }
 

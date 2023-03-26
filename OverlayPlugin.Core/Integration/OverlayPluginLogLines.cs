@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
 
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
@@ -15,6 +16,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             container.Register(new LineMapEffect(container));
             container.Register(new LineFateControl(container));
             container.Register(new LineCEDirector(container));
+            container.Register(new LineInCombat(container));
         }
     }
 

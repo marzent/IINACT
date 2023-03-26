@@ -8,34 +8,41 @@
     },
     {
         "ID": 256,
-        "Name": "RegisterLogLine",
+        "Name":  "RegisterLogLine",
         "Source": "OverlayPlugin",
         "Version": 1,
         "Comment": "Line to be emitted when a new log line is registered"
     },
     {
         "ID": 257,
-        "Name": "MapEffect",
+        "Name":  "MapEffect",
         "Source": "OverlayPlugin",
         "Version": 1,
         "Comment": "MapEffect data"
     },
     {
         "ID": 258,
-        "Name": "FateDirector",
+        "Name":  "FateDirector",
         "Source": "OverlayPlugin",
         "Version": 1,
         "Comment": "ActorControlSelf Fate data"
     },
     {
         "ID": 259,
-        "Name": "CEDirector",
+        "Name":  "CEDirector",
         "Source": "OverlayPlugin",
         "Version": 1,
         "Comment": "Critical Engagement data"
     },
     {
-        "StartID": 260,
+        "ID": 260,
+        "Name":  "InCombat",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Combat beginning / ending"
+    },
+    {
+        "StartID": 261,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

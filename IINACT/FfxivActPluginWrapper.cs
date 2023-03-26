@@ -187,6 +187,6 @@ public class FfxivActPluginWrapper : IDisposable
 
     private static void OnProcessException(DateTime timestamp, string text)
     {
-        PluginLog.Error($"[FFXIV_ACT_PLUGIN] Exception: {text}");
+        PluginLog.Debug(text);
     }
 }

@@ -155,7 +155,7 @@ namespace RainbowMage.OverlayPlugin
                 // Load our presets
                 try
                 {
-                    var presetData = "{}";
+                    var overlayTemplateData = "{}";
 
                     try
                     {
@@ -164,18 +164,18 @@ namespace RainbowMage.OverlayPlugin
                                                    .Single(str => str.EndsWith("overlays.json"));
                         using var stream = assembly.GetManifestResourceStream(resourceName);
                         using var reader = new StreamReader(stream);
-                        presetData = reader.ReadToEnd();
+                        overlayTemplateData = reader.ReadToEnd();
                     }
                     catch (Exception ex)
                     {
                         _logger.Log(LogLevel.Error, string.Format(Resources.ErrorCouldNotLoadPresets, ex));
                     }
 
-                    var presets = JsonConvert.DeserializeObject<Dictionary<string, OverlayPreset>>(presetData);
+                    var overlayTemplates = JsonConvert.DeserializeObject<OverlayTemplateConfig>(overlayTemplateData);
                     var registry = _container.Resolve<Registry>();
-                    foreach (var pair in presets)
+                    foreach (var pair in overlayTemplates.Overlays)
                     {
-                        registry.RegisterOverlayPreset2(pair.Value);
+                        registry.RegisterOverlayPreset2(pair);
                     }
                 }
                 catch (Exception ex)

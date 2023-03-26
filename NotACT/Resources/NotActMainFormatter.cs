@@ -2553,7 +2553,7 @@ public static class NotActMainFormatter
         }
     }
 
-    private static string CombatantFormatSwitch(CombatantData data, string varName, string extra)
+    private static string CombatantFormatSwitch(CombatantData data, string varName, string extra, int tries = 0)
     {
         try
         {
@@ -2792,6 +2792,9 @@ public static class NotActMainFormatter
         }
         catch (Exception ex)
         {
+            if (tries < 3)
+                return CombatantFormatSwitch(data, varName, extra, tries + 1);
+            
             oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
             return "ERROR";
         }

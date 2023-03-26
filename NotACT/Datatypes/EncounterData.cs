@@ -563,7 +563,8 @@ public class EncounterData
 
         var maxSwing = allies
                        .SelectMany(combatant => combatant.GetAttackType(ActGlobals.Trans["attackTypeTerm-all"],
-                                                                        CombatantData.DamageTypeDataOutgoingDamage)?.Items!)
+                                                                        CombatantData.DamageTypeDataOutgoingDamage)
+                                                         ?.Items ?? new List<MasterSwing>())
                        .Where(swing => swing.Damage > 0).MaxBy(swing => swing.Damage);
 
         if (maxSwing == null)

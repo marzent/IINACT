@@ -297,68 +297,54 @@ namespace RainbowMage.OverlayPlugin.EventSources
         }
 
         private List<KeyValuePair<CombatantData, Dictionary<string, string>>> GetCombatantList(
-            List<CombatantData> allies)
+            IEnumerable<CombatantData> allies)
         {
 #if TRACE
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
 
-            var combatantList = new List<KeyValuePair<CombatantData, Dictionary<string, string>>>();
-            Parallel.ForEach(allies, (ally) =>
-                                 //foreach (var ally in allies)
-                             {
-                                 var valueDict = new Dictionary<string, string>();
-                                 foreach (var exportValuePair in CombatantData.ExportVariables)
-                                 {
-                                     try
-                                     {
-                                         /*varStopwatch.Reset();
-                                         varStopwatch.Start();*/
+            Dictionary<string, string> BuildCombatantDict(CombatantData ally)
+            {
+                var valueDict = new Dictionary<string, string>();
+                foreach (var exportValuePair in CombatantData.ExportVariables)
+                {
+                    try
+                    {
+                        // NAME タグには {NAME:8} のようにコロンで区切られたエクストラ情報が必要で、
+                        // プラグインの仕組み的に対応することができないので除外する
+                        if (exportValuePair.Key.StartsWith("NAME"))
+                        {
+                            continue;
+                        }
 
-                                         // NAME タグには {NAME:8} のようにコロンで区切られたエクストラ情報が必要で、
-                                         // プラグインの仕組み的に対応することができないので除外する
-                                         if (exportValuePair.Key.StartsWith("NAME"))
-                                         {
-                                             continue;
-                                         }
+                        // ACT_FFXIV_Plugin が提供する LastXXDPS は、
+                        // ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items に All キーが存在しない場合に、
+                        // プラグイン内で例外が発生してしまい、パフォーマンスが悪化するので代わりに空の文字列を挿入する
+                        if (exportValuePair.Key == "Last10DPS" || exportValuePair.Key == "Last30DPS" || exportValuePair.Key == "Last60DPS" || exportValuePair.Key == "Last180DPS")
+                        {
+                            if (!ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items.ContainsKey("All"))
+                            {
+                                valueDict.Add(exportValuePair.Key, "");
+                                continue;
+                            }
+                        }
 
-                                         // ACT_FFXIV_Plugin が提供する LastXXDPS は、
-                                         // ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items に All キーが存在しない場合に、
-                                         // プラグイン内で例外が発生してしまい、パフォーマンスが悪化するので代わりに空の文字列を挿入する
-                                         if (exportValuePair.Key == "Last10DPS" ||
-                                             exportValuePair.Key == "Last30DPS" ||
-                                             exportValuePair.Key == "Last60DPS" ||
-                                             exportValuePair.Key == "Last180DPS")
-                                         {
-                                             if (!ally.Items[CombatantData.DamageTypeDataOutgoingDamage].Items
-                                                      .ContainsKey("All"))
-                                             {
-                                                 valueDict.Add(exportValuePair.Key, "");
-                                                 //Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
-                                                 continue;
-                                             }
-                                         }
+                        var value = exportValuePair.Value.GetExportString(ally, "");
+                        valueDict.Add(exportValuePair.Key, value);
+                    }
+                    catch (Exception e)
+                    {
+                        Log(LogLevel.Debug, "GetCombatantList: {0}: {1}: {2}", ally.Name, exportValuePair.Key, e);
+                    }
+                }
+                return valueDict;
+            }
 
-                                         var value = exportValuePair.Value.GetExportString(ally, "");
-                                         valueDict.Add(exportValuePair.Key, value);
-                                         // Log(LogLevel.Debug, $"Combatant: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
-                                     }
-                                     catch (Exception e)
-                                     {
-                                         Log(LogLevel.Debug, "GetCombatantList: {0}: {1}: {2}", ally.Name,
-                                             exportValuePair.Key, e);
-                                         continue;
-                                     }
-                                 }
-
-                                 lock (combatantList)
-                                 {
-                                     combatantList.Add(
-                                         new KeyValuePair<CombatantData, Dictionary<string, string>>(ally, valueDict));
-                                 }
-                             }
-            );
+            var combatantList = allies.AsParallel()
+                  .Select(combatantData => new KeyValuePair<CombatantData, Dictionary<string, string>>(
+                              combatantData, BuildCombatantDict(combatantData)))
+                  .ToList();
 
 #if TRACE
             stopwatch.Stop();

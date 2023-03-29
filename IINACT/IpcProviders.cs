@@ -6,7 +6,7 @@ namespace IINACT;
 
 internal class IpcProviders : IDisposable
 {
-    internal static Version IpcVersion => new(1,0, 0);
+    internal static Version IpcVersion => new(1, 0, 0);
     internal readonly ICallGateProvider<Version> GetVersion;
     internal readonly ICallGateProvider<Version> GetIpcVersion;
 

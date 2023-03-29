@@ -125,9 +125,9 @@ public sealed class Plugin : IDalamudPlugin
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
             MainWindow.OverlayPresets = registry.OverlayPresets;
-            var severController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
-            MainWindow.Server = severController;
-            IpcProviders.Server = severController;
+            var serverController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            MainWindow.Server = serverController;
+            IpcProviders.Server = serverController;
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         });
 

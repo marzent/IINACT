@@ -26,6 +26,7 @@ public class ServerController
     public bool Running => Server?.IsAccepting ?? false;
     public string? Address => Server?.Address;
     public int? Port => Server?.Port;
+    public bool Secure => false;
 
     public void Stop()
     {

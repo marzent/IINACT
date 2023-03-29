@@ -33,6 +33,7 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     internal FileDialogManager FileDialogManager { get; init; }
+    private IpcProviders IpcProviders { get; init; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
@@ -63,6 +64,8 @@ public sealed class Plugin : IDalamudPlugin
         FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);
         OverlayPlugin = InitOverlayPlugin();
 
+        IpcProviders = new IpcProviders(PluginInterface);
+
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
@@ -85,6 +88,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        IpcProviders.Dispose();
+        
         FfxivActPluginWrapper.Dispose();
         OverlayPlugin.DeInitPlugin();
         Trace.Listeners.Remove(PluginLogTraceListener);
@@ -120,7 +125,9 @@ public sealed class Plugin : IDalamudPlugin
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
             MainWindow.OverlayPresets = registry.OverlayPresets;
-            MainWindow.Server = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            var severController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            MainWindow.Server = severController;
+            IpcProviders.Server = severController;
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         });
 

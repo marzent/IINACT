@@ -2,7 +2,7 @@
 
 # IINACT
 
-A Dalamud plugin to run the [FFXIV_ACT_Plugin](https://github.com/ravahn/FFXIV_ACT_Plugin) in an [ACT](https://advancedcombattracker.com/)-like enviroment with a heavily modified port of [Overlay Plugin](https://github.com/OverlayPlugin/OverlayPlugin) for modern .NET.
+A [Dalamud](https://github.com/goatcorp/Dalamud) plugin to run the [FFXIV_ACT_Plugin](https://github.com/ravahn/FFXIV_ACT_Plugin) in an [ACT](https://advancedcombattracker.com/)-like enviroment with a heavily modified port of [Overlay Plugin](https://github.com/OverlayPlugin/OverlayPlugin) for modern .NET.
 
 The data source here is only based on `Dalamud.Game.Network` and does not require any extra injection with [Deucalion](https://github.com/ff14wed/deucalion) or network capture with elevated privileges.
 
@@ -20,21 +20,22 @@ This will **not** render overlays by itself, use something like [Browsingway](ht
 
 ## Installing 
 
-While this project is still a work in progress, you can use it by adding the following URL to the custom plugin repositories list in your Dalamud settings
+> **Warning**  
+> No support will be provided on any Dalamud official support channel. Please use the [Issues](https://github.com/marzent/IINACT/issues) page or [Discord](https://discord.gg/pcexJC8YPG) for any support requests. Do NOT ask for support on the [XIVLauncher & Dalamud Discord](https://discord.gg/holdshift), as support for 3rd-party plugins is not provided there. 
 
-1. `/xlsettings` -> Experimental tab
-2. Copy and paste the repo.json link below
-3. Click on the + button
-4. Click on the "Save and Close" button
-5. You will now see IINACT listed in the Available Plugins tab in the Dalamud Plugin Installer
-6. Do not forget to actually install IINACT from this tab.
-
-Please do not install IINACT manually by downloading a release zip and unpacking it into your devPlugins folder. That will require manually updating IINACT and you will miss out on features and bug fixes as you won't get update notifications automatically. Any manually installed copies of IINACT should be removed before switching to the custom plugin respository method, as they will conflict.
-- https://raw.githubusercontent.com/marzent/IINACT/main/repo.json
+Install instructions can be found [here](https://www.iinact.com/installation/), but are indentical to any other 3rd-party plugin repository.
 
 ## How to build
 
-Just clone and run `dotnet build`.
+Just run 
+```
+git clone --recurse-submodules https://github.com/marzent/IINACT.git
+cd IINACT
+dotnet build
+``` 
+on a Linux, macOS or Windows machine with the [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0). 
+
+You will need to be able to reference Dalamud as well, meaning having an install of [XL](https://github.com/goatcorp/FFXIVQuickLauncher) or [XOM](https://github.com/marzent/XIV-on-Mac) on Windows and macOS respectively. On Linux `DALAMUD_HOME` needs to be correctly set (for example `$HOME/.xlcore/dalamud/Hooks/dev`).
 
 ## FAQ
 
@@ -45,11 +46,3 @@ Just clone and run `dotnet build`.
 **Are these logs compatible with FFLogs? Can I use the FFLogs Uploader?**
 
 - Yes! 100% compatible.
-
-
-## Known Issues
-
-- TTS is not fully implemented yet
-
-
-PRs are always welcome :)

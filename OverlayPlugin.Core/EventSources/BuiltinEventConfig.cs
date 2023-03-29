@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using RainbowMage.OverlayPlugin.Overlays;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RainbowMage.OverlayPlugin.EventSources
 {
@@ -182,20 +180,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
             if (obj.TryGetValue("OverlayData", out value))
             {
                 result.OverlayData = value.ToObject<Dictionary<string, JToken>>();
-
-                // Remove data for overlays that no longer exist.
-                var overlayUuiDs = config.Overlays.OfType<MiniParseOverlayConfig>()
-                                         .Select(overlay => (overlay).Uuid.ToString()).ToList();
-
-                var obsoleteKeys = (result.OverlayData.Keys.Where(key => key.StartsWith("overlay#") && key.Length >= 44)
-                                          .Select(key => new { key, uuid = key.Substring(8, 36) })
-                                          .Where(@t => !overlayUuiDs.Contains(@t.uuid))
-                                          .Select(@t => @t.key)).ToList();
-
-                foreach (var key in obsoleteKeys)
-                {
-                    result.OverlayData.Remove(key);
-                }
             }
 
             if (obj.TryGetValue("LogLines", out value))

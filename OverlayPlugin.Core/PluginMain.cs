@@ -10,7 +10,6 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
-using RainbowMage.OverlayPlugin.Overlays;
 using RainbowMage.OverlayPlugin.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace RainbowMage.OverlayPlugin
 {
     public class PluginMain
     {
-        private TinyIoCContainer _container;
+        private readonly TinyIoCContainer _container;
         private ILogger _logger;
         public string Status { get; private set; }
 
@@ -180,7 +179,7 @@ namespace RainbowMage.OverlayPlugin
                 }
                 catch (Exception ex)
                 {
-                    _logger.Log(LogLevel.Error, string.Format("Failed to load presets: {0}", ex));
+                    _logger.Log(LogLevel.Error, $"Failed to load presets: {ex}");
                 }
 
 
@@ -374,10 +373,6 @@ namespace RainbowMage.OverlayPlugin
                 registry.StartEventSource(new FFXIVRequiredEventSource(_container));
                 registry.StartEventSource(new EnmityEventSource(_container));
                 registry.StartEventSource(new FFXIVClientStructsEventSource(_container));
-
-                registry.RegisterOverlay<MiniParseOverlay>();
-                registry.RegisterOverlay<LabelOverlay>();
-
 
                 _logger.Log(LogLevel.Info, "LoadAddons: Enabling builtin Cactbot event source.");
                 registry.StartEventSource(new CactbotEventSource(_container));

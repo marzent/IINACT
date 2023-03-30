@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -81,8 +82,12 @@ public class MainWindow : Window, IDisposable
             serverStatus = $"Listening on {Server?.Address}:{Server?.Port}";
 
         if (Server?.Failed ?? false)
+        {
             serverStatus = Server.LastException?.Message ?? "Failed";
-        
+            if (Server.LastException is SocketException { ErrorCode: 10048 })
+                serverStatus = $"Port {Server?.Port} is already in use";
+        }
+
         ImGui.TextColored(ImGuiColors.DalamudGrey,$"WebSocket Server:");
         ImGuiHelpers.ScaledRelativeSameLine(155);
         ImGui.Text(serverStatus);

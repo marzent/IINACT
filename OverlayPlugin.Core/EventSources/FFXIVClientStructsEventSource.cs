@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -15,7 +14,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
         public int TrustCount;
         public byte PetCount;
         public byte ChocoboCount;
-        public List<Entry> Entries = new List<Entry>();
+        public List<Entry> Entries = new();
 
         public struct Entry
         {
@@ -33,25 +32,21 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
     public class FFXIVClientStructsEventSource : EventSourceBase
     {
-        private IAtkStageMemory atkStageMemory;
-        private FFXIVMemory memory;
+        private readonly IAtkStageMemory atkStageMemory;
 
         public BuiltinEventConfig Config { get; set; }
 
         public FFXIVClientStructsEventSource(TinyIoCContainer container) : base(container)
         {
             atkStageMemory = container.Resolve<IAtkStageMemory>();
-            memory = container.Resolve<FFXIVMemory>();
-
+            
             RegisterEventHandler("getFFXIVCSAddonSlow", (msg) =>
             {
                 var key = msg["name"]?.ToString();
-                if (key == null)
-                    return null;
-                return GetAddon(key);
+                return key == null ? null : GetAddon(key);
             });
 
-            RegisterEventHandler("getSortedPartyList", (msg) => { return GetSortedPartyList(); });
+            RegisterEventHandler("getSortedPartyList", (_) => GetSortedPartyList());
         }
 
         private unsafe JObject GetSortedPartyList()
@@ -140,20 +135,19 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 return null;
             }
 
-            static void HandleDeserializationError(object sender, ErrorEventArgs errorArgs)
-            {
-                var currentError = errorArgs.ErrorContext.Error.Message;
+            static void HandleDeserializationError(object sender, ErrorEventArgs errorArgs) => 
                 errorArgs.ErrorContext.Handled = true;
-            }
 
-            var settings = new Newtonsoft.Json.JsonSerializerSettings();
-            settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            settings.Error = HandleDeserializationError;
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Error = HandleDeserializationError
+            };
             var serializer = Newtonsoft.Json.JsonSerializer.CreateDefault(settings);
 
-            var jobj = JObject.FromObject(addon, serializer);
+            var jObject = JObject.FromObject(addon, serializer);
 
-            return jobj;
+            return jObject;
         }
 
         public override void Start() { }

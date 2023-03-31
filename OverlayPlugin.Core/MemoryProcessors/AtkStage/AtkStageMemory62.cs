@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,21 +20,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
         public unsafe IntPtr GetAddonAddress(string name)
         {
             var atkStage = AtkStage.GetSingleton();
-            var raptureAtkUnitManager = atkStage->RaptureAtkUnitManager;
-            var unitMgr = raptureAtkUnitManager->AtkUnitManager;
-            var list = unitMgr.AllLoadedUnitsList;
-            var entries = (long*)&list.AtkUnitEntries;
+            if (atkStage == null)
+                return nint.Zero;
 
-            for (var i = 0; i < list.Count; i++)
-            {
-                var ptr = new nint(entries[i]);
-                var atkUnit = (AtkUnitBase)Marshal.PtrToStructure(ptr, typeof(AtkUnitBase))!;
-                var atkUnitNameValue = FFXIVMemory.GetStringFromBytes(atkUnit.Name, 32);
-                if (atkUnitNameValue.Equals(name))
-                    return ptr;
-            }
+            var unitMgr = atkStage->RaptureAtkUnitManager;
+            if (unitMgr == null)
+                return nint.Zero;
 
-            return nint.Zero;
+            var addon = unitMgr->GetAddonByName(name);
+            if (addon == null)
+                return nint.Zero;
+
+            return (IntPtr)addon;
         }
 
         private static readonly Dictionary<string, Type> AddonMap = new()

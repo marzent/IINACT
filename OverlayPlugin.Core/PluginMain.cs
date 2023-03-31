@@ -195,7 +195,6 @@ namespace RainbowMage.OverlayPlugin
                     _container.Register(new NetworkParser(_container));
                     _container.Register(new TriggIntegration(_container));
                     _container.Register(new FFXIVCustomLogLines(_container));
-                    _container.Register(new MemoryProcessors.AtkStage.FFXIVClientStructs.Data(_container));
 
                     // Register FFXIV memory reading subcomponents.
                     // Must be done before loading addons.

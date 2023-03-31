@@ -44,13 +44,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="..\FFXIVClientStructs\ida\data.yml" />
         <None Remove="resources\act-overlays\overlays.json" />
         <None Remove="resources\opcodes.jsonc" />
         <None Remove="resources\reserved_log_lines.json" />
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="..\FFXIVClientStructs\ida\data.yml" />
         <EmbeddedResource Include="resources\act-overlays\overlays.json" />
     </ItemGroup>
     <ItemGroup>
@@ -66,7 +64,6 @@
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="NetCoreServer" Version="7.0.0" />
         <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-        <PackageReference Include="YamlDotNet" Version="12.3.1" />
     </ItemGroup>
     <PropertyGroup>
         <PlatformTarget>x64</PlatformTarget>

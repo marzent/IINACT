@@ -1,71 +1,44 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
 using System.Runtime.InteropServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 {
     using AtkStage = global::FFXIVClientStructs.FFXIV.Component.GUI.AtkStage;
 
-    interface IAtkStageMemory62 : IAtkStageMemory { }
+    internal interface IAtkStageMemory62 : IAtkStageMemory { }
 
-    class AtkStageMemory62 : AtkStageMemory, IAtkStageMemory62
+    internal class AtkStageMemory62 : AtkStageMemory, IAtkStageMemory62
     {
-        private static long GetAtkStageSingletonAddress(TinyIoCContainer container)
-        {
-            var data = container.Resolve<FFXIVClientStructs.Data>();
-            return (long)data.GetClassInstanceAddress(FFXIVClientStructs.DataNamespace.Global,
-                                                      "Component::GUI::AtkStage");
-        }
-
         public AtkStageMemory62(TinyIoCContainer container) :
-            base(container, GetAtkStageSingletonAddress(container)) { }
+            base(container) { }
 
-        public override Version GetVersion()
-        {
-            return new Version(6, 2);
-        }
+        public override Version GetVersion() => new(6, 2);
 
         public unsafe IntPtr GetAddonAddress(string name)
         {
-            if (!IsValid())
+            var atkStage = AtkStage.GetSingleton();
+            var raptureAtkUnitManager = atkStage->RaptureAtkUnitManager;
+            var unitMgr = raptureAtkUnitManager->AtkUnitManager;
+            var list = unitMgr.AllLoadedUnitsList;
+            var entries = (long*)&list.AtkUnitEntries;
+
+            for (var i = 0; i < list.Count; i++)
             {
-                return IntPtr.Zero;
-            }
-
-            // Our current address points to an instance of AtkStage
-            // We need to traverse the object to AtkUnitManager, then check each pointer to see if it's the addon we're looking for
-
-            if (atkStageInstanceAddress.ToInt64() == 0)
-            {
-                return IntPtr.Zero;
-            }
-
-            dynamic atkStage = ManagedType<AtkStage>.GetManagedTypeFromIntPtr(atkStageInstanceAddress, memory);
-            dynamic raptureAtkUnitManager = atkStage.RaptureAtkUnitManager;
-            dynamic unitMgr = raptureAtkUnitManager.AtkUnitManager;
-            AtkUnitList list = unitMgr.AllLoadedUnitsList.ToType();
-            long* entries = (long*)&list.AtkUnitEntries;
-
-            for (var i = 0; i < list.Count; ++i)
-            {
-                var ptr = new IntPtr(entries[i]);
-                dynamic atkUnit = ManagedType<AtkUnitBase>.GetManagedTypeFromIntPtr(ptr, memory);
-                byte[] atkUnitName = atkUnit.Name;
-
-                var atkUnitNameValue = FFXIVMemory.GetStringFromBytes(atkUnitName, 0, atkUnitName.Length);
+                var ptr = new nint(entries[i]);
+                var atkUnit = (AtkUnitBase)Marshal.PtrToStructure(ptr, typeof(AtkUnitBase))!;
+                var atkUnitNameValue = FFXIVMemory.GetStringFromBytes(atkUnit.Name, 32);
                 if (atkUnitNameValue.Equals(name))
-                {
-                    return atkUnit.ptr;
-                }
+                    return ptr;
             }
 
-            return IntPtr.Zero;
+            return nint.Zero;
         }
 
-        private static Dictionary<string, Type> AddonMap = new Dictionary<string, Type>()
+        private static readonly Dictionary<string, Type> AddonMap = new()
         {
             // These addon entries are confirmed from the FFXIVClientStructs repos
             { "_ActionCross", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonActionCross) },
@@ -304,21 +277,23 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             */
         };
 
-        public unsafe dynamic GetAddon(string name)
+        public T? GetAddon<T>() where T : struct
+        {
+            var name = AddonMap.FirstOrDefault(x => x.Value == typeof(T)).Key;
+            return (T?)GetAddon(name);
+        }
+        
+        public object GetAddon(string name)
         {
             if (!AddonMap.ContainsKey(name) || !IsValid())
-            {
                 return null;
-            }
 
             var ptr = GetAddonAddress(name);
-
-            if (ptr != IntPtr.Zero)
-            {
-                return ManagedType<AtkStage>.GetDynamicManagedTypeFromIntPtr(ptr, memory, AddonMap[name]);
-            }
-
-            return null;
+            if (ptr == nint.Zero) return null;
+            var addonType = AddonMap[name];
+            
+            var addon = Marshal.PtrToStructure(ptr, addonType);
+            return addon;
         }
     }
 }

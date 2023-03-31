@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
-using RainbowMage.OverlayPlugin.MemoryProcessors.AtkGui.FFXIVClientStructs;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using Newtonsoft.Json.Serialization;
 
 namespace RainbowMage.OverlayPlugin.EventSources
 {
-    using Utilities = MemoryProcessors.AtkStage.FFXIVClientStructs.Utilities;
-
     public class SortedPartyList
     {
         public string PartyType;
@@ -55,50 +54,56 @@ namespace RainbowMage.OverlayPlugin.EventSources
             RegisterEventHandler("getSortedPartyList", (msg) => { return GetSortedPartyList(); });
         }
 
-        private JObject GetSortedPartyList()
+        private unsafe JObject GetSortedPartyList()
         {
             var partyList = new SortedPartyList();
 
-            if (!atkStageMemory.IsValid())
-            {
-                return null;
-            }
+            if (!atkStageMemory.IsValid()) return null;
 
-            dynamic addonPartyList = atkStageMemory.GetAddon("_PartyList");
+            var addonPartyListCandidate = atkStageMemory.GetAddon<AddonPartyList>();
+            if (!addonPartyListCandidate.HasValue) return null;
+            var addonPartyList = addonPartyListCandidate.Value;
+
 
             partyList.ChocoboCount = addonPartyList.ChocoboCount;
             partyList.MemberCount = addonPartyList.MemberCount;
-            partyList.PartyType = addonPartyList.PartyTypeTextNode.NodeText;
+            partyList.PartyType = addonPartyList.PartyTypeTextNode->NodeText.ToString();
             partyList.PetCount = addonPartyList.PetCount;
             partyList.TrustCount = addonPartyList.TrustCount;
 
-            for (int i = 0; i < partyList.MemberCount; ++i)
+            for (var i = 0; i < partyList.MemberCount; ++i)
             {
                 partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i,
                                                          SortedPartyList.Entry.EntryType.Party));
             }
 
-            for (int i = 0; i < partyList.TrustCount; ++i)
+            for (var i = 0; i < partyList.TrustCount; ++i)
             {
-                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i,
-                                                         SortedPartyList.Entry.EntryType.Party));
+                partyList.Entries.Add(TrustMemberToEntry(addonPartyList.TrustMember, i,
+                                                         SortedPartyList.Entry.EntryType.Trust));
             }
 
             return JObject.FromObject(partyList);
         }
 
-        private SortedPartyList.Entry PartyMemberToEntry(
-            dynamic partyMemberListStruct, int index, SortedPartyList.Entry.EntryType type)
+        private static unsafe SortedPartyList.Entry PartyMemberToEntry(
+            AddonPartyList.PartyMembers partyMembers, int index, SortedPartyList.Entry.EntryType type)
         {
-            string key = type.ToString() + "Member" + index;
-            var member = partyMemberListStruct[key];
-
-            var name = member.Name;
-            var nameStr = name.NodeText;
-            if (nameStr == null)
-            {
-                nameStr = "";
-            }
+            var member = partyMembers[index];
+            return TextNodeToEntry(member.Name, index, type);
+        }
+        
+        private static unsafe SortedPartyList.Entry TrustMemberToEntry(
+            AddonPartyList.TrustMembers trustMembers, int index, SortedPartyList.Entry.EntryType type)
+        {
+            var member = trustMembers[index];
+            return TextNodeToEntry(member.Name, index, type);
+        }
+        
+        private static unsafe SortedPartyList.Entry TextNodeToEntry(
+            AtkTextNode* textNode, int index, SortedPartyList.Entry.EntryType type)
+        {
+            var nameStr = textNode == null ? "" : textNode->NodeText.ToString();
 
             // Trim the utf8 chars at the start of the string by splitting on first space
             // Example raw string:
@@ -107,7 +112,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // "E06A" "E069" "E060" "20" etc
             // This translates to the following text in the special FFXIV UTF font
             // "Lv" "9" "0" " " etc
-            var parts = nameStr.Split(new char[] { ' ' }, 2);
+            var parts = nameStr.Split(new[] { ' ' }, 2);
             if (parts.Length > 1)
             {
                 nameStr = parts[1];
@@ -128,15 +133,22 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 return null;
             }
 
-            dynamic addon = atkStageMemory.GetAddon(key);
+            var addon = atkStageMemory.GetAddon(key);
 
             if (addon == null)
             {
                 return null;
             }
 
+            static void HandleDeserializationError(object sender, ErrorEventArgs errorArgs)
+            {
+                var currentError = errorArgs.ErrorContext.Error.Message;
+                errorArgs.ErrorContext.Handled = true;
+            }
+
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
             settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            settings.Error = HandleDeserializationError;
             var serializer = Newtonsoft.Json.JsonSerializer.CreateDefault(settings);
 
             var jobj = JObject.FromObject(addon, serializer);

@@ -70,6 +70,8 @@ public class ServerController
             var address = Config.WSServerIP == "*" ? IPAddress.Any : IPAddress.Parse(Config.WSServerIP);
 
             Server = new OverlayServer(address, Config.WSServerPort, Container);
+            Server.OptionReuseAddress = true;
+            
             Server.Start();
 
             OnStateChanged?.Invoke(this, new StateChangedArgs(true, false));

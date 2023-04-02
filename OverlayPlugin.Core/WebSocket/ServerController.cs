@@ -15,9 +15,11 @@ public class ServerController
         Container = container;
         Logger = container.Resolve<ILogger>();
         Config = container.Resolve<IPluginConfig>();
+        Dispatcher = container.Resolve<EventDispatcher>();
     }
 
     private TinyIoCContainer Container { get; }
+    private EventDispatcher Dispatcher { get; }
     private ILogger Logger { get; }
     private OverlayServer? Server { get; set; }
     private IPluginConfig Config { get; }
@@ -28,6 +30,7 @@ public class ServerController
     public int? Port => Server?.Port;
     public bool Secure => false;
     public Uri Uri => new Uri($"{(Secure ? "wss" : "ws")}//{Address}:{Port}");
+    public IpcEventReceiver? IpcEventReceiver;
 
     public void Stop()
     {
@@ -112,6 +115,22 @@ public class ServerController
             "OverlayPluginSSL.p12");
 
         return path;
+    }
+
+    public bool SubscribeToIpcSession(EventHandler<string> handler)
+    {
+        if (IpcEventReceiver != null) return true;
+        IpcEventReceiver = new IpcEventReceiver();
+        IpcEventReceiver.OnSendMessageOverIpc += handler;
+        Dispatcher.Subscribe("CombatData", IpcEventReceiver);
+        return true;
+    }
+
+    public void UnsubscribeFromIpcSession()
+    {
+        if (IpcEventReceiver == null) return;
+        Dispatcher.Unsubscribe("CombatData", IpcEventReceiver);
+        IpcEventReceiver = null;
     }
 
     public class StateChangedArgs : EventArgs

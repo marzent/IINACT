@@ -19,7 +19,7 @@ internal class IpcHandler : Handler
         Receiver.RegisterAction(DataReceived);
     }
 
-    protected override void Send(JObject e) => Sender.InvokeAction(e);
+    protected override void Send(JObject e) => Sender.InvokeFunc(e);
     
     public override void Dispose()
     {

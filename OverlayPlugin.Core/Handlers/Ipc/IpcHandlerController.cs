@@ -40,7 +40,7 @@ public class IpcHandlerController : IDisposable
         }
         catch (Exception ex)
         {
-            Logger.Log(LogLevel.Error, $"Failed cresting IPC handler {name}: {ex}");
+            Logger.Log(LogLevel.Error, $"Failed creating IPC handler {name}: {ex}");
             return false;
         }
     }

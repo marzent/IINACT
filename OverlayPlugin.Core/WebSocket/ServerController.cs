@@ -23,6 +23,7 @@ public class ServerController
     private ILogger Logger { get; }
     private OverlayServer? Server { get; set; }
     private IPluginConfig Config { get; }
+    private IpcEventReceiver? IpcEventReceiver { get; set; }
     public bool Failed { get; private set; }
     public Exception? LastException { get; private set; }
     public bool Running => Server?.IsAccepting ?? false;
@@ -30,7 +31,6 @@ public class ServerController
     public int? Port => Server?.Port;
     public bool Secure => false;
     public Uri Uri => new Uri($"{(Secure ? "wss" : "ws")}//{Address}:{Port}");
-    public IpcEventReceiver? IpcEventReceiver;
 
     public void Stop()
     {

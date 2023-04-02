@@ -1,14 +1,13 @@
 #nullable enable
 
+using System;
 using System.Net.Sockets;
 
-namespace RainbowMage.OverlayPlugin.WebSocket.Handlers;
+namespace RainbowMage.OverlayPlugin.Handlers.WebSocket;
 
-internal interface IHandler
+internal interface ISocketHandler : IDisposable
 {
-    public void OnOpen();
     public void OnMessage(string message);
-    public void OnClose();
     public void OnError(SocketError error);
 }
     

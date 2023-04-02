@@ -3,19 +3,21 @@
 using System.Net.Sockets;
 using System.Text;
 using NetCoreServer;
-using RainbowMage.OverlayPlugin.WebSocket.Handlers;
+using RainbowMage.OverlayPlugin.Handlers.WebSocket;
 
 namespace RainbowMage.OverlayPlugin.WebSocket;
 
 internal class OverlaySession : WsSession
 {
-    private TinyIoCContainer Container { get; }
+    private EventDispatcher Dispatcher { get; }
+    private FFXIVRepository Repository { get; }
     private ILogger Logger { get; }
-    private IHandler? Handler { get; set; }
+    private ISocketHandler? Handler { get; set; }
 
     public OverlaySession(WsServer server, TinyIoCContainer container) : base(server)
     {
-        Container = container;
+        Dispatcher = container.Resolve<EventDispatcher>();
+        Repository = container.Resolve<FFXIVRepository>();
         Logger = container.Resolve<ILogger>();
     }
 
@@ -26,22 +28,19 @@ internal class OverlaySession : WsSession
         switch (request.Url)
         {
             case "/ws":
-                Handler = new SocketHandler(Container, this);
+                Handler = new SocketHandler(Logger, Dispatcher, this);
                 break;
             case "/MiniParse":
             case "/BeforeLogLineRead":
-                Handler = new LegacyHandler(Container, this);
+                Handler = new LegacySocketHandler(Logger, Dispatcher, Repository, this);
                 break;
         }
-        
-        Handler?.OnOpen();
     }
 
     public override void OnWsDisconnected()
     {
         Logger.Log(LogLevel.Debug, $"Overlay WebSocket session with Id {Id} disconnected!");
-        
-        Handler?.OnClose();
+        Handler?.Dispose();
     }
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)

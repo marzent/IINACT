@@ -15,15 +15,12 @@ public class ServerController
         Container = container;
         Logger = container.Resolve<ILogger>();
         Config = container.Resolve<IPluginConfig>();
-        Dispatcher = container.Resolve<EventDispatcher>();
     }
 
     private TinyIoCContainer Container { get; }
-    private EventDispatcher Dispatcher { get; }
     private ILogger Logger { get; }
     private OverlayServer? Server { get; set; }
     private IPluginConfig Config { get; }
-    private IpcEventReceiver? IpcEventReceiver { get; set; }
     public bool Failed { get; private set; }
     public Exception? LastException { get; private set; }
     public bool Running => Server?.IsAccepting ?? false;
@@ -116,23 +113,7 @@ public class ServerController
 
         return path;
     }
-
-    public bool SubscribeToIpcSession(EventHandler<string> handler)
-    {
-        if (IpcEventReceiver != null) return true;
-        IpcEventReceiver = new IpcEventReceiver();
-        IpcEventReceiver.OnSendMessageOverIpc += handler;
-        Dispatcher.Subscribe("CombatData", IpcEventReceiver);
-        return true;
-    }
-
-    public void UnsubscribeFromIpcSession()
-    {
-        if (IpcEventReceiver == null) return;
-        Dispatcher.Unsubscribe("CombatData", IpcEventReceiver);
-        IpcEventReceiver = null;
-    }
-
+    
     public class StateChangedArgs : EventArgs
     {
         public StateChangedArgs(bool running, bool failed)

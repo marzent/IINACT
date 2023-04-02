@@ -113,6 +113,7 @@ public sealed class Plugin : IDalamudPlugin
 
         container.Register(Util.HttpClient);
         container.Register(FileDialogManager);
+        container.Register(PluginInterface);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
@@ -128,6 +129,7 @@ public sealed class Plugin : IDalamudPlugin
             var serverController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
             MainWindow.Server = serverController;
             IpcProviders.Server = serverController;
+            IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         });
 

@@ -17,6 +17,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina", "machina\Machina\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina.FFXIV", "machina\Machina.FFXIV\Machina.FFXIV.csproj", "{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OtterGui", "OtterGui-main\OtterGui.csproj", "{034BDA6E-A1EC-4627-A2B2-011462999425}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostNamazu", "PostNamazu\PostNamazu.csproj", "{94E01FE4-2491-44D4-BA05-6656BDA0B94B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostNamazu.OverlayHoster", "PostNamazu.OverlayHoster\PostNamazu.OverlayHoster.csproj", "{BCF43C56-FFCB-4D16-8745-38983824DAD2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TTS", "tts\TTS.csproj", "{3DE603AB-8C90-469C-96C6-32A03DF5FDB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CactbotSelf", "CactbotSelf\CactbotSelf.csproj", "{80D7A0AF-0EB4-42F8-BFAF-77EEF7876446}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +61,26 @@ Global
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{034BDA6E-A1EC-4627-A2B2-011462999425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{034BDA6E-A1EC-4627-A2B2-011462999425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{034BDA6E-A1EC-4627-A2B2-011462999425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{034BDA6E-A1EC-4627-A2B2-011462999425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94E01FE4-2491-44D4-BA05-6656BDA0B94B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94E01FE4-2491-44D4-BA05-6656BDA0B94B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94E01FE4-2491-44D4-BA05-6656BDA0B94B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94E01FE4-2491-44D4-BA05-6656BDA0B94B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCF43C56-FFCB-4D16-8745-38983824DAD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCF43C56-FFCB-4D16-8745-38983824DAD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCF43C56-FFCB-4D16-8745-38983824DAD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCF43C56-FFCB-4D16-8745-38983824DAD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DE603AB-8C90-469C-96C6-32A03DF5FDB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DE603AB-8C90-469C-96C6-32A03DF5FDB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DE603AB-8C90-469C-96C6-32A03DF5FDB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DE603AB-8C90-469C-96C6-32A03DF5FDB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80D7A0AF-0EB4-42F8-BFAF-77EEF7876446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80D7A0AF-0EB4-42F8-BFAF-77EEF7876446}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80D7A0AF-0EB4-42F8-BFAF-77EEF7876446}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80D7A0AF-0EB4-42F8-BFAF-77EEF7876446}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

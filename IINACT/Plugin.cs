@@ -1,14 +1,22 @@
 using System.Diagnostics;
+using System.Windows.Forms;
+using CactbotSelf;
 using Dalamud.Data;
+using Dalamud.Game;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Network;
+using Dalamud.Hooking;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Utility;
+using FFXIV_ACT_Plugin.Network.PacketHandlers;
 using IINACT.Windows;
+using PostNamazu;
+using static OtterGui.Raii.ImRaii;
 
 namespace IINACT;
 
@@ -19,14 +27,10 @@ public sealed class Plugin : IDalamudPlugin
     
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
+    private const string ChatCommandName = "/chat";
     public readonly WindowSystem WindowSystem = new("IINACT");
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
-    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] internal static CommandManager CommandManager { get; private set; } = null!;
-    [PluginService] internal static GameNetwork GameNetwork { get; private set; } = null!;
-    [PluginService] internal static DataManager DataManager { get; private set; } = null!;
-    [PluginService] internal static ChatGui ChatGui { get; private set; } = null!;
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; init; }
     private TextToSpeechProvider TextToSpeechProvider { get; init; }
@@ -40,50 +44,81 @@ public sealed class Plugin : IDalamudPlugin
     internal string OverlayPluginStatus => OverlayPlugin.Status;
     private PluginLogTraceListener PluginLogTraceListener { get; init; }
 
-    public Plugin()
+    private delegate void OnUpdateInputUI(IntPtr EventArgument);
+    private Hook<OnUpdateInputUI> onUpdateInputUIHook;
+    private static readonly Queue<string> ChatQueue = new();
+    public DateTime NextClick;
+    public Plugin(DalamudPluginInterface pluginInterface)
     {
+        DalamudApi.Initialize(this, pluginInterface);
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);
         
         FileDialogManager = new FileDialogManager();
-        Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
-        
+        Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = DalamudApi.Network;
+
         var fetchDeps = new FetchDependencies.FetchDependencies(
-            PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
+            DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
         
         fetchDeps.GetFfxivPlugin();
 
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
 
-        Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        Configuration.Initialize(PluginInterface);
+        Configuration = DalamudApi.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Configuration.Initialize(DalamudApi.PluginInterface);
 
-        this.TextToSpeechProvider = new TextToSpeechProvider();
+        this.TextToSpeechProvider = new TextToSpeechProvider(Configuration);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DalamudApi.ClientState.ClientLanguage, DalamudApi.Chat);
         OverlayPlugin = InitOverlayPlugin();
 
-        IpcProviders = new IpcProviders(PluginInterface);
+        IpcProviders = new IpcProviders(DalamudApi.PluginInterface);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
-
-        CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
+        DalamudApi.Framework.Update += Updata;
+        onUpdateInputUIHook= Hook<OnUpdateInputUI>.FromAddress(
+                    DalamudApi.SigScanner.ScanText("4C 8B DC 53 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 83 B9"), OnUpdateInputUIDo);
+        onUpdateInputUIHook.Enable();
+        this.NextClick = DateTime.Now;
+        DalamudApi.Commands.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Displays the IINACT main window"
         });
-
-        CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
+        DalamudApi.Commands.ProcessCommand(MainWindowCommandName);
+        DalamudApi.Commands.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
         {
             HelpMessage = "Ends the current encounter IINACT is parsing"
         });
+        DalamudApi.Commands.AddHandler(ChatCommandName, new CommandInfo(ChatDo)
+        {
+            HelpMessage = "chat"
+        });
+        DalamudApi.PluginInterface.UiBuilder.Draw += DrawUI;
+        DalamudApi.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+    }
 
-        PluginInterface.UiBuilder.Draw += DrawUI;
-        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+    private void OnUpdateInputUIDo(IntPtr EventArgument)
+    {
+        onUpdateInputUIHook.Original(EventArgument);
+        var now = DateTime.Now;
+
+        if (this.NextClick < now && ChatQueue.Count > 0)
+        {
+
+            var com = ChatQueue.Dequeue();
+            ChatHelper.SendMessage(com);
+            this.NextClick = now.AddSeconds(1/6);
+        }
+    }
+
+    private void Updata(Framework framework)
+    {
+
     }
 
     public void Dispose()
@@ -98,11 +133,13 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
-
-        CommandManager.RemoveHandler(MainWindowCommandName);
-        CommandManager.RemoveHandler(EndEncCommandName);
+        DalamudApi.Framework.Update -= Updata;
+        DalamudApi.Commands.RemoveHandler(MainWindowCommandName);
+        DalamudApi.Commands.RemoveHandler(EndEncCommandName);
+        DalamudApi.Commands.RemoveHandler(ChatCommandName);
+        onUpdateInputUIHook.Disable();
     }
-
+    public  static CactbotSelf.CactbotSelf cactboSelf;
     private RainbowMage.OverlayPlugin.PluginMain InitOverlayPlugin()
     {
         var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
@@ -115,13 +152,13 @@ public sealed class Plugin : IDalamudPlugin
         container.Register(FileDialogManager);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
-            PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
+            DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
         container.Register(overlayPlugin);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.OverlayPluginContainer = container;
         
         Task.Run(() =>
         {
-            overlayPlugin.InitPlugin(PluginInterface.ConfigDirectory.FullName);
+            overlayPlugin.InitPlugin(DalamudApi.PluginInterface.ConfigDirectory.FullName);
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
             MainWindow.OverlayPresets = registry.OverlayPresets;
@@ -129,6 +166,11 @@ public sealed class Plugin : IDalamudPlugin
             MainWindow.Server = serverController;
             IpcProviders.Server = serverController;
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+            var post = new PostNamazu.PostNamazu(DalamudApi.Commands);
+            post.InitPlugin();
+            cactboSelf = new CactbotSelf.CactbotSelf(Configuration.shunxu, true);
+            cactboSelf.InitPlugin();
+            PluginLog.Log("初始化鲶鱼精");
         });
 
         return overlayPlugin;
@@ -136,7 +178,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        MainWindow.IsOpen = true;
+        MainWindow.IsOpen = !MainWindow.IsOpen;
         FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.GetServerTime();
     }
 
@@ -144,7 +186,20 @@ public sealed class Plugin : IDalamudPlugin
     {
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
     }
+    private void ChatDo(string command, string arguments)
+    {
+        string[] array = arguments.Split(new char[]
+    {
+                    ' '
+    });
+        if (array.Length >=2)
+        {
+            NextClick = DateTime.Now.AddSeconds(1/6);
+            ChatQueue.Enqueue(arguments);
+            //ChatHelper.SendMessage(arguments);
+        }
 
+    }
     private void DrawUI()
     {
         WindowSystem.Draw();

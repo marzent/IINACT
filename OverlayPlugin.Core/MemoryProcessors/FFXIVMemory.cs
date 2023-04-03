@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -66,7 +66,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             try
             {
                 process = proc;
-                processHandle = -1;
+                processHandle = (IntPtr)(-1); 
             }
             catch (Exception e)
             {

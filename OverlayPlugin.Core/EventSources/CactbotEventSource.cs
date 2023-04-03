@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using System;
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Dalamud.Interface.ImGuiFileDialog;
+using System.Windows.Forms;
 
 namespace RainbowMage.OverlayPlugin.EventSources;
 

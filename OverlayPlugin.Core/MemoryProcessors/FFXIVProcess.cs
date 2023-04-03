@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,7 +16,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             this.process = process;
             if (process == null || process.HasExited)
                 return;
-            Handle = -1;
+            Handle = (IntPtr)(-1);
         }
 
         ~LimitedProcess()

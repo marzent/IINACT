@@ -9,6 +9,9 @@ public class Configuration : IPluginConfiguration
 {
     public string DefaultLogFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "IINACT");
     private string? logFilePath;
+    public List<string> shunxu=new();
+    public int TTSIndex;
+    public bool UseEdeg;
 
     [JsonIgnore]
     private DalamudPluginInterface? PluginInterface { get; set; }

@@ -1,7 +1,9 @@
+using System.Configuration;
 using System.Diagnostics;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 using Dalamud.Logging;
+using tts;
 
 namespace IINACT;
 
@@ -10,14 +12,17 @@ internal class TextToSpeechProvider
     private string binary = "/usr/bin/say";
     private string args = "";
     private readonly object speechLock = new();
-    private readonly SpeechSynthesizer? speechSynthesizer;  
-    
-    public TextToSpeechProvider()
+    private readonly SpeechSynthesizer? speechSynthesizer;
+    tts.TTS tts;
+    Configuration configuration;
+    public TextToSpeechProvider(Configuration con)
     {
         try
         {
+            configuration = con;
             speechSynthesizer = new SpeechSynthesizer();
             speechSynthesizer?.SetOutputToDefaultAudioDevice();
+            tts=new tts.TTS();
         }
         catch (Exception ex)
         {
@@ -64,7 +69,15 @@ internal class TextToSpeechProvider
         try
         {
             lock (speechLock)
-                speechSynthesizer?.Speak(message);
+            {
+                if (configuration.UseEdeg)
+                {
+                    tts.Speak(message,configuration.TTSIndex);
+                }
+                else speechSynthesizer?.Speak(message);
+
+            }
+              
         }
         catch (Exception ex)
         {

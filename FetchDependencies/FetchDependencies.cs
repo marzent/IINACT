@@ -9,33 +9,35 @@ public class FetchDependencies
 
     public FetchDependencies(string assemblyDir, HttpClient httpClient)
     {
+        //DependenciesDir = Path.Combine(assemblyDir, "external_dependencies");
         DependenciesDir = assemblyDir;
         HttpClient = httpClient;
     }
 
     public void GetFfxivPlugin()
     {
+        Directory.CreateDirectory(DependenciesDir);
         var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
         var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
 
-        if (!NeedsUpdate(pluginPath))
+        if (!NeedsUpdate(DependenciesDir))
             return;
 
-        if (!File.Exists(pluginZipPath))
-            DownloadPlugin(pluginZipPath);
+        if (!File.Exists(pluginPath))
+            DownloadPlugin(DependenciesDir);
 
-        try
-        {
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
-        }
-        catch (InvalidDataException) 
-        {
-            File.Delete(pluginZipPath);
-            DownloadPlugin(pluginZipPath);
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
-        }
+        //try
+        //{
+        //    ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        //}
+        //catch (InvalidDataException) 
+        //{
+        //    File.Delete(pluginZipPath);
+        //    DownloadPlugin(DependenciesDir);
+        //    ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+        //}
 
-        File.Delete(pluginZipPath);
+        //File.Delete(pluginZipPath);
 
         var patcher = new Patcher(DependenciesDir);
         patcher.MainPlugin();
@@ -45,20 +47,25 @@ public class FetchDependencies
 
     private bool NeedsUpdate(string dllPath)
     {
-        if (!File.Exists(dllPath)) return true;
+        var txtPath = Path.Combine(dllPath, "版本.txt");
+        if (!File.Exists(txtPath)) return true;
         try
         {
-            using var plugin = new TargetAssembly(dllPath);
-
-            if (!plugin.ApiVersionMatches())
+            if (File.Exists(txtPath))
+            {
+                using var txt = new StreamReader(txtPath);
+                var nowVerson = new Version(txt.ReadToEnd());
+                using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                var textStream = HttpClient.GetStringAsync("https://cninact.diemoe.net/CN解析/版本.txt").Result;
+                var remoteVersion = new Version(textStream);
+                return remoteVersion > nowVerson;
+            }
+            else
+            {
+                DownloadPlugin(dllPath);
                 return true;
-            
-            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            var remoteVersionString = HttpClient
-                                      .GetStringAsync("https://www.iinact.com/updater/version",
-                                                      cancelAfterDelay.Token).Result;
-            var remoteVersion = new Version(remoteVersionString);
-            return remoteVersion > plugin.Version;
+            };
+
         }
         catch
         {
@@ -68,12 +75,23 @@ public class FetchDependencies
 
     private void DownloadPlugin(string path)
     {
-        using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var downloadStream = HttpClient
-                                   .GetStreamAsync("https://www.iinact.com/updater/download",
-                                                   cancelAfterDelay.Token).Result;
-        using var zipFileStream = new FileStream(path, FileMode.Create);
+        //using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        //using var downloadStream = HttpClient
+        //                           .GetStreamAsync("https://www.iinact.com/updater/download",
+        //                                           cancelAfterDelay.Token).Result;
+        //using var zipFileStream = new FileStream(path, FileMode.Create);
+        //downloadStream.CopyTo(zipFileStream);
+        //zipFileStream.Close();
+        var pluginPath = Path.Combine(path, "FFXIV_ACT_Plugin.dll");
+        var txtinPath = Path.Combine(path, "版本.txt");
+        using var downloadStream = HttpClient.GetStreamAsync("https://cninact.diemoe.net/CN解析/FFXIV_ACT_Plugin.dll\r\n").Result;
+        using var textStream = HttpClient.GetStreamAsync("https://cninact.diemoe.net/CN解析/版本.txt").Result;
+        //await using var downloadStream = await httpClient.GetStreamAsync($"https://github.com/TundraWork/FFXIV_ACT_Plugin_CN/releases/download/{bcd}/FFXIV_ACT_Plugin.dll");
+        using var zipFileStream = new FileStream(pluginPath, FileMode.Create);
         downloadStream.CopyTo(zipFileStream);
         zipFileStream.Close();
+        using var zipFileStream1 = new FileStream(txtinPath, FileMode.Create);
+        textStream.CopyTo(zipFileStream1);
+        zipFileStream1.Close();
     }
 }

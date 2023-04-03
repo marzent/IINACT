@@ -1,0 +1,86 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="XivCommon" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NotACT\NotACT.csproj" />
+    <ProjectReference Include="..\PostNamazu.OverlayHoster\PostNamazu.OverlayHoster.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Dalamud">
+      <HintPath>E:\Dalamud\addon\Hooks\7.3.3.0\Dalamud.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>E:\Dalamud\addon\Hooks\7.3.3.0\FFXIVClientStructs.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin">
+      <HintPath>..\external_dependencies\FFXIV_ACT_Plugin.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Common">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Config">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Config.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Logfile">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Memory">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Memory.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Network">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Network.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Parse">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Parse.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Resource">
+      <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
+		<Private>False</Private>
+    </Reference>
+    <Reference Include="ImGui.NET">
+      <HintPath>E:\Dalamud\addon\Hooks\7.3.3.0\ImGui.NET.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="ImGuiScene">
+      <HintPath>E:\Dalamud\addon\Hooks\7.3.3.0\ImGuiScene.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="FASM-LICENSE.TXT">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

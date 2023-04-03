@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Advanced_Combat_Tracker;
 using Dalamud;
 using Dalamud.Game.Gui;
@@ -43,7 +43,18 @@ public class FfxivActPluginWrapper : IDisposable
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
-        OpcodeManager.Instance.SetRegion(GameRegion.Global);
+        switch (dalamudClientLanguage)
+        {
+            case Dalamud.ClientLanguage.Japanese:
+            case Dalamud.ClientLanguage.English:
+            case Dalamud.ClientLanguage.German:
+            case Dalamud.ClientLanguage.French:
+                OpcodeManager.Instance.SetRegion(GameRegion.Global);
+                break;
+            default:
+                OpcodeManager.Instance.SetRegion(GameRegion.Chinese);
+                break;
+        }
 
         var iocContainer = ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();
@@ -83,7 +94,7 @@ public class FfxivActPluginWrapper : IDisposable
             Dalamud.ClientLanguage.English => Language.English,
             Dalamud.ClientLanguage.German => Language.German,
             Dalamud.ClientLanguage.French => Language.French,
-            _ => Language.English
+            _ => Language.Chinese
         };
 
     public void Dispose()
@@ -103,7 +114,6 @@ public class FfxivActPluginWrapper : IDisposable
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
             UseWinPCap = false,
-            UseDeucalion = true,
             ProcessID = Environment.ProcessId
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
@@ -134,8 +144,8 @@ public class FfxivActPluginWrapper : IDisposable
                                                    DataCollectionSettings.LogAllNetworkData,
                                                    DataCollectionSettings.DisableCombatLog,
                                                    DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap,
-                                                   DataCollectionSettings.UseSocketFilter,
-                                                   DataCollectionSettings.UseDeucalion);
+                                                   DataCollectionSettings.UseSocketFilter
+                                                  );
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);

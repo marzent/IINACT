@@ -3,21 +3,38 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Interface.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using RainbowMage.OverlayPlugin;
 using FFXIV_ACT_Plugin.Config;
-
+using OtterGui.Raii;
 namespace IINACT.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
+    public List<string> shunxu = new List<string> { "黑骑", "枪刃", "战士", "骑士", "白魔", "占星", "贤者", "学者", "武士", "武僧", "镰刀", "龙骑", "忍者", "机工", "舞者", "诗人", "黑魔", "召唤", "赤魔" };
+    public enum TTS
+    {
+        女晓晓,
+        女晓依,
+        男云健,
+        男云扬,
+        男云霞,
+        男云希,
+        女曉佳, 
+        女曉臻,
+        女七海,
+        女阿莉雅,
+        女珍妮,
+        男盖, 
+        女索尼娅
+    }
     private Configuration Configuration { get; init; }
     private FileDialogManager FileDialogManager { get; init; }
 
     public ConfigWindow(Plugin plugin) : base("IINACT Configuration")
     {
+
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(307, 207),
@@ -25,6 +42,10 @@ public class ConfigWindow : Window, IDisposable
         };
 
         Configuration = plugin.Configuration;
+        if (Configuration.shunxu is null || Configuration.shunxu.Count <= 10)
+        {
+            Configuration.shunxu = shunxu;
+        }
         FileDialogManager = plugin.FileDialogManager;
     }
 
@@ -40,7 +61,7 @@ public class ConfigWindow : Window, IDisposable
         DrawParseSettings();
         DrawWebSocketSettings();
     }
-    
+
      private void DrawParseSettings()
     {
         using var tab = ImRaii.TabItem("Parser");
@@ -99,28 +120,102 @@ public class ConfigWindow : Window, IDisposable
             Configuration.ShowDebug = showDebug;
             Configuration.Save();
         }
-
-        if (!showDebug) return;
-
         ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
-        var simulateIndividualDoTCrits = Configuration.SimulateIndividualDoTCrits;
-        if (ImGui.Checkbox("Simulate Individual DoT Crits", ref simulateIndividualDoTCrits))
+        if (ImGui.Checkbox("使用Edeg语音",ref Configuration.UseEdeg))
         {
-            Configuration.SimulateIndividualDoTCrits = simulateIndividualDoTCrits;
             Configuration.Save();
         }
 
-        var showRealDoTTicks = Configuration.ShowRealDoTTicks;
-        if (ImGui.Checkbox("Also Show 'Real' DoT Ticks", ref showRealDoTTicks))
+        if (Configuration.UseEdeg)
         {
-            Configuration.ShowRealDoTTicks = showRealDoTTicks;
-            Configuration.Save();
+            if (ImGui.BeginCombo("TTS", Enum.GetName(typeof(TTS), Configuration.TTSIndex)))
+            {
+                foreach (var tts in Enum.GetValues<TTS>())
+                {
+                    if (ImGui.Selectable(Enum.GetName(typeof(TTS), tts),
+                                    (TTS)Configuration.TTSIndex == tts))
+                    {
+                        Configuration.TTSIndex = (int)tts;
+                        Configuration.Save();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+
         }
+
+        if (showDebug)
+        {
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            var simulateIndividualDoTCrits = Configuration.SimulateIndividualDoTCrits;
+            if (ImGui.Checkbox("Simulate Individual DoT Crits", ref simulateIndividualDoTCrits))
+            {
+                Configuration.SimulateIndividualDoTCrits = simulateIndividualDoTCrits;
+                Configuration.Save();
+            }
+
+            var showRealDoTTicks = Configuration.ShowRealDoTTicks;
+            if (ImGui.Checkbox("Also Show 'Real' DoT Ticks", ref showRealDoTTicks))
+            {
+                Configuration.ShowRealDoTTicks = showRealDoTTicks;
+                Configuration.Save();
+            }
+        }
+        ImGui.BeginChild("cover window", new Vector2(100, 200));
+        ImGui.ListBox("##1", ref selet, Configuration.shunxu.ToArray(), Configuration.shunxu.Count);
+        ImGui.EndChild();
+        ImGui.SameLine(0, -10);
+        ImGui.SetCursorPosY((float)(ImGui.GetCursorPosY() + 30));
+        ImGui.SetCursorPosX((float)(ImGui.GetCursorPosX() -20));
+        ImGui.BeginChild("cover window1", new Vector2(50, 150), false, ImGuiWindowFlags.NoDocking);
+        if (ImGui.Button("↑"))
+        {
+            if (selet>=1)
+            {
+                var 交换 = Configuration.shunxu[selet];
+                Configuration.shunxu[selet] = Configuration.shunxu[selet - 1];
+                Configuration.shunxu[selet - 1] = 交换;
+                selet -= 1;
+                if (Plugin.cactboSelf is not null)
+                {
+                    Plugin.cactboSelf.ChangeSetting(Configuration.shunxu, true);
+                }
+              
+            }
+        }
+        ImGui.SetCursorPosY((float)(ImGui.GetCursorPosY() + ImGui.GetTextLineHeight() * 0.5));
+        if (ImGui.Button("initi"))
+        {
+           
+           Configuration.shunxu=shunxu;
+            selet = 0;
+            if (Plugin.cactboSelf is not null)
+            {
+                Plugin.cactboSelf.ChangeSetting(Configuration.shunxu, true);
+            }
+        }
+        ImGui.SetCursorPosY((float)(ImGui.GetCursorPosY() + ImGui.GetTextLineHeight() * 0.5));
+        if (ImGui.Button("↓"))
+        {
+            if (selet <= Configuration.shunxu.Count-2)
+            {
+                var 交换 = Configuration.shunxu[selet];
+                Configuration.shunxu[selet] = Configuration.shunxu[selet + 1];
+                Configuration.shunxu[selet + 1] = 交换;
+                selet += 1;
+                if (Plugin.cactboSelf is not null)
+                {
+                    Plugin.cactboSelf.ChangeSetting(Configuration.shunxu, true);
+                }
+            }
+        }
+        ImGui.EndChild();
+        ;
     }
-
+    private int selet=0;
     private void DrawWebSocketSettings()
     {
         using var tab = ImRaii.TabItem("WebSocket Server");

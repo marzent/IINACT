@@ -21,15 +21,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
         {
             var atkStage = AtkStage.GetSingleton();
             if (atkStage == null)
-                return nint.Zero;
+                return IntPtr.Zero;
 
             var unitMgr = atkStage->RaptureAtkUnitManager;
             if (unitMgr == null)
-                return nint.Zero;
+                return IntPtr.Zero;
 
             var addon = unitMgr->GetAddonByName(name);
             if (addon == null)
-                return nint.Zero;
+                return IntPtr.Zero;
 
             return (IntPtr)addon;
         }
@@ -50,7 +50,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             { "ChatLogPanel_3", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonChatLogPanel) },
             { "ItemSearchResult", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonItemSearchResult) },
             { "_PartyList", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonPartyList) },
-            { "Macro", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonMacro) },
+
             { "Teleport", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonTeleport) },
 
             // These addons are guessed based on patterns
@@ -66,15 +66,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 
             // These addons are guessed based on names matching up or based on github code search
             { "AOZNotebook", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonAOZNotebook) },
-            { "ChocoboBreedTraining", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonChocoboBreedTraining) },
-            { "ContentsFinder", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonContentsFinder) },
+
             { "ContentsFinderConfirm", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonContentsFinderConfirm) },
             { "ContextIconMenu", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonContextIconMenu) },
             { "ContextMenu", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonContextMenu) },
             { "_EnemyList", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonEnemyList) },
             { "_Exp", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonExp) },
-            { "FateReward", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonFateReward) },
-            { "FieldMarker", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonFieldMarker) },
+
             { "Gathering", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGathering) },
             { "GatheringMasterpiece", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonGatheringMasterpiece) },
             {
@@ -92,23 +90,22 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
             { "MaterializeDialog", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonMaterializeDialog) },
             { "MateriaRetrieveDialog", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonMateriaRetrieveDialog) },
             { "NamePlate", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonNamePlate) },
-            { "NeedGreed", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonNeedGreed) },
-            { "RaceChocoboResult", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRaceChocoboResult) },
+
             { "RecipeNote", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRecipeNote) },
-            { "ReconstructionBox", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonReconstructionBox) },
+
             { "RelicNoteBook", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRelicNoteBook) },
             { "Repair", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRepair) },
             { "Request", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRequest) },
-            { "RetainerList", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRetainerList) },
+
             { "RetainerSell", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRetainerSell) },
             { "RetainerTaskAsk", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRetainerTaskAsk) },
-            { "RetainerTaskList", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRetainerTaskList) },
+
             { "RetainerTaskResult", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonRetainerTaskResult) },
             { "SalvageDialog", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSalvageDialog) },
             { "SalvageItemSelector", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSalvageItemSelector) },
-            { "SatisfactionSupply", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSatisfactionSupply) },
+
             { "SelectIconString", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSelectIconString) },
-            { "SelectOk", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSelectOk) },
+
             { "SelectString", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSelectString) },
             // Both of these seem to exist in memory somehow??
             { "SelectYesno", typeof(global::FFXIVClientStructs.FFXIV.Client.UI.AddonSelectYesno) },
@@ -285,7 +282,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
                 return null;
 
             var ptr = GetAddonAddress(name);
-            if (ptr == nint.Zero) return null;
+            if (ptr == IntPtr.Zero) return null;
             var addonType = AddonMap[name];
             
             var addon = Marshal.PtrToStructure(ptr, addonType);

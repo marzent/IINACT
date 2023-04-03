@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
+using RainbowMage.OverlayPlugin.Handlers.Ipc;
 using RainbowMage.OverlayPlugin.Integration;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Aggro;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
@@ -225,7 +226,9 @@ namespace RainbowMage.OverlayPlugin
 
                         InitializeOverlays();
 
-                        Status = @"Init Phase 2: Overlay tasks";
+                        Status = @"Init Phase 2: Dalamud IPC";
+                        
+                        _container.Register(new IpcHandlerController(_container));
 
                         // WSServer has to start after the LoadAddons() call because clients can connect immediately
                         // after it's initialized and that requires the event sources to be initialized.
@@ -353,6 +356,15 @@ namespace RainbowMage.OverlayPlugin
             catch (Exception ex)
             {
                 _logger.Log(LogLevel.Error, $"DeInitPlugin: Failed to stop WebSocket server {ex.Message}");
+            }
+            
+            try
+            {
+                _container.Resolve<IpcHandlerController>().Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, $"DeInitPlugin: Failed to dispose IPC handlers {ex.Message}");
             }
 
             _logger.Log(LogLevel.Info, "DeInitPlugin: Finalized.");

@@ -24,8 +24,9 @@ public class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, Height)
         };
         SizeCondition = ImGuiCond.Always;
-
+        IsOpen = false;
         Plugin = plugin;
+        
     }
     
     public IReadOnlyList<RainbowMage.OverlayPlugin.IOverlayPreset>? OverlayPresets { get; set; }

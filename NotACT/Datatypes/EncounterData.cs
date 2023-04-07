@@ -1,4 +1,6 @@
-﻿namespace Advanced_Combat_Tracker;
+﻿using System.Collections.Immutable;
+
+namespace Advanced_Combat_Tracker;
 
 public class EncounterData
 {
@@ -452,15 +454,22 @@ public class EncounterData
 
             for (var i = 0; i < sortedAllies.Count; i++)
             {
-                foreach (var (name, value) in sortedAllies.Values[i].cd.Allies)
+                ImmutableArray<KeyValuePair<string,int>> subAllies;
+                try
+                {
+                    subAllies = sortedAllies.Values[i].cd.Allies.ToImmutableArray();
+                }
+                catch (InvalidOperationException)
+                {
+                    continue;
+                }
+                foreach (var (name, value) in subAllies)
                 {
                     if (!sortedAllies.ContainsKey(name))
                     {
                         var combatant2 = GetCombatant(name);
                         if (combatant2 == null)
-                        {
                             continue;
-                        }
 
                         sortedAllies.Add(name, new AllyObject(combatant2));
                         listChanged = true;

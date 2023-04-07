@@ -37,6 +37,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
+    private RainbowMage.OverlayPlugin.WebSocket.ServerController? WebSocketServer { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
     private PluginLogTraceListener PluginLogTraceListener { get; init; }
 
@@ -126,9 +127,9 @@ public sealed class Plugin : IDalamudPlugin
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
             MainWindow.OverlayPresets = registry.OverlayTemplates;
-            var serverController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
-            MainWindow.Server = serverController;
-            IpcProviders.Server = serverController;
+            WebSocketServer = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            MainWindow.Server = WebSocketServer;
+            IpcProviders.Server = WebSocketServer;
             IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         });
@@ -138,8 +139,18 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        MainWindow.IsOpen = true;
-        FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.GetServerTime();
+        switch (args) 
+        {
+            case "start":
+                WebSocketServer?.Start();
+                break;
+            case "stop":
+                WebSocketServer?.Stop();
+                break;
+            default:
+                MainWindow.IsOpen = true;
+                break;
+        }
     }
 
     private static void EndEncounter(string command, string args)

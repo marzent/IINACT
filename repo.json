@@ -3,8 +3,8 @@
   "Author": "Usagi",
   "Name": "IINACT",
   "InternalName": "IINACT",
-  "AssemblyVersion": "2.1.5.0",
-  "TestingAssemblyVersion": "2.1.5.0",
+  "AssemblyVersion": "2.1.5.1",
+  "TestingAssemblyVersion": "2.1.5.1",
   "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/marzent/IINACT",
@@ -19,8 +19,8 @@
   "Punchline": "A parsing plugin.",
   "IsHide": "False",
   "IsTestingExclusive": "False",
-  "DownloadLinkInstall": "https://github.com/marzent/IINACT/releases/download/v2.1.5.0/IINACT.zip",
-  "DownloadLinkTesting": "https://github.com/marzent/IINACT/releases/download/v2.1.5.0/IINACT.zip",
-  "DownloadLinkUpdate": "https://github.com/marzent/IINACT/releases/download/v2.1.5.0/IINACT.zip"
+  "DownloadLinkInstall": "https://github.com/marzent/IINACT/releases/download/v2.1.5.1/IINACT.zip",
+  "DownloadLinkTesting": "https://github.com/marzent/IINACT/releases/download/v2.1.5.1/IINACT.zip",
+  "DownloadLinkUpdate": "https://github.com/marzent/IINACT/releases/download/v2.1.5.1/IINACT.zip"
 }
 ]

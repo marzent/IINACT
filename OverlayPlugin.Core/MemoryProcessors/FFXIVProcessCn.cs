@@ -288,7 +288,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return data;
         }
 
-        public unsafe override JObject GetJobSpecificData(EntityJob job)
+        public override unsafe JObject GetJobSpecificData(EntityJob job)
         {
             if (!HasProcess() || job_data_outer_addr_ == IntPtr.Zero)
                 return null;

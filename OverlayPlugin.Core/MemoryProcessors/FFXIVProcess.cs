@@ -2,14 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
     // Wrap Process so that Process.Handle can be overridden with a more restricted handle.
     public class LimitedProcess
     {
-        private Process process;
+        private readonly Process process;
 
         public LimitedProcess(Process process)
         {
@@ -17,12 +16,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             if (process == null || process.HasExited)
                 return;
             Handle = -1;
-        }
-
-        ~LimitedProcess()
-        {
-            if (Handle == IntPtr.Zero)
-                return;
         }
 
         public IntPtr Handle { get; } = IntPtr.Zero;
@@ -38,9 +31,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
     // memory addresses when FFXIV is run or closed.
     public abstract class FFXIVProcess
     {
-        internal ILogger logger_ = null;
-        private bool showed_dx9_error_ = false;
-        private LimitedProcess process_ = null;
+        internal ILogger logger_;
+        private LimitedProcess process_;
 
         // Filled in by ReadSignatures().
         internal IntPtr player_ptr_addr_ = IntPtr.Zero;
@@ -232,7 +224,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         {
             // If FindProcess failed, return false. But also return false if
             // FindProcess succeeded but the process has since exited.
-            return process_ != null && !process_.HasExited;
+            return process_ != null;
         }
 
         public bool FindProcess()
@@ -241,35 +233,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 return true;
 
             // Only support the DirectX 11 binary. The DirectX 9 one has different addresses.
-            var found_process = (from x in Process.GetProcessesByName("ffxiv_dx11")
-                                 where !x.HasExited && x.MainModule != null &&
-                                       x.MainModule.ModuleName == "ffxiv_dx11.exe"
-                                 select x).FirstOrDefault<Process>();
-            if (found_process != null && found_process.HasExited)
-                found_process = null;
-            var changed_existance = (process_ == null) != (found_process == null);
-            var changed_pid = process_ != null && found_process != null && process_.Id != found_process.Id;
+            var found_process = Process.GetCurrentProcess();
+            var changed_existance = process_ == null;
+            var changed_pid = process_ != null && process_.Id != found_process.Id;
             if (changed_existance || changed_pid)
             {
                 player_ptr_addr_ = IntPtr.Zero;
                 job_data_outer_addr_ = IntPtr.Zero;
-                process_ = found_process != null ? new LimitedProcess(found_process) : null;
+                process_ = new LimitedProcess(found_process);
 
                 if (process_ != null)
                 {
                     ReadSignatures();
-                }
-            }
-
-            if (process_ == null && !showed_dx9_error_)
-            {
-                var found_32bit = (from x in Process.GetProcessesByName("ffxiv")
-                                   where !x.HasExited && x.MainModule != null && x.MainModule.ModuleName == "ffxiv.exe"
-                                   select x).Count();
-                if (found_32bit > 0)
-                {
-                    logger_.Log(LogLevel.Error, "Found DirectX9 FFXIV process. Requires DirectX11.");
-                    showed_dx9_error_ = true;
                 }
             }
 
@@ -318,7 +293,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return Read8(job_inner_ptr, kJobDataInnerStructSize);
         }
 
-        public unsafe abstract JObject GetJobSpecificData(EntityJob job);
+        public abstract JObject GetJobSpecificData(EntityJob job);
         internal abstract EntityData GetEntityData(IntPtr entity_ptr);
         public abstract EntityData GetSelfData();
 
@@ -503,7 +478,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                                 // In RIP addressing, the pointer from the executable is 32bits which we stored as |rip_ptr_offset|. The pointer
                                 // is then added to the address of the byte following the pointer, making it relative to that address, which we
                                 // stored as |rip_ptr_base|.
-                                pointer = new IntPtr((Int64)rip_ptr_offset + rip_ptr_base);
+                                pointer = new IntPtr(rip_ptr_offset + rip_ptr_base);
                             }
                             else
                             {

@@ -22,24 +22,24 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("IINACT");
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
-    [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] internal static CommandManager CommandManager { get; private set; } = null!;
-    [PluginService] internal static GameNetwork GameNetwork { get; private set; } = null!;
-    [PluginService] internal static DataManager DataManager { get; private set; } = null!;
-    [PluginService] internal static ChatGui ChatGui { get; private set; } = null!;
+    [PluginService] internal DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] internal CommandManager CommandManager { get; private set; } = null!;
+    [PluginService] internal GameNetwork GameNetwork { get; private set; } = null!;
+    [PluginService] internal DataManager DataManager { get; private set; } = null!;
+    [PluginService] internal ChatGui ChatGui { get; private set; } = null!;
     // ReSharper restore UnusedAutoPropertyAccessor.Local
-    internal Configuration Configuration { get; init; }
-    private TextToSpeechProvider TextToSpeechProvider { get; init; }
-    private ConfigWindow ConfigWindow { get; init; }
-    private MainWindow MainWindow { get; init; }
-    internal FileDialogManager FileDialogManager { get; init; }
-    private IpcProviders IpcProviders { get; init; }
+    internal Configuration Configuration { get; }
+    private TextToSpeechProvider TextToSpeechProvider { get; }
+    private ConfigWindow ConfigWindow { get; }
+    private MainWindow MainWindow { get; }
+    internal FileDialogManager FileDialogManager { get; }
+    private IpcProviders IpcProviders { get; }
 
-    private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
+    private FfxivActPluginWrapper FfxivActPluginWrapper { get; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
     private RainbowMage.OverlayPlugin.WebSocket.ServerController? WebSocketServer { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
-    private PluginLogTraceListener PluginLogTraceListener { get; init; }
+    private PluginLogTraceListener PluginLogTraceListener { get; }
 
     public Plugin()
     {

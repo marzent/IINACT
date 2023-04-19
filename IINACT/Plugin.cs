@@ -89,7 +89,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Displays the IINACT main window"
         });
-        DalamudApi.Commands.ProcessCommand(MainWindowCommandName);
+        //DalamudApi.Commands.ProcessCommand(MainWindowCommandName);
         DalamudApi.Commands.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
         {
             HelpMessage = "Ends the current encounter IINACT is parsing"

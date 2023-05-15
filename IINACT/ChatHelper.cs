@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using Framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 
 // Original:
@@ -22,7 +23,7 @@ public static class ChatHelper
 		internal const string SanitiseString = "E8 ?? ?? ?? ?? EB 0A 48 8D 4C 24 ?? E8 ?? ?? ?? ?? 48 8D 8D";
 	}
 
-	private delegate void ProcessChatBoxDelegate(IntPtr uiModule, IntPtr message, IntPtr unused, byte a4);
+	private unsafe delegate void ProcessChatBoxDelegate(UIModule* uiModule, IntPtr message, IntPtr unused, byte a4);
 
 	private static ProcessChatBoxDelegate? ProcessChatBox { get; }
 
@@ -59,20 +60,7 @@ public static class ChatHelper
 	/// <exception cref="InvalidOperationException">If the signature for this function could not be found</exception>
 	public static unsafe void SendMessageUnsafe(byte[] message)
 	{
-		if (ProcessChatBox == null)
-		{
-			throw new InvalidOperationException("Could not find signature for chat sending");
-		}
 
-		var uiModule = (IntPtr)Framework.Instance()->GetUiModule();
-
-		using var payload = new ChatPayload(message);
-		var mem1 = Marshal.AllocHGlobal(400);
-		Marshal.StructureToPtr(payload, mem1, false);
-
-		ProcessChatBox(uiModule, mem1, IntPtr.Zero, 0);
-
-		Marshal.FreeHGlobal(mem1);
 	}
 
 	/// <summary>
@@ -88,26 +76,19 @@ public static class ChatHelper
 	/// <param name="message">message to send</param>
 	/// <exception cref="ArgumentException">If <paramref name="message"/> is empty, longer than 500 bytes in UTF-8, or contains invalid characters.</exception>
 	/// <exception cref="InvalidOperationException">If the signature for this function could not be found</exception>
-	public static void SendMessage(string message)
+	public unsafe static void SendMessage(string message)
 	{
-		var bytes = Encoding.UTF8.GetBytes(message);
-		if (bytes.Length == 0)
-		{
-			throw new ArgumentException("message is empty", nameof(message));
-		}
+        var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+        var uiModule = framework->GetUiModule();
 
-		if (bytes.Length > 500)
-		{
-			throw new ArgumentException("message is longer than 500 bytes", nameof(message));
-		}
+        using var payload = new ChatPayload(message);
+        var payloadPtr = Marshal.AllocHGlobal(400);
+        Marshal.StructureToPtr(payload, payloadPtr, false);
 
-		if (message.Length != SanitiseText(message).Length)
-		{
-			throw new ArgumentException("message contained invalid characters", nameof(message));
-		}
+        ProcessChatBox(uiModule, payloadPtr, IntPtr.Zero, 0);
 
-		SendMessageUnsafe(bytes);
-	}
+        Marshal.FreeHGlobal(payloadPtr);
+    }
 
 	/// <summary>
 	/// <para>
@@ -140,37 +121,38 @@ public static class ChatHelper
 		return sanitised;
 	}
 
-	[StructLayout(LayoutKind.Explicit)]
-	[SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
-	private readonly struct ChatPayload : IDisposable
-	{
-		[FieldOffset(0)]
-		private readonly IntPtr textPtr;
+    [StructLayout(LayoutKind.Explicit)]
+    private readonly struct ChatPayload : IDisposable
+    {
+        [FieldOffset(0)]
+        private readonly IntPtr textPtr;
 
-		[FieldOffset(16)]
-		private readonly ulong textLen;
+        [FieldOffset(16)]
+        private readonly ulong textLen;
 
-		[FieldOffset(8)]
-		private readonly ulong unk1;
+        [FieldOffset(8)]
+        private readonly ulong unk1;
 
-		[FieldOffset(24)]
-		private readonly ulong unk2;
+        [FieldOffset(24)]
+        private readonly ulong unk2;
 
-		internal ChatPayload(byte[] stringBytes)
-		{
-			this.textPtr = Marshal.AllocHGlobal(stringBytes.Length + 30);
-			Marshal.Copy(stringBytes, 0, this.textPtr, stringBytes.Length);
-			Marshal.WriteByte(this.textPtr + stringBytes.Length, 0);
+        internal ChatPayload(string text)
+        {
+            var stringBytes = Encoding.UTF8.GetBytes(text);
+            this.textPtr = Marshal.AllocHGlobal(stringBytes.Length + 30);
 
-			this.textLen = (ulong)(stringBytes.Length + 1);
+            Marshal.Copy(stringBytes, 0, this.textPtr, stringBytes.Length);
+            Marshal.WriteByte(this.textPtr + stringBytes.Length, 0);
 
-			this.unk1 = 64;
-			this.unk2 = 0;
-		}
+            this.textLen = (ulong)(stringBytes.Length + 1);
 
-		public void Dispose()
-		{
-			Marshal.FreeHGlobal(this.textPtr);
-		}
-	}
+            this.unk1 = 64;
+            this.unk2 = 0;
+        }
+
+        public void Dispose()
+        {
+            Marshal.FreeHGlobal(this.textPtr);
+        }
+    }
 }

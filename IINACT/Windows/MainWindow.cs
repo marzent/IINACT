@@ -37,6 +37,7 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
+        if (!IsOpen) return;
         ImGui.TextColored(ImGuiColors.DalamudGrey, "OverlayPlugin Status:");
         ImGuiHelpers.ScaledRelativeSameLine(155);
         ImGui.Text(Plugin.OverlayPluginStatus);

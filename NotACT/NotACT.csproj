@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <DalamudLibPath>E:\Dalamud\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 

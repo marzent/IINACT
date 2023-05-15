@@ -168,7 +168,7 @@ namespace CactbotSelf
 		public override void Stop()
 		{
 			fast_update_timer_.Stop();
-
+            mainClass.DeInitPlugin();
 		}
 		public override void Start()
 		{

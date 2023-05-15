@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Advanced_Combat_Tracker.Resources;
 using Dalamud.Logging;
@@ -122,12 +124,30 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         PluginLog.Error(ex, MoreInfo);
 
     public void OpenLog(bool GetCurrentZone, bool GetCharNameFromFile) { }
-
+    public static IntPtr delta0 = IntPtr.Zero;
+    public static IntPtr delta4 = IntPtr.Zero;
+    public static IntPtr deltaC = IntPtr.Zero;
     public void ParseRawLogLine(string logLine)
     {
         LogQueue.Enqueue(logLine);
         if (BeforeLogLineRead == null || GetDateTimeFromLog == null)
             return;
+        var log= logLine.Split(new char[] { '|'});
+        var logMesssageType = Int32.TryParse(log[0],out var a);
+        if (a!=0&&a!=254)
+        {
+            var abcd = 1;
+        }
+        if (a ==27)
+        {
+            var 计算数1 = Marshal.ReadInt32(delta0);
+            var 计算数2 = Marshal.ReadInt32(delta4);
+            var 计算数3 = Marshal.ReadInt32(deltaC);
+            var abc = Math.Min(计算数3 + 计算数1 - 计算数2, 0);
+             Int32.TryParse(log[6], out var id);
+            var trueID = id + abc;
+            logLine.Replace(log[6],$"{trueID:X4}");
+        }
         var parsedLogTime = GetDateTimeFromLog(logLine);
         LastKnownTime = parsedLogTime;
         var logLineEventArgs = new LogLineEventArgs(logLine, 0, parsedLogTime, CurrentZone, inCombat, "Plugin");

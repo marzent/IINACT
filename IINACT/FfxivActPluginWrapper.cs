@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
 using Dalamud.Game.Gui;
@@ -114,6 +115,7 @@ public class FfxivActPluginWrapper : IDisposable
             LogFileFolder = ActGlobals.oFormActMain.LogFilePath,
             UseSocketFilter = false,
             UseWinPCap = false,
+            UseDeucalion = true,
             ProcessID = Environment.ProcessId
         };
         settingsMediator.DataCollectionSettings = DataCollectionSettings;
@@ -145,15 +147,15 @@ public class FfxivActPluginWrapper : IDisposable
                                                    DataCollectionSettings.DisableCombatLog,
                                                    DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap,
                                                    DataCollectionSettings.UseSocketFilter
-                                                  );
+                                                  , DataCollectionSettings.UseDeucalion);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);
         ActGlobals.oFormActMain.GetDateTimeFromLog = parseMediator.ParseLogDateTime;
-
+       
         ProcessManager.Verify();
     }
-
+   
     private void OnChatMessage(
         XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
     {

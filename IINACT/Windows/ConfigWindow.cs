@@ -7,7 +7,8 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using RainbowMage.OverlayPlugin;
 using FFXIV_ACT_Plugin.Config;
-using OtterGui.Raii;
+using Dalamud.Interface.Raii;
+
 namespace IINACT.Windows;
 
 public class ConfigWindow : Window, IDisposable

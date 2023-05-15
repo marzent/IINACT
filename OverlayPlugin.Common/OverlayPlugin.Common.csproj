@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <OutputType>Library</OutputType>
         <RootNamespace>RainbowMage.OverlayPlugin</RootNamespace>
@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <DalamudLibPath>E:\Dalamud\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 

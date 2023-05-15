@@ -30,16 +30,16 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x92)]
             public ushort distance;
 
-            [FieldOffset(0xA0)]
+            [FieldOffset(0xB0)]
             public Single pos_x;
 
-            [FieldOffset(0xA4)]
+            [FieldOffset(0xB4)]
             public Single pos_z;
 
-            [FieldOffset(0xA8)]
+            [FieldOffset(0xB8)]
             public Single pos_y;
 
-            [FieldOffset(0xB0)]
+            [FieldOffset(0xC0)]
             public Single rotation;
 
             [FieldOffset(0x1C4)]
@@ -52,7 +52,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         [StructLayout(LayoutKind.Explicit)]
         public struct CharacterDetails
         {
-
             [FieldOffset(0x00)]
             public int hp;
 
@@ -89,9 +88,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         // A piece of code that reads the pointer to the list of all entities, that we
         // refer to as the charmap.
         private static String kCharmapSignature = "488b5720b8000000e0483Bd00f84????????488d0d";
+
         private static int kCharmapSignatureOffset = 0;
+
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kCharmapSignatureRIP = true;
+
         // The pointer is to a structure as:
         //
         // CharmapStruct* outer;  // The pointer found from the signature.
@@ -105,7 +107,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         // This reader is "cmp byte ptr [ffxiv_dx11.exe+????????],00 { (0),0 }"
         private static String kInCombatSignature = "803D????????000F95C04883C428";
         private static int kInCombatSignatureOffset = -12;
+
         private static bool kInCombatSignatureRIP = true;
+
         // Because this line is a cmp byte line, the signature is not at the end of the line.
         private static int kInCombatRipOffset = 1;
 
@@ -118,7 +122,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         // A piece of code that reads the job data.
         // The pointer of interest is the first ???????? in the signature.
         private static String kJobDataSignature = "488B0D????????4885C90F84????????488B05????????3C03";
+
         private static int kJobDataSignatureOffset = -22;
+
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kJobDataSignatureRIP = true;
 
@@ -191,7 +197,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 var mem = *(EntityMemory*)&p[0];
 
                 // dump '\0' string terminators
-                var memoryName = System.Text.Encoding.UTF8.GetString(mem.Name, EntityMemory.nameBytes).Split(new[] { '\0' }, 2)[0];
+                var memoryName = System.Text.Encoding.UTF8.GetString(mem.Name, EntityMemory.nameBytes)
+                                       .Split(new[] { '\0' }, 2)[0];
 
                 var entity = new EntityData()
                 {
@@ -221,6 +228,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                         entity.gp = mem.charDetails.gp;
                         entity.max_gp = mem.charDetails.max_gp;
                     }
+
                     if (IsCrafter(entity.job))
                     {
                         entity.cp = mem.charDetails.cp;
@@ -240,6 +248,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                         }
                     }
                 }
+
                 return entity;
             }
         }
@@ -251,6 +260,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var source = Read8(entity_ptr, EntityMemory.Size);
             return GetEntityDataFromByteArray(source);
         }
+
         public override EntityData GetSelfData()
         {
             if (!HasProcess() || player_ptr_addr_ == IntPtr.Zero)
@@ -276,6 +286,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 // The pointer can be null when not logged in.
                 return null;
             }
+
             job_inner_ptr = IntPtr.Add(job_inner_ptr, kJobDataInnerStructOffset);
 
             fixed (byte* p = Read8(job_inner_ptr, kJobDataInnerStructSize))
@@ -331,6 +342,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                         case EntityJob.RPR:
                             return JObject.FromObject(*(ReaperJobMemory*)&p[0]);
                     }
+
                     return null;
                 }
             }
@@ -405,8 +417,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             private enum SongFlags : byte
             {
                 None = 0,
-                Ballad = 1, // Mage's Ballad.
-                Paeon = 1 << 1, // Army's Paeon.
+                Ballad = 1,          // Mage's Ballad.
+                Paeon = 1 << 1,      // Army's Paeon.
                 Minuet = 1 | 1 << 1, // The Wanderer's Minuet.
                 BalladLastPlayed = 1 << 2,
                 PaeonLastPlayed = 1 << 3,
@@ -461,11 +473,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             {
                 get
                 {
-                    return new[] {
-            this.songFlags.HasFlag(SongFlags.BalladCoda) ? "Ballad" : "None",
-            this.songFlags.HasFlag(SongFlags.PaeonCoda) ? "Paeon" : "None",
-            this.songFlags.HasFlag(SongFlags.MinuetCoda) ? "Minuet" : "None",
-          };
+                    return new[]
+                    {
+                        this.songFlags.HasFlag(SongFlags.BalladCoda) ? "Ballad" : "None",
+                        this.songFlags.HasFlag(SongFlags.PaeonCoda) ? "Paeon" : "None",
+                        this.songFlags.HasFlag(SongFlags.MinuetCoda) ? "Minuet" : "None",
+                    };
                 }
             }
         };
@@ -490,7 +503,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [NonSerialized]
             [FieldOffset(0x02)]
-            private Step step1;  // Order of steps in current Standard Step/Technical Step combo.
+            private Step step1; // Order of steps in current Standard Step/Technical Step combo.
 
             [NonSerialized]
             [FieldOffset(0x03)]
@@ -542,6 +555,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                         return 0;
                 }
             }
+
             public uint lifeMilliseconds
             {
                 get
@@ -591,6 +605,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 Enochian = 1,
                 Paradox = 2,
             }
+
             [FieldOffset(0x00)]
             public ushort nextPolyglotMilliseconds; // Number of ms left before polyglot proc.
 
@@ -709,7 +724,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public ushort fairyMilliseconds; // Seraph time left ms.
 
             [FieldOffset(0x06)]
-            public byte fairyStatus; // Varies depending on which fairy was summoned, during Seraph/Dissipation: 6 - Eos, 7 - Selene, else 0.
+            public byte
+                fairyStatus; // Varies depending on which fairy was summoned, during Seraph/Dissipation: 6 - Eos, 7 - Selene, else 0.
         };
 
 
@@ -848,6 +864,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                         var arcanum = (_arcanumsmix >> 2 * i) & 0x3;
                         _arcanums.Add((Arcanum)arcanum);
                     }
+
                     return _arcanums.Select(a => a.ToString()).Where(a => a != "None").ToArray();
                 }
             }

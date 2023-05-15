@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Advanced_Combat_Tracker;
+using Dalamud.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace RainbowMage.OverlayPlugin.EventSources

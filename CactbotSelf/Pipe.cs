@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using FFXIV_ACT_Plugin.Logfile;
 using FFXIV_ACT_Plugin.Memory;
 using H.Pipes;
@@ -29,7 +29,12 @@ namespace CactbotSelf
 			var pipeName = $"DDD";
 			pipeClient = new PipeClient<string>(pipeName);
 			RestartPipeClient();
-		}
+
+        }
+        public void Dispose()
+        {
+            pipeClient.DisposeAsync();
+        }
 		private ILogOutput _logOutput;
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal bool WriteLogLineImpl(int ID,string line)
@@ -51,9 +56,8 @@ namespace CactbotSelf
 		{
 			try
 			{
-				var process = Process.GetProcessesByName("ffxiv_dx11")[0];
-				var pipeName = $"DDD{process.Id}";
-				pipeClient = new PipeClient<string>(pipeName);
+                var pipeName = $"DDD{Process.GetCurrentProcess().Id}";
+                pipeClient = new PipeClient<string>(pipeName);
 				pipeClient.Connected += (o, args) =>
 				{
 					
@@ -99,7 +103,7 @@ namespace CactbotSelf
                     }
 					catch (Exception ex)
 					{
-						MessageBox.Show($"传入消息错误：{ex.Message}");
+						//MessageBox.Show($"传入消息错误：{ex.Message}");
 					}
 
 					//Log("200", args.Message);

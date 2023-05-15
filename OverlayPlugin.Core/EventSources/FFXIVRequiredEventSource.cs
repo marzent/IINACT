@@ -299,7 +299,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
             var lookupTable = new Dictionary<uint, PluginCombatant>();
             foreach (var c in combatants)
             {
-                if (GetPartyType(c) != 0 /* None */)
+                if (c.type != 0 /* None */)
                 {
                     lookupTable[c.ID] = c;
                 }
@@ -325,7 +325,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                             worldId = c.WorldID,
                             job = c.Job,
                             level = c.Level,
-                            inParty = GetPartyType(c) == 1 /* Party */,
+                            inParty = c.type == 1 /* Party */,
                         });
                     }
                     else

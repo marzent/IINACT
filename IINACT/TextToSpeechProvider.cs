@@ -56,7 +56,7 @@ internal class TextToSpeechProvider
                     // heuristic pause
                     Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
                 }
-                
+
                 return;
             }
             catch (Exception ex)
@@ -65,24 +65,26 @@ internal class TextToSpeechProvider
                 return;
             }
         }
-        
-        try
-        {
-            lock (speechLock)
+        else {
+            try
             {
-                if (configuration.UseEdeg)
+                lock (speechLock)
                 {
-                    tts.Speak(message,configuration.TTSIndex);
+                    if (configuration.UseEdeg)
+                    {
+                        tts.Speak(message, configuration.TTSIndex);
+                    }
+                    else speechSynthesizer?.Speak(message);
+
                 }
-                else speechSynthesizer?.Speak(message);
 
             }
-              
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, $"TTS failed to play back {message}");
+            }
         }
-        catch (Exception ex)
-        {
-            PluginLog.Error(ex, $"TTS failed to play back {message}");
-        }
+       
         
     }
 }

@@ -1,4 +1,4 @@
-﻿using Advanced_Combat_Tracker;
+using Advanced_Combat_Tracker;
 using CactbotSelf.内存相关.offset;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Memory;
@@ -84,7 +84,7 @@ namespace CactbotSelf
 			//var iocContainer = (TinyIoCContainer)typeof(FFXIV_ACT_Plugin.FFXIV_ACT_Plugin).GetField("_iocContainer", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(ffxivPlugin);
 			if (iocContainer != null) CombatantManager = iocContainer.Resolve<ICombatantManager>();
 			ffxivPlugin.DataSubscription.NetworkReceived += new NetworkReceivedDelegate(this.MoreLogLines_OnNetworkReceived);
-			var pi = new Pipe();
+		    pi = new Pipe();
 		}
 		public uint GetMapeffect()
 		{
@@ -129,10 +129,15 @@ namespace CactbotSelf
 		}
 
 
-		#endregion
+        #endregion
+        public void DeInitPlugin()
+        {
+            ffxivPlugin.DataSubscription.NetworkReceived -= new NetworkReceivedDelegate(this.MoreLogLines_OnNetworkReceived);
+            pi.Dispose();
 
+        }
 
-		[StructLayout(LayoutKind.Explicit)]
+        [StructLayout(LayoutKind.Explicit)]
 		public unsafe struct ServerMessageHeader
 		{
 			[FieldOffset(0)]
@@ -447,8 +452,9 @@ namespace CactbotSelf
 			return Name;
 		}
 		private ILogOutput _logOutput;
+        private Pipe pi;
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
 		public bool WriteLogLineImpl(string type, string line, long epoch)
 		{
 			if (_logOutput == null)

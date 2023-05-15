@@ -1,58 +1,30 @@
 #nullable enable
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
+namespace RainbowMage.OverlayPlugin.Handlers;
 
-namespace RainbowMage.OverlayPlugin.WebSocket.Handlers;
-
-internal class SocketHandler : IHandler, IEventReceiver
+internal abstract class Handler : IHandler, IEventReceiver
 {
-    public string Name => "WSHandler";
-    private ILogger Logger { get; }
+    public string Name { get; }
+    protected ILogger Logger { get; }
     private EventDispatcher Dispatcher { get; }
-    private OverlaySession Session { get; }
 
-    public SocketHandler(TinyIoCContainer container, OverlaySession session)
+    protected Handler(string name, ILogger logger, EventDispatcher eventDispatcher)
     {
-        Logger = container.Resolve<ILogger>();
-        Dispatcher = container.Resolve<EventDispatcher>();
-        Session = session;
-    }
-        
-    public void HandleEvent(JObject e)
-    {
-        Session.SendTextAsync(e.ToString(Formatting.None));
+        Name = name;
+        Logger = logger;
+        Dispatcher = eventDispatcher;
     }
 
-    public void OnOpen()
-    {
-    }
-    
-    public void OnError(SocketError error)
-    {
-        Logger.Log(LogLevel.Error, Resources.WSMessageSendFailed, Enum.GetName(error)); 
-        Dispatcher.UnsubscribeAll(this); 
-    }
+    protected abstract void Send(JObject data);
+    public void HandleEvent(JObject e) => Send(e);
 
-    public void OnMessage(string message)
+    public void DataReceived(JObject data)
     {
-        JObject data;
-
-        try
-        {
-            data = JObject.Parse(message);
-        }
-        catch (JsonException ex)
-        {
-            Logger.Log(LogLevel.Error, Resources.WSInvalidDataRecv, ex, message);
-            return;
-        }
-
         if (!data.ContainsKey("call")) return;
 
         var msgType = data["call"]?.ToString();
@@ -62,9 +34,7 @@ internal class SocketHandler : IHandler, IEventReceiver
                 try
                 {
                     foreach (var item in data["events"]?.ToList() ?? new List<JToken>())
-                    {
                         Dispatcher.Subscribe(item.ToString(), this);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -76,9 +46,7 @@ internal class SocketHandler : IHandler, IEventReceiver
                 try
                 {
                     foreach (var item in data["events"]?.ToList() ?? new List<JToken>())
-                    {
                         Dispatcher.Unsubscribe(item.ToString(), this);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -94,9 +62,7 @@ internal class SocketHandler : IHandler, IEventReceiver
                         var response = Dispatcher.CallHandler(data);
 
                         if (response != null && response.Type != JTokenType.Object)
-                        {
                             throw new Exception("Handler response must be an object or null");
-                        }
 
                         if (response == null)
                         {
@@ -104,12 +70,11 @@ internal class SocketHandler : IHandler, IEventReceiver
                             response["$isNull"] = true;
                         }
 
-                        if (data.ContainsKey("rseq"))
-                        {
-                            response["rseq"] = data["rseq"];
-                        }
+                        if (data.ContainsKey("rseq")) response["rseq"] = data["rseq"];
 
-                        Session.SendTextAsync(response.ToString(Formatting.None));
+                        var jObject = response.ToObject<JObject>()!;
+                        
+                        Send(jObject);
                     }
                     catch (Exception ex)
                     {
@@ -120,8 +85,5 @@ internal class SocketHandler : IHandler, IEventReceiver
         }
     }
 
-    public void OnClose()
-    {
-        Dispatcher.UnsubscribeAll(this);
-    }
+    public virtual void Dispose() => Dispatcher.UnsubscribeAll(this);
 }

@@ -9,13 +9,13 @@ namespace RainbowMage.OverlayPlugin
         private readonly TinyIoCContainer _container;
         private readonly List<Type> _overlays;
         private readonly List<IEventSource> _eventSources;
-        private readonly List<IOverlayPreset> _overlayPresets;
+        private readonly List<IOverlayTemplate> _overlayTemplates;
 
         public IEnumerable<Type> Overlays => _overlays;
 
         public IEnumerable<IEventSource> EventSources => _eventSources;
 
-        public IReadOnlyList<IOverlayPreset> OverlayPresets => _overlayPresets;
+        public IReadOnlyList<IOverlayTemplate> OverlayTemplates => _overlayTemplates;
 
         public event EventHandler<EventSourceRegisteredEventArgs> EventSourceRegistered;
         public event EventHandler EventSourcesStarted;
@@ -25,7 +25,7 @@ namespace RainbowMage.OverlayPlugin
             _container = container;
             _overlays = new List<Type>();
             _eventSources = new List<IEventSource>();
-            _overlayPresets = new List<IOverlayPreset>();
+            _overlayTemplates = new List<IOverlayTemplate>();
         }
 
         public void RegisterOverlay<T>()
@@ -64,13 +64,13 @@ namespace RainbowMage.OverlayPlugin
             container.Resolve<Registry>().StartEventSource(obj);
         }
 
-        public void RegisterOverlayPreset2(IOverlayPreset preset)
+        public void RegisterOverlayPreset2(IOverlayTemplate preset)
         {
-            _overlayPresets.Add(preset);
+            _overlayTemplates.Add(preset);
         }
 
         [Obsolete("Please call RegisterOverlayPreset2() on the Registry object instead.")]
-        public static void RegisterOverlayPreset(IOverlayPreset preset)
+        public static void RegisterOverlayPreset(IOverlayTemplate preset)
         {
             GetContainer().Resolve<Registry>().RegisterOverlayPreset2(preset);
         }

@@ -29,17 +29,18 @@ public sealed class Plugin : IDalamudPlugin
     
     // ReSharper disable UnusedAutoPropertyAccessor.Local
     // ReSharper restore UnusedAutoPropertyAccessor.Local
-    internal Configuration Configuration { get; init; }
-    private TextToSpeechProvider TextToSpeechProvider { get; init; }
-    private ConfigWindow ConfigWindow { get; init; }
-    private MainWindow MainWindow { get; init; }
-    internal FileDialogManager FileDialogManager { get; init; }
-    private IpcProviders IpcProviders { get; init; }
+    internal Configuration Configuration { get; }
+    private TextToSpeechProvider TextToSpeechProvider { get; }
+    private ConfigWindow ConfigWindow { get; }
+    private MainWindow MainWindow { get; }
+    internal FileDialogManager FileDialogManager { get; }
+    private IpcProviders IpcProviders { get; }
 
-    private FfxivActPluginWrapper FfxivActPluginWrapper { get; init; }
+    private FfxivActPluginWrapper FfxivActPluginWrapper { get; }
     private RainbowMage.OverlayPlugin.PluginMain OverlayPlugin { get; set; }
+    private RainbowMage.OverlayPlugin.WebSocket.ServerController? WebSocketServer { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
-    private PluginLogTraceListener PluginLogTraceListener { get; init; }
+    private PluginLogTraceListener PluginLogTraceListener { get; }
 
     private delegate void OnUpdateInputUI(IntPtr EventArgument);
     private Hook<OnUpdateInputUI> onUpdateInputUIHook;
@@ -190,6 +191,7 @@ public sealed class Plugin : IDalamudPlugin
 
         container.Register(Util.HttpClient);
         container.Register(FileDialogManager);
+        container.Register(PluginInterface);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
@@ -201,10 +203,11 @@ public sealed class Plugin : IDalamudPlugin
             overlayPlugin.InitPlugin(DalamudApi.PluginInterface.ConfigDirectory.FullName);
 
             var registry = container.Resolve<RainbowMage.OverlayPlugin.Registry>();
-            MainWindow.OverlayPresets = registry.OverlayPresets;
-            var serverController = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
-            MainWindow.Server = serverController;
-            IpcProviders.Server = serverController;
+            MainWindow.OverlayPresets = registry.OverlayTemplates;
+            WebSocketServer = container.Resolve<RainbowMage.OverlayPlugin.WebSocket.ServerController>();
+            MainWindow.Server = WebSocketServer;
+            IpcProviders.Server = WebSocketServer;
+            IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
              post = new PostNamazu.PostNamazu(DalamudApi.Commands);
             post.InitPlugin();
@@ -246,8 +249,18 @@ public sealed class Plugin : IDalamudPlugin
     }
     private void OnCommand(string command, string args)
     {
-        MainWindow.IsOpen = !MainWindow.IsOpen;
-        FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.GetServerTime();
+        switch (args) 
+        {
+            case "start":
+                WebSocketServer?.Start();
+                break;
+            case "stop":
+                WebSocketServer?.Stop();
+                break;
+            default:
+                MainWindow.IsOpen = true;
+                break;
+        }
     }
 
     private static void EndEncounter(string command, string args)

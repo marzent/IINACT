@@ -113,7 +113,7 @@ public class ServerController
 
         return path;
     }
-
+    
     public class StateChangedArgs : EventArgs
     {
         public StateChangedArgs(bool running, bool failed)

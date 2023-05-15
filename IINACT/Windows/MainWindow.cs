@@ -29,7 +29,7 @@ public class MainWindow : Window, IDisposable
         
     }
     
-    public IReadOnlyList<RainbowMage.OverlayPlugin.IOverlayPreset>? OverlayPresets { get; set; }
+    public IReadOnlyList<RainbowMage.OverlayPlugin.IOverlayTemplate>? OverlayPresets { get; set; }
     private string[]? OverlayNames => OverlayPresets?.Select(x => x.Name).ToArray();
     public RainbowMage.OverlayPlugin.WebSocket.ServerController? Server { get; set; }
 
@@ -60,19 +60,11 @@ public class MainWindow : Window, IDisposable
         }
 
         var selectedOverlay = OverlayPresets?[selectedOverlayIndex];
-        var overlayURL = selectedOverlay?.HttpUrl ?? "";
-        if (!string.IsNullOrEmpty(overlayURL))
-        {
-            if (selectedOverlay?.Modern ?? false)
-                overlayURL += $"?OVERLAY_WS=ws://{Server?.Address}:{Server?.Port}/ws";
-            else
-                overlayURL += $"?HOST_PORT=ws://{Server?.Address}:{Server?.Port}";
-            if (!string.IsNullOrEmpty(selectedOverlay?.Options))
-                overlayURL += selectedOverlay.Options;
-        }
+        var overlayUri = selectedOverlay?.ToOverlayUri(new Uri($"ws://{Server?.Address}:{Server?.Port}/ws"));
+        var overlayUriString = overlayUri?.ToString() ?? "<Error generating URI>";
 
         ImGui.SetNextItemWidth(comboWidth);
-        ImGui.InputText("URL", ref overlayURL, 1000, ImGuiInputTextFlags.ReadOnly);
+        ImGui.InputText("URI", ref overlayUriString, 1000, ImGuiInputTextFlags.ReadOnly);
 
         ImGui.Spacing();
         ImGui.Separator();

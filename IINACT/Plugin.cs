@@ -30,7 +30,6 @@ public sealed class Plugin : IDalamudPlugin
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
-    private ConfigWindow ConfigWindow { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
     private IpcProviders IpcProviders { get; }
@@ -67,10 +66,8 @@ public sealed class Plugin : IDalamudPlugin
 
         IpcProviders = new IpcProviders(PluginInterface);
 
-        ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
-        WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
 
         CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
@@ -97,7 +94,6 @@ public sealed class Plugin : IDalamudPlugin
 
         WindowSystem.RemoveAllWindows();
 
-        ConfigWindow.Dispose();
         MainWindow.Dispose();
 
         CommandManager.RemoveHandler(MainWindowCommandName);
@@ -131,7 +127,7 @@ public sealed class Plugin : IDalamudPlugin
             MainWindow.Server = WebSocketServer;
             IpcProviders.Server = WebSocketServer;
             IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
-            ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
+            MainWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
         });
 
         return overlayPlugin;
@@ -166,6 +162,6 @@ public sealed class Plugin : IDalamudPlugin
 
     public void DrawConfigUI()
     {
-        ConfigWindow.IsOpen = true;
+        MainWindow.IsOpen = true;
     }
 }

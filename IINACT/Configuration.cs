@@ -31,7 +31,13 @@ public class Configuration : IPluginConfiguration
         set => logFilePath = value;
     }
 
-    public int Version { get; set; } = 0;
+    public bool WriteLogFile
+    {
+        get => Advanced_Combat_Tracker.ActGlobals.oFormActMain.WriteLogFile;
+        set => Advanced_Combat_Tracker.ActGlobals.oFormActMain.WriteLogFile = value;
+    }
+
+    public int Version { get; set; } = 1;
 
     public void Initialize(DalamudPluginInterface pluginInterface)
     {

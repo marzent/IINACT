@@ -158,6 +158,13 @@ public class MainWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+        
+        var writeLogFile = Plugin.Configuration.WriteLogFile;
+        if (ImGui.Checkbox("Write out network log file", ref writeLogFile))
+        {
+            Plugin.Configuration.WriteLogFile = writeLogFile;
+            Plugin.Configuration.Save();
+        }
 
         var disableDamageShield = Plugin.Configuration.DisableDamageShield;
         if (ImGui.Checkbox("Disable Damage Shield Estimates", ref disableDamageShield))

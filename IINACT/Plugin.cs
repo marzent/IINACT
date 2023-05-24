@@ -75,7 +75,7 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "Displays the IINACT main window"
         });
 
-        CommandManager.AddHandler(EndEncCommandName, new CommandInfo(EndEncounter)
+        CommandManager.AddHandler(EndEncCommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Ends the current encounter IINACT is parsing"
         });
@@ -135,23 +135,34 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
+        if (command == EndEncCommandName)
+        {
+            Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
+            return;
+        }
+            
         switch (args) 
         {
-            case "start":
+            case "start": //deprecated
+            case "ws start":
                 WebSocketServer?.Start();
                 break;
-            case "stop":
+            case "stop": //deprecated
+            case "ws stop":
                 WebSocketServer?.Stop();
+                break;
+            case "log start":
+                Configuration.WriteLogFile = true;
+                Configuration.Save();
+                break;
+            case "log stop":
+                Configuration.WriteLogFile = false;
+                Configuration.Save();
                 break;
             default:
                 MainWindow.IsOpen = true;
                 break;
         }
-    }
-
-    private static void EndEncounter(string command, string args)
-    {
-        Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
     }
 
     private void DrawUI()

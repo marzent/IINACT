@@ -139,7 +139,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             // Fields that should be written out for add or full list of changes
             public static readonly FieldInfo[] AllFields = typeof(Combatant).GetFields()
                 .Where((field) => !IgnoreFieldNames.Contains(field.Name))
-                .ToArray();
+                .OrderBy((field) => field.Name).ToArray();
 
             private static object GetDefault(Type type)
             {
@@ -284,13 +284,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
                 var oldCombatant = combatantStateMap[combatant.ID].combatant;
                 var lastUpdatedDiff = (now - combatantStateMap[combatant.ID].lastUpdated).TotalMilliseconds;
-                var changed = new List<FieldInfo>();
+                var changed = new HashSet<FieldInfo>();
 
                 // Check position/heading first since it has a custom delay timing with threshold
                 // and custom behavior (all position data is written)
                 if (lastUpdatedDiff > criteria.DelayPosition)
                 {
-
                     var writePosition = false;
                     // This check seems redundant but it's less expensive than the check below against distance
                     // so it uses less CPU
@@ -359,10 +358,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                         lastUpdated = now,
                         combatant = combatant,
                     };
+
                     WriteLine(
                         CombatantMemoryChangeType.Change,
                         combatant.ID,
-                        string.Join("", changed.Select((fi) => FormatFieldChange(fi, combatant))));
+                        string.Join("",
+                            CombatantChangeCriteria.AllFields.Where((field) => changed.Contains(field))
+                            .Select((fi) => FormatFieldChange(fi, combatant))));
                 }
             }
 

@@ -58,23 +58,21 @@ namespace RainbowMage.OverlayPlugin.EventSources
             {
                 try
                 {
-                    // @TODO: Should this be a customizable setting so that it can be changed per game, or somehow allow
-                    // downstream plugins to override it to change it per game?
-                    var line = args.originalLogLine.Split('|');
+                    LogMessageType lineType = (LogMessageType)args.detectedType;
 
-                    if (int.TryParse(line[0], out int lineTypeInt))
+                    // If an imported log has split the encounter, also split it while importing.
+                    // TODO: should we also consider the current user's wipe config option here for splitting,
+                    // even if the original log writer did not have it set to true?
+                    if (lineType == LogMessageType.InCombat)
                     {
-                        // If an imported log has split the encounter, also split it while importing.
-                        // TODO: should we also consider the current user's wipe config option here for splitting,
-                        // even if the original log writer did not have it set to true?
-                        LogMessageType lineType = (LogMessageType)lineTypeInt;
-                        if (lineType == LogMessageType.InCombat)
+                        // @TODO: Should this be a customizable setting so that it can be changed per game, or somehow allow
+                        // downstream plugins to override it to change it per game?
+                        var line = args.originalLogLine.Split('|');
+
+                        var inACTCombat = Convert.ToUInt32(line[2]);
+                        if (inACTCombat == 0)
                         {
-                            var inACTCombat = Convert.ToUInt32(line[2]);
-                            if (inACTCombat == 0)
-                            {
-                                StopACTCombat();
-                            }
+                            StopACTCombat();
                         }
                     }
                 }
@@ -88,23 +86,9 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             try
             {
-                LogMessageType lineType;
+                LogMessageType lineType = (LogMessageType)args.detectedType;
                 var line = args.originalLogLine.Split('|');
-
-                if (!int.TryParse(line[0], out int lineTypeInt))
-                {
-                    return;
-                }
-
-                try
-                {
-                    lineType = (LogMessageType)lineTypeInt;
-                }
-                catch
-                {
-                    return;
-                }
-
+                
                 switch (lineType)
                 {
                     case LogMessageType.ChangeZone:

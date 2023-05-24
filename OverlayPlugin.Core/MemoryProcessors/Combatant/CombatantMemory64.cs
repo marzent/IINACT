@@ -194,7 +194,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             [FieldOffset(0x1E3)]
             public byte Level;
 
-            [FieldOffset(0xC80)]
+            [FieldOffset(0xCB0)]
             public uint PCTargetID;
 
             // TODO: this is incorrect in 6.3, please fix
@@ -217,28 +217,28 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             [FieldOffset(0x1B1E)]
             public ushort WorldID;
 
-            [FieldOffset(0x1B0A)]
+            [FieldOffset(0x1B2C)]
             public byte WeaponId;
 
-            [FieldOffset(0x1B68)]
+            [FieldOffset(0x1B88)]
             public fixed byte Effects[EffectBytes];
 
-            [FieldOffset(0x1CF0)]
+            [FieldOffset(0x1D10)]
             public byte IsCasting1;
 
-            [FieldOffset(0x1CF2)]
+            [FieldOffset(0x1D11)]
             public byte IsCasting2;
 
-            [FieldOffset(0x1CF4)]
+            [FieldOffset(0x1D14)]
             public uint CastBuffID;
 
-            [FieldOffset(0x1CF0)]
+            [FieldOffset(0x1D20)]
             public uint CastTargetID;
 
-            [FieldOffset(0x1DF4)]
+            [FieldOffset(0x1D44)]
             public float CastDurationCurrent;
 
-            [FieldOffset(0x1DF8)]
+            [FieldOffset(0x1D48)]
             public float CastDurationMax;
             // Missing PartyType
         }

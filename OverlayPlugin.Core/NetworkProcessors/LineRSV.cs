@@ -26,8 +26,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 return
                     $"|" +
                     $"{unknown1:X8}|" +
-                    $"{FFXIVMemory.GetStringFromBytes(key, keySize)}|" +
-                    $"{FFXIVMemory.GetStringFromBytes(value, valueSize)}";
+                    $"{FFXIVMemory.GetStringFromBytes(key, keySize).Replace("\r", "\\r").Replace("\n", "\\n")}|" +
+                    $"{FFXIVMemory.GetStringFromBytes(value, valueSize).Replace("\r", "\\r").Replace("\n", "\\n")}";
             }
         }
 

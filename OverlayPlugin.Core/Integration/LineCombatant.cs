@@ -231,10 +231,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 {
                     var now = DateTime.Now;
 
-                    if (inCombat)
-                    {
-                        CheckCombatants(now);
-                    }
+                    CheckCombatants(now);
 
                     // Wait for next poll
                     var delay = CombatantChangeCriteria.PollingRate - (int)Math.Ceiling((DateTime.Now - now).TotalMilliseconds);
@@ -334,7 +331,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 {
                     foreach (var fi in criteria.CheckFieldDelay)
                     {
-                        if (fi.Value <= lastUpdatedDiff && ValueNotEqual(fi.Key, oldCombatant, combatant))
+                        if (fi.Value <= lastUpdatedDiff && !ValueEqual(fi.Key, oldCombatant, combatant))
                         {
                             changed.Add(fi.Key);
                         }
@@ -351,7 +348,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                         {
                             continue;
                         }
-                        if (ValueNotEqual(fi, oldCombatant, combatant))
+                        if (!ValueEqual(fi, oldCombatant, combatant))
                         {
                             changed.Add(fi);
                         }
@@ -385,7 +382,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             }
         }
 
-        private bool ValueNotEqual(FieldInfo fi, Combatant oldCombatant, Combatant combatant)
+        private bool ValueEqual(FieldInfo fi, Combatant oldCombatant, Combatant combatant)
         {
             var oldVal = fi.GetValue(oldCombatant);
             var newVal = fi.GetValue(combatant);
@@ -396,6 +393,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 {
                     return false;
                 }
+                return true;
             }
             if (!oldVal.Equals(newVal))
             {

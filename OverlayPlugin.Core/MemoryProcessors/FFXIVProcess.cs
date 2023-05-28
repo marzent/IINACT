@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
@@ -300,14 +301,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// Reads |count| bytes at |addr| in the |process_|. Returns null on error.
         internal byte[] Read8(IntPtr addr, int count)
         {
-            var buffer_len = 1 * count;
-            var buffer = new byte[buffer_len];
-            var bytes_read = IntPtr.Zero;
-            var ok = NativeMethods.ReadProcessMemory(process_.Handle, addr, buffer, new IntPtr(buffer_len),
-                                                     ref bytes_read);
-            if (!ok || bytes_read.ToInt32() != buffer_len)
-                return null;
-            return buffer;
+            var data = new byte[count];
+            Marshal.Copy(addr, data, 0, count);
+            return data;
         }
 
         /// Reads |addr| in the |process_| and returns it as a 16bit ints. Returns null on error.
@@ -371,12 +367,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         /// Reads |addr| in the |process_| and returns it as a 64bit pointer. Returns 0 on error.
-        internal IntPtr ReadIntPtr(IntPtr addr)
+        internal unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            var buffer = Read8(addr, 8);
-            if (buffer == null)
-                return IntPtr.Zero;
-            return new IntPtr(BitConverter.ToInt64(buffer, 0));
+            return new IntPtr(*(long*)addr);
         }
 
         /// <summary>

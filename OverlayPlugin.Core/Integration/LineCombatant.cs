@@ -11,7 +11,7 @@ using RainbowMage.OverlayPlugin.NetworkProcessors;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 {
-    public class LineCombatant
+    public class LineCombatant: IDisposable
     {
         public const uint LogFileLineID = 261;
         private ILogger logger;
@@ -217,10 +217,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
         ~LineCombatant()
         {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
             if (cancellationToken != null)
-            {
                 cancellationToken.Cancel();
-            }
         }
 
         private void PollCombatants()

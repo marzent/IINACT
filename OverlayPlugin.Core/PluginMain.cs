@@ -334,6 +334,9 @@ namespace RainbowMage.OverlayPlugin
 
                 this.Overlays.Clear();
             }
+            
+            var lineCombatant = _container.Resolve<LineCombatant>();
+            lineCombatant.Dispose();
 
             try
             {

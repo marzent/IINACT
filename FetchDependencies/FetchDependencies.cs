@@ -107,9 +107,6 @@ public class FetchDependencies
                 remoteVersionString = HttpClient
                           .GetStringAsync("https://cninact.diemoe.net/CN解析/版本.txt"
                                           ).Result;
-                //remoteVersionString = HttpClient
-                //          .GetStringAsync("https://dev.ff14.cloud/index.php?user/publicLink&fid=cd5eTDD_9a3yJy9zxUpJQgZehqyT49CAJtzko9f2jjr2leefQ-AAP9duHXg92cAJ5zBlpOpdiE5W6IGlHrrIXDbEHnG5gyDt-w&file_name=/%E7%89%88%E6%9C%AC.txt"
-                //                        , cancelAfterDelay.Token).Result;
             }
             else
             {

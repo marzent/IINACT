@@ -7,7 +7,6 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using Dalamud.Utility;
 using IINACT.Windows;
 
 namespace IINACT;
@@ -39,6 +38,7 @@ public sealed class Plugin : IDalamudPlugin
     private RainbowMage.OverlayPlugin.WebSocket.ServerController? WebSocketServer { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
     private PluginLogTraceListener PluginLogTraceListener { get; }
+    private HttpClient HttpClient { get; }
 
     public Plugin()
     {
@@ -47,9 +47,11 @@ public sealed class Plugin : IDalamudPlugin
         
         FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
+
+        HttpClient = new HttpClient();
         
         var fetchDeps = new FetchDependencies.FetchDependencies(
-            PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient);
+            PluginInterface.AssemblyLocation.Directory!.FullName, HttpClient);
         
         fetchDeps.GetFfxivPlugin();
 
@@ -108,7 +110,7 @@ public sealed class Plugin : IDalamudPlugin
         container.Register(logger);
         container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
-        container.Register(Util.HttpClient);
+        container.Register(HttpClient);
         container.Register(FileDialogManager);
         container.Register(PluginInterface);
 

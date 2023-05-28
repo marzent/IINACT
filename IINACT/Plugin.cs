@@ -191,7 +191,7 @@ public sealed class Plugin : IDalamudPlugin
 
         container.Register(Util.HttpClient);
         container.Register(FileDialogManager);
-        container.Register(PluginInterface);
+        container.Register(DalamudApi.PluginInterface);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);

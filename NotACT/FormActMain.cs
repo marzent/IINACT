@@ -150,7 +150,10 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         }
         var parsedLogTime = GetDateTimeFromLog(logLine);
         LastKnownTime = parsedLogTime;
+
         var logLineEventArgs = new LogLineEventArgs(logLine, 0, parsedLogTime, CurrentZone, inCombat, "Plugin");
+        if (inCombat) { 
+            this.ActiveZone.ActiveEncounter.LogLines.Add(new LogLineEntry(parsedLogTime, logLine, logLineEventArgs.detectedType, this.GlobalTimeSorter)); }
         BeforeLogLineRead(false, logLineEventArgs);
         if (OnLogLineRead == null)
             return;
@@ -180,7 +183,6 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
         if (ActiveZone != null) return;
         ActiveZone = new ZoneData(DateTime.Now, CurrentZone, true, false, false);
-        ZoneList.Add(ActiveZone);
     }
 
     public void ActCommands(string commandText)

@@ -8,6 +8,7 @@ using ImGuiNET;
 using RainbowMage.OverlayPlugin;
 using FFXIV_ACT_Plugin.Config;
 using Dalamud.Interface.Raii;
+using Advanced_Combat_Tracker;
 
 namespace IINACT.Windows;
 

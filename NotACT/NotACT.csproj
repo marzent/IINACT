@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Datatypes\"/>
+        <Folder Include="Datatypes\" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -33,6 +33,14 @@
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">
         <DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <DebugType>full</DebugType>
     </PropertyGroup>
 
     <ItemGroup>

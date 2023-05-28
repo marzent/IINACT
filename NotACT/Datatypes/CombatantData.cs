@@ -1,4 +1,5 @@
-﻿using static System.String;
+using System.Diagnostics;
+using static System.String;
 
 
 namespace Advanced_Combat_Tracker;
@@ -75,6 +76,7 @@ public class CombatantData : IComparable, IEquatable<CombatantData>, IComparable
 
     public CombatantData(string combatantName, EncounterData Parent)
     {
+ 
         Name = combatantName;
         Items = new Dictionary<string, DamageTypeData>();
         foreach (var outgoingDamageTypeDataObject in OutgoingDamageTypeDataObjects)

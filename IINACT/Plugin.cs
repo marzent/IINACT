@@ -20,13 +20,12 @@ public sealed class Plugin : IDalamudPlugin
     private const string EndEncCommandName = "/endenc";
     public readonly WindowSystem WindowSystem = new("IINACT");
     
-    // ReSharper disable UnusedAutoPropertyAccessor.Local
-    [PluginService] internal DalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] internal CommandManager CommandManager { get; private set; } = null!;
-    [PluginService] internal GameNetwork GameNetwork { get; private set; } = null!;
-    [PluginService] internal DataManager DataManager { get; private set; } = null!;
-    [PluginService] internal ChatGui ChatGui { get; private set; } = null!;
-    // ReSharper restore UnusedAutoPropertyAccessor.Local
+    internal DalamudPluginInterface PluginInterface { get; }
+    internal CommandManager CommandManager { get; }
+    internal GameNetwork GameNetwork { get; }
+    internal DataManager DataManager { get; }
+    internal ChatGui ChatGui { get; }
+
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
     private MainWindow MainWindow { get; }
@@ -40,8 +39,18 @@ public sealed class Plugin : IDalamudPlugin
     private PluginLogTraceListener PluginLogTraceListener { get; }
     private HttpClient HttpClient { get; }
 
-    public Plugin()
+    public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+                  [RequiredVersion("1.0")] CommandManager commandManager,
+                  [RequiredVersion("1.0")] GameNetwork gameNetwork,
+                  [RequiredVersion("1.0")] DataManager dataManager,
+                  [RequiredVersion("1.0")] ChatGui chatGui)
     {
+        PluginInterface = pluginInterface;
+        CommandManager = commandManager;
+        GameNetwork = gameNetwork;
+        DataManager = dataManager;
+        ChatGui = chatGui;
+
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);
         

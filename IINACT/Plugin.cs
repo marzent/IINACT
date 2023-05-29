@@ -51,9 +51,6 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ChatGui = chatGui;
 
-        PluginLogTraceListener = new PluginLogTraceListener();
-        Trace.Listeners.Add(PluginLogTraceListener);
-        
         FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
 
@@ -63,6 +60,9 @@ public sealed class Plugin : IDalamudPlugin
             PluginInterface.AssemblyLocation.Directory!.FullName, HttpClient);
         
         fetchDeps.GetFfxivPlugin();
+        
+        PluginLogTraceListener = new PluginLogTraceListener();
+        Trace.Listeners.Add(PluginLogTraceListener);
 
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
 

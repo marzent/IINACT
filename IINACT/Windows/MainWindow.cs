@@ -14,11 +14,11 @@ namespace IINACT.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private Plugin Plugin { get; init; }
+    private Plugin Plugin { get; }
 
     private int selectedOverlayIndex;
 
-    public MainWindow(Plugin plugin) : base("IINACT Configuration")
+    public MainWindow(Plugin plugin) : base($"IINACT v{plugin.Version}")
     {
         SizeConstraints = new WindowSizeConstraints
         {

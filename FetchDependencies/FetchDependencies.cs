@@ -4,11 +4,13 @@ namespace FetchDependencies;
 
 public class FetchDependencies
 {
+    private Version PluginVersion { get; }
     private string DependenciesDir { get; }
     private HttpClient HttpClient { get; }
 
-    public FetchDependencies(string assemblyDir, HttpClient httpClient)
+    public FetchDependencies(Version version, string assemblyDir, HttpClient httpClient)
     {
+        PluginVersion = version;
         DependenciesDir = assemblyDir;
         HttpClient = httpClient;
     }
@@ -37,7 +39,7 @@ public class FetchDependencies
 
         File.Delete(pluginZipPath);
 
-        var patcher = new Patcher(DependenciesDir);
+        var patcher = new Patcher(PluginVersion, DependenciesDir);
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();

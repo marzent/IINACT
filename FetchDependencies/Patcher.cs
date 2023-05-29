@@ -5,10 +5,12 @@ namespace FetchDependencies;
 
 internal class Patcher
 {
+    private Version PluginVersion { get; }
     private string WorkPath { get; }
 
-    public Patcher(string workPath)
+    public Patcher(Version version, string workPath)
     {
+        PluginVersion = version;
         WorkPath = workPath;
     }
 
@@ -60,7 +62,7 @@ internal class Patcher
             while (ilProcessor.Body.Instructions.First().OpCode != OpCodes.Ldstr)
                 ilProcessor.RemoveAt(0);
             ilProcessor.Replace(
-                0, Instruction.Create(OpCodes.Ldstr, "This is IINACT based on FFXIV_ACT_Plugin {0}"));
+                0, Instruction.Create(OpCodes.Ldstr, $"This is IINACT API {ApiVersion.IinactApiVersion} (patched on {PluginVersion}) based on FFXIV_ACT_Plugin {{0}}"));
             ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4_1));
             var stelemIndex = Array.FindIndex(ilProcessor.Body.Instructions.ToArray(),
                                               code => code.OpCode == OpCodes.Stelem_Ref);

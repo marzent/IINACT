@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
@@ -15,7 +16,8 @@ namespace IINACT;
 public sealed class Plugin : IDalamudPlugin
 {
     public string Name => "IINACT";
-    
+    public Version Version { get; }
+
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
     public readonly WindowSystem WindowSystem = new("IINACT");
@@ -51,13 +53,16 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ChatGui = chatGui;
 
+        Version = Assembly.GetExecutingAssembly().GetName().Version!;
+
         FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
 
         HttpClient = new HttpClient();
         
-        var fetchDeps = new FetchDependencies.FetchDependencies(
-            PluginInterface.AssemblyLocation.Directory!.FullName, HttpClient);
+        var fetchDeps =
+            new FetchDependencies.FetchDependencies(Version, PluginInterface.AssemblyLocation.Directory!.FullName,
+                                                    HttpClient);
         
         fetchDeps.GetFfxivPlugin();
         

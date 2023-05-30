@@ -151,7 +151,7 @@ internal class Patcher
         {
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadParty::Read()",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadZoneMap::Read()",
-            "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadCombatant::Read(System.IntPtr)",
+            //"System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadCombatant::Read(System.IntPtr)",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadPlayer::Read()",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadMobArray::Read64()"
         };

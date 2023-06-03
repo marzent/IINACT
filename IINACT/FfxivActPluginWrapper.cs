@@ -227,20 +227,21 @@ public class FfxivActPluginWrapper : IDisposable
         PluginLog.Debug(text);
     }
     
-    public void CombatantRefresh()
+    private void CombatantRefresh()
     {
-        if (DateTime.UtcNow.Subtract(combatantManager._lastCombatantRefresh).TotalMilliseconds < 100.0)
+        var refreshRate = ActGlobals.oFormActMain.InCombat ? 40.0 : 200.0;
+        if (DateTime.UtcNow.Subtract(combatantManager._lastCombatantRefresh).TotalMilliseconds < refreshRate)
             return;
 
         combatantManager._lastCombatantRefresh = DateTime.UtcNow;
         framework.RunOnFrameworkThread(() =>
         {
+            mobArrayProcessor.Refresh();
+            if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
+                return;
+            var mobArray = combatantManager._mobArrayProcessor.MobArray;
             lock (combatantManager.CombatantLock)
             {
-                mobArrayProcessor.Refresh();
-                if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
-                    return;
-                var mobArray = combatantManager._mobArrayProcessor.MobArray;
                 for (var i = 0; i < mobArray.Count; i++)
                 {
                     combatantManager._combatantProcessor.RefreshCombatant(

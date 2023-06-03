@@ -62,7 +62,7 @@ internal class Patcher
             while (ilProcessor.Body.Instructions.First().OpCode != OpCodes.Ldstr)
                 ilProcessor.RemoveAt(0);
             ilProcessor.Replace(
-                0, Instruction.Create(OpCodes.Ldstr, $"This is IINACT API {ApiVersion.IinactApiVersion} (patched on {PluginVersion}) based on FFXIV_ACT_Plugin {{0}}"));
+                0, Instruction.Create(OpCodes.Ldstr, $"This is IINACT {PluginVersion} (API {ApiVersion.IinactApiVersion}) based on FFXIV_ACT_Plugin {{0}}"));
             ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4_1));
             var stelemIndex = Array.FindIndex(ilProcessor.Body.Instructions.ToArray(),
                                               code => code.OpCode == OpCodes.Stelem_Ref);
@@ -105,24 +105,9 @@ internal class Patcher
 
         {
             var method = memory.GetMethod(
-                "System.Void FFXIV_ACT_Plugin.Memory.CurrentProcess::set_Handle(System.IntPtr)");
-            var ilProcessor = method.Body.GetILProcessor();
-            ilProcessor.Replace(1, Instruction.Create(OpCodes.Ldc_I4, 1));
-            ilProcessor.InsertAfter(1, Instruction.Create(OpCodes.Neg));
-        }
-
-        {
-            var method = memory.GetMethod(
-                "System.Void FFXIV_ACT_Plugin.Memory.MemoryProcessors.LogProcessor::Refresh()");
-            var ilProcessor = method.Body.GetILProcessor();
-            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
-        }
-        
-        {
-            var method = memory.GetMethod(
                 "System.Void FFXIV_ACT_Plugin.Memory.ScanMemory::Run(System.Object)");
             var ilProcessor = method.Body.GetILProcessor();
-            ilProcessor.Replace(16, Instruction.Create(OpCodes.Ldc_I4_S, (sbyte)10));
+            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
         }
         
         var marshallType = memory.Assembly.MainModule.ImportReference(typeof(System.Runtime.InteropServices.Marshal)).Resolve();
@@ -151,7 +136,7 @@ internal class Patcher
         {
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadParty::Read()",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadZoneMap::Read()",
-            //"System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadCombatant::Read(System.IntPtr)",
+            "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadCombatant::Read(System.IntPtr)",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadPlayer::Read()",
             "System.IntPtr FFXIV_ACT_Plugin.Memory.MemoryReader.ReadMobArray::Read64()"
         };

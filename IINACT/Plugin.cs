@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using Dalamud.Data;
+using Dalamud.Game;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Network;
@@ -27,6 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     internal GameNetwork GameNetwork { get; }
     internal DataManager DataManager { get; }
     internal ChatGui ChatGui { get; }
+    internal Framework Framework { get; }
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
@@ -45,13 +47,15 @@ public sealed class Plugin : IDalamudPlugin
                   [RequiredVersion("1.0")] CommandManager commandManager,
                   [RequiredVersion("1.0")] GameNetwork gameNetwork,
                   [RequiredVersion("1.0")] DataManager dataManager,
-                  [RequiredVersion("1.0")] ChatGui chatGui)
+                  [RequiredVersion("1.0")] ChatGui chatGui,
+                  [RequiredVersion("1.0")] Framework framework)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
         GameNetwork = gameNetwork;
         DataManager = dataManager;
         ChatGui = chatGui;
+        Framework = framework;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
@@ -127,6 +131,7 @@ public sealed class Plugin : IDalamudPlugin
         container.Register(HttpClient);
         container.Register(FileDialogManager);
         container.Register(PluginInterface);
+        container.Register(Framework);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);

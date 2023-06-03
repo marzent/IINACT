@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Dalamud.Game;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
@@ -30,7 +31,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
     // Exposes the FFXIV game directly. Call FindProcess() regularly to update
     // memory addresses when FFXIV is run or closed.
-    public abstract class FFXIVProcess
+    public abstract partial class FFXIVProcess
     {
         internal ILogger logger_;
         private LimitedProcess process_;
@@ -297,14 +298,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public abstract JObject GetJobSpecificData(EntityJob job);
         internal abstract EntityData GetEntityData(IntPtr entity_ptr);
         public abstract EntityData GetSelfData();
+        
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsBadReadPtr(IntPtr lp, ulong ucb);
 
         /// Reads |count| bytes at |addr| in the |process_|. Returns null on error.
         internal byte[] Read8(IntPtr addr, int count)
         {
             var data = new byte[count];
-            Marshal.Copy(addr, data, 0, count);
+            if (!IsBadReadPtr(addr, (ulong)count))
+                Marshal.Copy(addr, data, 0, count);
             return data;
-        }
+            }
 
         /// Reads |addr| in the |process_| and returns it as a 16bit ints. Returns null on error.
         internal Int16[] Read16(IntPtr addr, int count)
@@ -369,7 +375,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// Reads |addr| in the |process_| and returns it as a 64bit pointer. Returns 0 on error.
         internal unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            return new IntPtr(*(long*)addr);
+            return IsBadReadPtr(addr, 8) ? 0 : new IntPtr(*(long*)addr);
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Machina.FFXIV;
+using Dalamud.Game;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
@@ -14,7 +15,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         bool IsValid();
     }
 
-    public class FFXIVMemory
+    public partial class FFXIVMemory
     {
         private event EventHandler<Process> OnProcessChange;
 
@@ -35,6 +36,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             repository.RegisterProcessChangedHandler(UpdateProcess);
         }
+        
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsBadReadPtr(IntPtr lp, ulong ucb);
 
         public void RegisterOnProcessChangeHandler(EventHandler<Process> handler)
         {
@@ -149,6 +154,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// </summary>
         public bool Peek(IntPtr address, byte[] buffer)
         {
+            if (IsBadReadPtr(address, (ulong)buffer.Length))
+                return false;
             Marshal.Copy(address, buffer, 0, buffer.Length);
             return true;
         }
@@ -174,18 +181,23 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// <returns></returns>
         public unsafe int GetInt32(IntPtr address, int offset = 0)
         {
+            if (IsBadReadPtr(address + offset, 4))
+                    return 0;
             return *(int*)(address + offset);
         }
 
         public unsafe long GetInt64(IntPtr address, int offset = 0)
         {
+            if (IsBadReadPtr(address + offset, 8))
+                    return 0;
             return *(long*)(address + offset);
         }
 
         /// Reads |count| bytes at |addr| in the |process|. Returns null on error.
         public byte[] Read8(IntPtr addr, int count)
         {
-            return GetByteArray(addr, count);
+            var data = new byte[count];
+            return Peek(addr, data) ? data : null;
         }
 
         /// Reads |addr| in the |process| and returns it as a 16bit ints. Returns null on error.
@@ -251,7 +263,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// Reads |addr| in the |process| and returns it as a 64bit pointer. Returns 0 on error.
         public unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            return new IntPtr(*(long*)addr);
+            return IsBadReadPtr(addr, 8) ? 0 : new IntPtr(*(long*)addr);
         }
 
         /// <summary>

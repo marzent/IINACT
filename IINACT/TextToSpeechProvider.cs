@@ -29,47 +29,49 @@ internal class TextToSpeechProvider
     
     public void Speak(string message)
     {
-        if (new FileInfo(binary).Exists)
+        Task.Run(() =>
         {
+            if (new FileInfo(binary).Exists)
+            {
+                try
+                {
+                    var ttsProcess = new Process
+                    {
+                        StartInfo =
+                        {
+                            FileName = "C:\\windows\\system32\\start.exe",
+                            CreateNoWindow = true,
+                            UseShellExecute = false,
+                            Arguments = $"/unix {binary} {args} \"" +
+                                        Regex.Replace(Regex.Replace(message, @"(\\*)" + "\"", @"$1$1\" + "\""),
+                                                      @"(\\+)$", @"$1$1") + "\""
+                        }
+                    };
+                    lock (speechLock)
+                    {
+                        ttsProcess.Start();
+                        // heuristic pause
+                        Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
+                    }
+                
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Error(ex, $"TTS failed to play back {message}");
+                    return;
+                }
+            }
+        
             try
             {
-                var ttsProcess = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = "C:\\windows\\system32\\start.exe",
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        Arguments = $"/unix {binary} {args} \"" +
-                                    Regex.Replace(Regex.Replace(message, @"(\\*)" + "\"", @"$1$1\" + "\""),
-                                                  @"(\\+)$", @"$1$1") + "\""
-                    }
-                };
                 lock (speechLock)
-                {
-                    ttsProcess.Start();
-                    // heuristic pause
-                    Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
-                }
-                
-                return;
+                    speechSynthesizer?.Speak(message);
             }
             catch (Exception ex)
             {
                 PluginLog.Error(ex, $"TTS failed to play back {message}");
-                return;
             }
-        }
-        
-        try
-        {
-            lock (speechLock)
-                speechSynthesizer?.Speak(message);
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error(ex, $"TTS failed to play back {message}");
-        }
-        
+        });
     }
 }

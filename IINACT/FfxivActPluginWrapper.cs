@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -31,6 +32,7 @@ public class FfxivActPluginWrapper : IDisposable
     private readonly ClientLanguage dalamudClientLanguage;
     private readonly ChatGui chatGui;
     private readonly Framework framework;
+    private readonly Condition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly Container iocContainer;
@@ -65,12 +67,14 @@ public class FfxivActPluginWrapper : IDisposable
     public readonly IDataSubscription Subscription;
 
     public unsafe FfxivActPluginWrapper(
-        Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui, Framework framework)
+        Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui, Framework framework,
+        Condition condition)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
         this.chatGui = chatGui;
         this.framework = framework;
+        this.condition = condition;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -263,7 +267,7 @@ public class FfxivActPluginWrapper : IDisposable
         if (settingsMediator.DataCollectionSettings == null)
             return;
 
-        if (mobDataAge < 3 || (!ActGlobals.oFormActMain.InCombat && mobDataAge < 10))
+        if (mobDataAge < 3 || (!condition[ConditionFlag.BoundByDuty56] && mobDataAge < 10))
         {
             mobDataAge++;
             if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Network;
@@ -29,6 +30,7 @@ public sealed class Plugin : IDalamudPlugin
     internal DataManager DataManager { get; }
     internal ChatGui ChatGui { get; }
     internal Framework Framework { get; }
+    internal Condition Condition { get; }
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
@@ -48,7 +50,8 @@ public sealed class Plugin : IDalamudPlugin
                   [RequiredVersion("1.0")] GameNetwork gameNetwork,
                   [RequiredVersion("1.0")] DataManager dataManager,
                   [RequiredVersion("1.0")] ChatGui chatGui,
-                  [RequiredVersion("1.0")] Framework framework)
+                  [RequiredVersion("1.0")] Framework framework,
+                  [RequiredVersion("1.0")] Condition condition)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
@@ -56,6 +59,7 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ChatGui = chatGui;
         Framework = framework;
+        Condition = condition;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
@@ -81,7 +85,7 @@ public sealed class Plugin : IDalamudPlugin
         this.TextToSpeechProvider = new TextToSpeechProvider();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(PluginInterface);

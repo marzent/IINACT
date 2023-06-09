@@ -76,13 +76,13 @@ public sealed class Plugin : IDalamudPlugin
         this.TextToSpeechProvider = new TextToSpeechProvider(Configuration);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DalamudApi.GameData.Language, DalamudApi.Chat, DalamudApi.Framework, DalamudApi.Conditions);
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(DalamudApi.PluginInterface);
-
+        ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
-
+        WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         DalamudApi.Framework.Update += Updata;
         onUpdateInputUIHook= Hook<OnUpdateInputUI>.FromAddress(
@@ -160,7 +160,7 @@ public sealed class Plugin : IDalamudPlugin
     {
 
     }
-
+    private ConfigWindow ConfigWindow { get; }
     public void Dispose()
     {
         IpcProviders.Dispose();
@@ -193,8 +193,8 @@ public sealed class Plugin : IDalamudPlugin
 
         container.Register(HttpClient);
         container.Register(FileDialogManager);
-        container.Register(PluginInterface);
-        container.Register(Framework);
+        container.Register(DalamudApi.PluginInterface);
+        container.Register(DalamudApi.Framework);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
@@ -308,6 +308,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public void DrawConfigUI()
     {
-        MainWindow.IsOpen = true;
+        ConfigWindow.IsOpen = true;
+
     }
 }

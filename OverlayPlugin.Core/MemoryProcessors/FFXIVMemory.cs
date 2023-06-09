@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Machina.FFXIV;
+using Dalamud.Game;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
@@ -14,7 +15,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         bool IsValid();
     }
 
-    public class FFXIVMemory
+    public partial class FFXIVMemory
     {
         private event EventHandler<Process> OnProcessChange;
 
@@ -35,6 +36,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             repository.RegisterProcessChangedHandler(UpdateProcess);
         }
+        
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsBadReadPtr(IntPtr lp, ulong ucb);
 
         public void RegisterOnProcessChangeHandler(EventHandler<Process> handler)
         {
@@ -149,9 +154,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// </summary>
         public bool Peek(IntPtr address, byte[] buffer)
         {
-            IntPtr zero = IntPtr.Zero;
-            IntPtr nSize = new IntPtr(buffer.Length);
-            return NativeMethods.ReadProcessMemory(processHandle, address, buffer, nSize, ref zero);
+            if (IsBadReadPtr(address, (ulong)buffer.Length))
+                return false;
+            Marshal.Copy(address, buffer, 0, buffer.Length);
+            return true;
         }
 
         /// <summary>
@@ -175,33 +181,23 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// <returns></returns>
         public unsafe int GetInt32(IntPtr address, int offset = 0)
         {
-            int ret;
-            var value = new byte[4];
-            Peek(IntPtr.Add(address, offset), value);
-            fixed (byte* p = &value[0]) ret = *(int*)p;
-            return ret;
+            if (IsBadReadPtr(address + offset, 4))
+                    return 0;
+            return *(int*)(address + offset);
         }
 
         public unsafe long GetInt64(IntPtr address, int offset = 0)
         {
-            long ret;
-            var value = new byte[8];
-            Peek(IntPtr.Add(address, offset), value);
-            fixed (byte* p = &value[0]) ret = *(long*)p;
-            return ret;
+            if (IsBadReadPtr(address + offset, 8))
+                    return 0;
+            return *(long*)(address + offset);
         }
 
         /// Reads |count| bytes at |addr| in the |process|. Returns null on error.
         public byte[] Read8(IntPtr addr, int count)
         {
-            int buffer_len = 1 * count;
-            var buffer = new byte[buffer_len];
-            var bytes_read = IntPtr.Zero;
-            bool ok = NativeMethods.ReadProcessMemory(processHandle, addr, buffer, new IntPtr(buffer_len),
-                                                      ref bytes_read);
-            if (!ok || bytes_read.ToInt32() != buffer_len)
-                return null;
-            return buffer;
+            var data = new byte[count];
+            return Peek(addr, data) ? data : null;
         }
 
         /// Reads |addr| in the |process| and returns it as a 16bit ints. Returns null on error.
@@ -265,12 +261,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         }
 
         /// Reads |addr| in the |process| and returns it as a 64bit pointer. Returns 0 on error.
-        public IntPtr ReadIntPtr(IntPtr addr)
+        public unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            var buffer = Read8(addr, 8);
-            if (buffer == null)
-                return IntPtr.Zero;
-            return new IntPtr(BitConverter.ToInt64(buffer, 0));
+            return IsBadReadPtr(addr, 8) ? 0 : new IntPtr(*(long*)addr);
         }
 
         /// <summary>

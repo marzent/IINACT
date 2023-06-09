@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -11,6 +13,9 @@ using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
 using FFXIV_ACT_Plugin.Logfile;
 using FFXIV_ACT_Plugin.Memory;
+using FFXIV_ACT_Plugin.Memory.MemoryProcessors;
+using FFXIV_ACT_Plugin.Memory.MemoryReader;
+using FFXIV_ACT_Plugin.Memory.Models;
 using FFXIV_ACT_Plugin.Parse;
 using FFXIV_ACT_Plugin.Resource;
 using Machina.FFXIV;
@@ -25,22 +30,50 @@ public class FfxivActPluginWrapper : IDisposable
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
     private readonly ChatGui chatGui;
+    private readonly Framework framework;
+    private readonly Condition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
+    private readonly Container iocContainer;
+    private ISettingsMediator settingsMediator = null!;
     private readonly ParseMediator parseMediator;
+
+    private readonly IServerTimeProcessor serverTimeProcessor;
+    private readonly MobArrayProcessor mobArrayProcessor;
+    private readonly IZoneMapProcessor zoneMapProcessor;
+    private readonly CombatantManager combatantManager;
+    private readonly IPlayerProcessor playerProcessor;
+    private readonly IPartyProcessor partyProcessor;
+
+    private readonly int mobArraySize;
+    private readonly int combatantSize;
+    private readonly int combatantBufferSize;
+    private readonly nint mobData;
+    private readonly nint[] mobDataOffsets;
+    private readonly SemaphoreSlim refreshSemaphore = new(0);
+    private byte mobDataAge = byte.MaxValue;
+
+    private readonly Thread scanThread;
+    private readonly CancellationTokenSource cancellationTokenSource;
+
     private readonly ILogOutput logOutput;
     private readonly ILogFormat logFormat;
-    public readonly ProcessManager ProcessManager;
+    private readonly IProcessManager processManager;
+
     public DataCollectionSettingsEventArgs DataCollectionSettings = null!;
     public ParseSettings ParseSettings = null!;
     public readonly IDataRepository Repository;
     public readonly IDataSubscription Subscription;
 
-    public FfxivActPluginWrapper(Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui)
+    public unsafe FfxivActPluginWrapper(
+        Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui, Framework framework,
+        Condition condition)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
         this.chatGui = chatGui;
+        this.framework = framework;
+        this.condition = condition;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -57,7 +90,7 @@ public class FfxivActPluginWrapper : IDisposable
                 break;
         }
 
-        var iocContainer = ffxivActPlugin._iocContainer;
+        iocContainer = ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();
 
         Subscription = iocContainer.Resolve<DataSubscription>();
@@ -67,11 +100,18 @@ public class FfxivActPluginWrapper : IDisposable
 
         ffxivActPlugin._dataCollection = iocContainer.Resolve<DataCollection>();
 
-        var scanPackets = ffxivActPlugin._dataCollection._scanPackets;
-        ProcessManager = scanPackets.GetField<ProcessManager>("_processManager");
-        
         logOutput = ffxivActPlugin._dataCollection._logOutput;
         logFormat = ffxivActPlugin._dataCollection._logFormat;
+
+        var scanMemory = (ScanMemory)ffxivActPlugin._dataCollection._scanMemory;
+
+        processManager = scanMemory._processManager;
+        serverTimeProcessor = scanMemory._serverTimeProcessor;
+        mobArrayProcessor = (MobArrayProcessor)scanMemory._mobArrayProcessor;
+        zoneMapProcessor = scanMemory._zoneProcessor;
+        combatantManager = (CombatantManager)scanMemory._combatantManager;
+        playerProcessor = scanMemory._playerProcessor;
+        partyProcessor = scanMemory._partyProcessor;
 
         SetupActWrapper();
 
@@ -84,8 +124,26 @@ public class FfxivActPluginWrapper : IDisposable
 
         ffxivActPlugin._dataCollection.StartMemory();
 
-        chatGui.ChatMessage += OnChatMessage;
+        this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
+
+        cancellationTokenSource = new CancellationTokenSource();
+        scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))
+        {
+            IsBackground = true
+        };
+        scanThread.Start();
+
+        mobArraySize = mobArrayProcessor._internalMmobArray.Length;
+        var combatantProcessor = ((CombatantProcessor)combatantManager._combatantProcessor);
+        combatantBufferSize = ((ReadCombatant)combatantProcessor._readCombatant)._buffer.Length;
+        combatantSize = sizeof(Combatant64Struct);
+        mobData = Marshal.AllocHGlobal((mobArraySize * combatantSize) + (combatantBufferSize - combatantSize));
+        mobDataOffsets = new nint[mobArraySize];
+        for (var i = 0; i < mobArraySize; i++)
+            mobDataOffsets[i] = mobData + (i * combatantSize);
+
+        this.framework.Update += MobDataRefresh;
     }
 
     private Language ClientLanguage =>
@@ -100,15 +158,19 @@ public class FfxivActPluginWrapper : IDisposable
 
     public void Dispose()
     {
+        cancellationTokenSource.Cancel();
+        cancellationTokenSource.Dispose();
+        framework.Update -= MobDataRefresh;
         chatGui.ChatMessage -= OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead -= OFormActMain_BeforeLogLineRead;
         ffxivActPlugin.DeInitPlugin();
         ffxivActPlugin.Dispose();
+        Marshal.FreeHGlobal(mobData);
     }
 
     private void SetupSettingsMediator()
     {
-        var settingsMediator = ffxivActPlugin._dataCollection._settingsMediator;
+        settingsMediator = ffxivActPlugin._dataCollection._settingsMediator;
 
         DataCollectionSettings = new DataCollectionSettingsEventArgs
         {
@@ -152,8 +214,9 @@ public class FfxivActPluginWrapper : IDisposable
 
         logOutput.CallMethod("ConfigureLogFile", null);
         ActGlobals.oFormActMain.GetDateTimeFromLog = parseMediator.ParseLogDateTime;
-       
-        ProcessManager.Verify();
+
+        if (!processManager.Verify())
+            throw new InvalidOperationException("Game offsets could not be found");
     }
    
     private void OnChatMessage(
@@ -164,8 +227,8 @@ public class FfxivActPluginWrapper : IDisposable
         var text = message.TextValue.Replace('\r', ' ').Replace('\n', ' ')
                                     .Replace('|', '❘');
         var line = logFormat.FormatChatMessage(evenType, player, text);
-        
-        logOutput.WriteLine(LogMessageType.ChatLog, DateTime.Now, line);
+
+        logOutput.WriteLine(LogMessageType.ChatLog, serverTimeProcessor.ServerTime, line);
     }
 
     private void SetupActWrapper()
@@ -200,5 +263,91 @@ public class FfxivActPluginWrapper : IDisposable
     private static void OnProcessException(DateTime timestamp, string text)
     {
         PluginLog.Debug(text);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ServerTimeRefresh()
+    {
+        serverTimeProcessor.Refresh();
+        // Machina.FFXIV.Dalamud.DalamudClient.ServerTime = serverTimeProcessor.ServerTime;
+    }
+
+    private unsafe void MobDataRefresh(Framework _)
+    {
+        if (settingsMediator.DataCollectionSettings == null)
+            return;
+
+        if (mobDataAge < 3 || (!condition[ConditionFlag.BoundByDuty56] && mobDataAge < 10))
+        {
+            mobDataAge++;
+            if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
+            {
+                ServerTimeRefresh();
+                return;
+            }
+            refreshSemaphore.Release();
+            return;
+        }
+
+        mobDataAge = 0;
+        var mobArrayAddress = (ulong*)mobArrayProcessor._readMobArray.Read64();
+        var mobArray = mobArrayProcessor._internalMmobArray;
+
+        if (*mobArrayAddress == 0)
+        {
+            Array.Clear(mobArray);
+            ServerTimeRefresh();
+            return;
+        }
+
+        Buffer.MemoryCopy((void*)*mobArrayAddress, mobDataOffsets[0].ToPointer(), combatantSize, combatantSize);
+        mobArray[0] = mobDataOffsets[0];
+
+        for (var i = 1; i < mobArraySize; i++)
+        {
+            if (*(mobArrayAddress + i) == 0)
+            {
+                mobArray[i] = nint.Zero;
+                continue;
+            }
+            Buffer.MemoryCopy((void*)*(mobArrayAddress + i), mobDataOffsets[i].ToPointer(), combatantSize, combatantSize);
+            mobArray[i] = mobDataOffsets[i];
+        }
+
+        refreshSemaphore.Release();
+    }
+
+    private void ScanMemory(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                refreshSemaphore.Wait(token);
+
+                serverTimeProcessor.Refresh();
+
+                var zoneId = zoneMapProcessor.ZoneID;
+                zoneMapProcessor.Refresh();
+                if (zoneMapProcessor.ZoneID == 0)
+                    continue;
+
+                if (zoneId != zoneMapProcessor.ZoneID)
+                    combatantManager.Rescan();
+                else
+                    combatantManager.Refresh();
+
+                playerProcessor.Refresh();
+                partyProcessor.Refresh();
+            }
+            catch (Exception ex) when (ex is ThreadAbortException or OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "[FFXIV_ACT_Plugin] ScanMemory failure");
+            }
+        }
     }
 }

@@ -42,7 +42,21 @@
         "Comment": "Combat beginning / ending"
     },
     {
-        "StartID": 261,
+        "ID": 261,
+        "Name":  "CombatantMemory",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Combatant Memory Information"
+    },
+    {
+        "ID": 262,
+        "Name":  "RSVData",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "RSV Key/Value data"
+    },
+    {
+        "StartID": 263,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

@@ -334,6 +334,15 @@ namespace RainbowMage.OverlayPlugin
 
                 this.Overlays.Clear();
             }
+            
+            try
+            {
+                _container.Resolve<LineCombatant>().Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, $"DeInitPlugin: Failed to dispose LineCombatant {ex.Message}");
+            }
 
             try
             {

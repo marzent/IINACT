@@ -8,7 +8,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
     public class FFXIVProcessIntl : FFXIVProcess
     {
-        // Last updated for FFXIV 6.3
+        // Last updated for FFXIV 6.4
 
         [StructLayout(LayoutKind.Explicit)]
         public unsafe struct EntityMemory
@@ -45,7 +45,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x1C4)]
             public CharacterDetails charDetails;
 
-            [FieldOffset(0x1AEB)]
+            [FieldOffset(0x1ED)]
             public byte shieldPercentage;
         }
 
@@ -73,10 +73,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x16)]
             public short max_cp;
 
-            [FieldOffset(0x1C)]
+            [FieldOffset(0x1E)]
             public EntityJob job;
 
-            [FieldOffset(0x1D)]
+            [FieldOffset(0x1F)]
             public byte level;
         }
 
@@ -714,18 +714,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         [StructLayout(LayoutKind.Explicit)]
         public struct ScholarJobMemory
         {
-            [FieldOffset(0x02)]
+            [FieldOffset(0x01)]
             public byte aetherflowStacks;
 
-            [FieldOffset(0x03)]
+            [FieldOffset(0x02)]
             public byte fairyGauge;
 
-            [FieldOffset(0x04)]
+            [FieldOffset(0x03)]
             public ushort fairyMilliseconds; // Seraph time left ms.
 
-            [FieldOffset(0x06)]
+            [FieldOffset(0x05)]
             public byte
-                fairyStatus; // Varies depending on which fairy was summoned, during Seraph/Dissipation: 6 - Eos, 7 - Selene, else 0.
+                fairyStatus; // Seraph: 6, else 0.
         };
 
 

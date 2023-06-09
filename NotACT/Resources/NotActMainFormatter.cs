@@ -2125,7 +2125,7 @@ public static class NotActMainFormatter
     }
 
     private static string EncounterFormatSwitch(
-        EncounterData data, List<CombatantData> selectiveAllies, string varName, string extra)
+        EncounterData data, List<CombatantData> selectiveAllies, string varName, string extra, int tries = 0)
     {
         try
         {
@@ -2549,7 +2549,14 @@ public static class NotActMainFormatter
         }
         catch (Exception ex)
         {
-            oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
+            if (tries < 3)
+                return EncounterFormatSwitch(data, selectiveAllies, varName, extra, tries + 1);
+            
+            if (ex is not InvalidOperationException)
+                oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
+            else 
+                PluginLog.Verbose(ex, $"FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
+            
             return "ERROR";
         }
     }

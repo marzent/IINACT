@@ -39,6 +39,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     }
 
     public bool ReadThreadLock { get; set; }
+    public bool WriteLogFile { get; set; } = true;
     public int GlobalTimeSorter { get; set; }
     public List<ZoneData> ZoneList { get; set; } = new();
     public string LogFileFilter { get; set; } = "notact*.txt";
@@ -129,7 +130,8 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public static IntPtr deltaC = IntPtr.Zero;
     public void ParseRawLogLine(string logLine)
     {
-        LogQueue.Enqueue(logLine);
+        if (WriteLogFile)
+            LogQueue.Enqueue(logLine);
         if (BeforeLogLineRead == null || GetDateTimeFromLog == null)
             return;
         var log= logLine.Split(new char[] { '|'});
@@ -329,6 +331,12 @@ public partial class FormActMain : Form, ISynchronizeInvoke
             using var outputWriter = new StreamWriter(stream);
             while (true)
             {
+                if (!WriteLogFile)
+                {
+                    Thread.Sleep(2000);
+                    continue;
+                }
+                
                 while (LogQueue.TryDequeue(out var line))
                     outputWriter.WriteLine(line);
 
@@ -338,9 +346,9 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         }
         catch (ObjectDisposedException) { }
         catch (ThreadAbortException) { }
-        catch (Exception ex5)
+        catch (Exception ex)
         {
-            WriteExceptionLog(ex5, "StartLogReaderThread failed, restarting thread");
+            WriteExceptionLog(ex, "StartLogReaderThread failed, restarting thread");
             StartLogWriterThread();
         }
     }
@@ -378,9 +386,9 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         }
         catch (ObjectDisposedException) { }
         catch (ThreadAbortException) { }
-        catch (Exception ex5)
+        catch (Exception ex)
         {
-            WriteExceptionLog(ex5, "StartLogReaderThread failed, restarting thread");
+            WriteExceptionLog(ex, "StartLogReaderThread failed, restarting thread");
             StartLogReaderThread();
         }
     }

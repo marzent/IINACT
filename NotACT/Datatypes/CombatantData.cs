@@ -291,6 +291,7 @@ public class CombatantData : IComparable, IEquatable<CombatantData>, IComparable
 
             for (var i = 0; i < fightStartTimes.Count; i++)
             {
+                if (i >= fightEndTimes.Count) continue;
                 var start = fightStartTimes[i];
                 var end = fightEndTimes[i];
 

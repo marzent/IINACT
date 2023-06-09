@@ -21,7 +21,8 @@ namespace IINACT;
 public sealed class Plugin : IDalamudPlugin
 {
     public string Name => "IINACT";
-    
+    public Version Version { get; }
+
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
     private const string ChatCommandName = "/chat";
@@ -31,7 +32,6 @@ public sealed class Plugin : IDalamudPlugin
     // ReSharper restore UnusedAutoPropertyAccessor.Local
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
-    private ConfigWindow ConfigWindow { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
     private IpcProviders IpcProviders { get; }
@@ -41,6 +41,7 @@ public sealed class Plugin : IDalamudPlugin
     private RainbowMage.OverlayPlugin.WebSocket.ServerController? WebSocketServer { get; set; }
     internal string OverlayPluginStatus => OverlayPlugin.Status;
     private PluginLogTraceListener PluginLogTraceListener { get; }
+    private HttpClient HttpClient { get; }
 
     private delegate void OnUpdateInputUI(IntPtr EventArgument);
     private Hook<OnUpdateInputUI> onUpdateInputUIHook;
@@ -63,6 +64,9 @@ public sealed class Plugin : IDalamudPlugin
             DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient, DalamudApi.ClientState.ClientLanguage);
         
         fetchDeps.GetFfxivPlugin();
+        
+        PluginLogTraceListener = new PluginLogTraceListener();
+        Trace.Listeners.Add(PluginLogTraceListener);
 
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
 
@@ -72,15 +76,13 @@ public sealed class Plugin : IDalamudPlugin
         this.TextToSpeechProvider = new TextToSpeechProvider(Configuration);
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DalamudApi.ClientState.ClientLanguage, DalamudApi.Chat);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(DalamudApi.PluginInterface);
 
-        ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this);
 
-        WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         DalamudApi.Framework.Update += Updata;
         onUpdateInputUIHook= Hook<OnUpdateInputUI>.FromAddress(
@@ -189,9 +191,10 @@ public sealed class Plugin : IDalamudPlugin
         container.Register(logger);
         container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 
-        container.Register(Util.HttpClient);
+        container.Register(HttpClient);
         container.Register(FileDialogManager);
-        container.Register(DalamudApi.PluginInterface);
+        container.Register(PluginInterface);
+        container.Register(Framework);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
@@ -249,13 +252,29 @@ public sealed class Plugin : IDalamudPlugin
     }
     private void OnCommand(string command, string args)
     {
+        if (command == EndEncCommandName)
+        {
+            Advanced_Combat_Tracker.ActGlobals.oFormActMain.EndCombat(false);
+            return;
+        }
+            
         switch (args) 
         {
-            case "start":
+            case "start": //deprecated
+            case "ws start":
                 WebSocketServer?.Start();
                 break;
-            case "stop":
+            case "stop": //deprecated
+            case "ws stop":
                 WebSocketServer?.Stop();
+                break;
+            case "log start":
+                Configuration.WriteLogFile = true;
+                Configuration.Save();
+                break;
+            case "log stop":
+                Configuration.WriteLogFile = false;
+                Configuration.Save();
                 break;
             default:
                 MainWindow.IsOpen = true;
@@ -289,6 +308,6 @@ public sealed class Plugin : IDalamudPlugin
 
     public void DrawConfigUI()
     {
-        ConfigWindow.IsOpen = true;
+        MainWindow.IsOpen = true;
     }
 }

@@ -364,5 +364,21 @@
             "opcode": 430,
             "size": 1080
         }
+    },
+    "2023.06.14.0000.0000": {
+        // Region: Global
+        // Version: 6.41
+        "MapEffect": {
+            "opcode": 736,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 392,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 142,
+            "size": 1080
+        }
     }
 }

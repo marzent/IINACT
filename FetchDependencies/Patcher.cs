@@ -186,6 +186,14 @@ internal class Patcher
             ilProcessor.Emit(OpCodes.Ret);
         }
         
+        // not needed and sometimes throws an exception during early load, see #61
+        {
+            var method = memory.GetMethod(
+                "System.Void FFXIV_ACT_Plugin.Memory.SignatureManager::RefreshVtable()");
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
+        }
+        
         memory.WriteOut();
     }
 }

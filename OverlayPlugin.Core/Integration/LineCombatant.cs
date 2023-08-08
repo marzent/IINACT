@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -438,7 +439,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             // Format numbers to 4 decimal places, to prevent scientific notation
             if (info.FieldType == typeof(Single) || info.FieldType == typeof(Double))
             {
-                return $"|{info.Name}|{value:F4}";
+                return string.Format(CultureInfo.InvariantCulture, "|{0}|{1:F4}", info.Name, value);
             }
 
             return $"|{info.Name}|{value}";

@@ -307,8 +307,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         internal byte[] Read8(IntPtr addr, int count)
         {
             var data = new byte[count];
-            if (!IsBadReadPtr(addr, (ulong)count))
-                Marshal.Copy(addr, data, 0, count);
+            if (IsBadReadPtr(addr, (ulong)count))
+                return null;
+            Marshal.Copy(addr, data, 0, count);
             return data;
             }
 

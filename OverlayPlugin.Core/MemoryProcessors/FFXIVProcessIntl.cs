@@ -292,59 +292,33 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             fixed (byte* p = Read8(job_inner_ptr, kJobDataInnerStructSize))
             {
                 if (p == null)
-                {
                     return null;
-                }
-                else
-                {
-                    switch (job)
-                    {
-                        case EntityJob.RDM:
-                            return JObject.FromObject(*(RedMageJobMemory*)&p[0]);
-                        case EntityJob.WAR:
-                            return JObject.FromObject(*(WarriorJobMemory*)&p[0]);
-                        case EntityJob.DRK:
-                            return JObject.FromObject(*(DarkKnightJobMemory*)&p[0]);
-                        case EntityJob.PLD:
-                            return JObject.FromObject(*(PaladinJobMemory*)&p[0]);
-                        case EntityJob.GNB:
-                            return JObject.FromObject(*(GunbreakerJobMemory*)&p[0]);
-                        case EntityJob.BRD:
-                            return JObject.FromObject(*(BardJobMemory*)&p[0]);
-                        case EntityJob.DNC:
-                            return JObject.FromObject(*(DancerJobMemory*)&p[0]);
-                        case EntityJob.DRG:
-                            return JObject.FromObject(*(DragoonJobMemory*)&p[0]);
-                        case EntityJob.NIN:
-                            return JObject.FromObject(*(NinjaJobMemory*)&p[0]);
-                        case EntityJob.THM:
-                            return JObject.FromObject(*(ThaumaturgeJobMemory*)&p[0]);
-                        case EntityJob.BLM:
-                            return JObject.FromObject(*(BlackMageJobMemory*)&p[0]);
-                        case EntityJob.WHM:
-                            return JObject.FromObject(*(WhiteMageJobMemory*)&p[0]);
-                        case EntityJob.ACN:
-                            return JObject.FromObject(*(ArcanistJobMemory*)&p[0]);
-                        case EntityJob.SMN:
-                            return JObject.FromObject(*(SummonerJobMemory*)&p[0]);
-                        case EntityJob.SCH:
-                            return JObject.FromObject(*(ScholarJobMemory*)&p[0]);
-                        case EntityJob.MNK:
-                            return JObject.FromObject(*(MonkJobMemory*)&p[0]);
-                        case EntityJob.MCH:
-                            return JObject.FromObject(*(MachinistJobMemory*)&p[0]);
-                        case EntityJob.AST:
-                            return JObject.FromObject(*(AstrologianJobMemory*)&p[0]);
-                        case EntityJob.SAM:
-                            return JObject.FromObject(*(SamuraiJobMemory*)&p[0]);
-                        case EntityJob.SGE:
-                            return JObject.FromObject(*(SageJobMemory*)&p[0]);
-                        case EntityJob.RPR:
-                            return JObject.FromObject(*(ReaperJobMemory*)&p[0]);
-                    }
 
-                    return null;
-                }
+                return job switch
+                {
+                    EntityJob.RDM => JObject.FromObject(*(RedMageJobMemory*)&p[0]),
+                    EntityJob.WAR => JObject.FromObject(*(WarriorJobMemory*)&p[0]),
+                    EntityJob.DRK => JObject.FromObject(*(DarkKnightJobMemory*)&p[0]),
+                    EntityJob.PLD => JObject.FromObject(*(PaladinJobMemory*)&p[0]),
+                    EntityJob.GNB => JObject.FromObject(*(GunbreakerJobMemory*)&p[0]),
+                    EntityJob.BRD => JObject.FromObject(*(BardJobMemory*)&p[0]),
+                    EntityJob.DNC => JObject.FromObject(*(DancerJobMemory*)&p[0]),
+                    EntityJob.DRG => JObject.FromObject(*(DragoonJobMemory*)&p[0]),
+                    EntityJob.NIN => JObject.FromObject(*(NinjaJobMemory*)&p[0]),
+                    EntityJob.THM => JObject.FromObject(*(ThaumaturgeJobMemory*)&p[0]),
+                    EntityJob.BLM => JObject.FromObject(*(BlackMageJobMemory*)&p[0]),
+                    EntityJob.WHM => JObject.FromObject(*(WhiteMageJobMemory*)&p[0]),
+                    EntityJob.ACN => JObject.FromObject(*(ArcanistJobMemory*)&p[0]),
+                    EntityJob.SMN => JObject.FromObject(*(SummonerJobMemory*)&p[0]),
+                    EntityJob.SCH => JObject.FromObject(*(ScholarJobMemory*)&p[0]),
+                    EntityJob.MNK => JObject.FromObject(*(MonkJobMemory*)&p[0]),
+                    EntityJob.MCH => JObject.FromObject(*(MachinistJobMemory*)&p[0]),
+                    EntityJob.AST => JObject.FromObject(*(AstrologianJobMemory*)&p[0]),
+                    EntityJob.SAM => JObject.FromObject(*(SamuraiJobMemory*)&p[0]),
+                    EntityJob.SGE => JObject.FromObject(*(SageJobMemory*)&p[0]),
+                    EntityJob.RPR => JObject.FromObject(*(ReaperJobMemory*)&p[0]),
+                    _ => null
+                };
             }
         }
 

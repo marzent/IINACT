@@ -476,5 +476,69 @@
             "opcode": 530,
             "size": 1080
         }
+    },
+    "2023.08.03.0000.0000": {
+        // Region: KR
+        // Version: 6.35
+        "MapEffect": {
+            "opcode": 435,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 601,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 458,
+            "size": 1080
+        }
+    },
+    "2023.09.06.0000.0000": {
+        // Region: CN
+        // Version: 6.4
+        "MapEffect": {
+            "opcode": 286,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 847,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 364,
+            "size": 1080
+        }
+    },
+    "2023.09.08.0000.0000": {
+        // Region: KR
+        // Version: 6.38
+        "MapEffect": {
+            "opcode": 812,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 211,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 961,
+            "size": 1080
+        }
+    },
+    "2023.09.28.0000.0000": {
+        // Region: Global
+        // Version: 6.50
+        "MapEffect": {
+            "opcode": 340,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 432,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 464,
+            "size": 1080
+        }
     }
 }

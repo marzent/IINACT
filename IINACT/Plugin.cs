@@ -10,6 +10,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using IINACT.Windows;
 
 namespace IINACT;
@@ -25,12 +26,12 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("IINACT");
     
     internal DalamudPluginInterface PluginInterface { get; }
-    internal CommandManager CommandManager { get; }
-    internal GameNetwork GameNetwork { get; }
-    internal DataManager DataManager { get; }
-    internal ChatGui ChatGui { get; }
-    internal Framework Framework { get; }
-    internal Condition Condition { get; }
+    internal ICommandManager CommandManager { get; }
+    internal IGameNetwork GameNetwork { get; }
+    internal IDataManager DataManager { get; }
+    internal IChatGui ChatGui { get; }
+    internal IFramework Framework { get; }
+    internal ICondition Condition { get; }
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
@@ -46,12 +47,12 @@ public sealed class Plugin : IDalamudPlugin
     private HttpClient HttpClient { get; }
 
     public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-                  [RequiredVersion("1.0")] CommandManager commandManager,
-                  [RequiredVersion("1.0")] GameNetwork gameNetwork,
-                  [RequiredVersion("1.0")] DataManager dataManager,
-                  [RequiredVersion("1.0")] ChatGui chatGui,
-                  [RequiredVersion("1.0")] Framework framework,
-                  [RequiredVersion("1.0")] Condition condition)
+                  [RequiredVersion("1.0")] ICommandManager commandManager,
+                  [RequiredVersion("1.0")] IGameNetwork gameNetwork,
+                  [RequiredVersion("1.0")] IDataManager dataManager,
+                  [RequiredVersion("1.0")] IChatGui chatGui,
+                  [RequiredVersion("1.0")] IFramework framework,
+                  [RequiredVersion("1.0")] ICondition condition)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;

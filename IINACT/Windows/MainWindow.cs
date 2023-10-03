@@ -1,7 +1,6 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.Interface.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIV_ACT_Plugin.Config;
 using ImGuiNET;
@@ -9,6 +8,8 @@ using RainbowMage.OverlayPlugin;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 
 namespace IINACT.Windows;
 

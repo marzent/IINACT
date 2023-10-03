@@ -9,6 +9,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
 using FFXIV_ACT_Plugin.Config;
@@ -30,9 +31,9 @@ public class FfxivActPluginWrapper : IDisposable
 {
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
-    private readonly ChatGui chatGui;
-    private readonly Framework framework;
-    private readonly Condition condition;
+    private readonly IChatGui chatGui;
+    private readonly IFramework framework;
+    private readonly ICondition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly Container iocContainer;
@@ -67,8 +68,8 @@ public class FfxivActPluginWrapper : IDisposable
     public readonly IDataSubscription Subscription;
 
     public unsafe FfxivActPluginWrapper(
-        Configuration configuration, ClientLanguage dalamudClientLanguage, ChatGui chatGui, Framework framework,
-        Condition condition)
+        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui, IFramework framework,
+        ICondition condition)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
@@ -262,7 +263,7 @@ public class FfxivActPluginWrapper : IDisposable
         // Machina.FFXIV.Dalamud.DalamudClient.ServerTime = serverTimeProcessor.ServerTime;
     }
 
-    private unsafe void MobDataRefresh(Framework _)
+    private unsafe void MobDataRefresh(IFramework _)
     {
         if (settingsMediator.DataCollectionSettings == null)
             return;

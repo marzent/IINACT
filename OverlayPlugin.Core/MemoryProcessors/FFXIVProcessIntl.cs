@@ -42,10 +42,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0xC0)]
             public Single rotation;
 
-            [FieldOffset(0x1C4)]
+            [FieldOffset(0x1BC)]
             public CharacterDetails charDetails;
 
-            [FieldOffset(0x1ED)]
+            [FieldOffset(0x1E6)]
             public byte shieldPercentage;
         }
 

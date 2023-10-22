@@ -212,7 +212,7 @@ public sealed class Plugin : IDalamudPlugin
             IpcProviders.Server = WebSocketServer;
             IpcProviders.OverlayIpcHandler = container.Resolve<RainbowMage.OverlayPlugin.Handlers.Ipc.IpcHandlerController>();
             ConfigWindow.OverlayPluginConfig = container.Resolve<RainbowMage.OverlayPlugin.IPluginConfig>();
-             post = new PostNamazu.PostNamazu(DalamudApi.Commands);
+            post = new PostNamazu.PostNamazu(DalamudApi.Commands);
             post.InitPlugin();
             cactboSelf = new CactbotSelf.CactbotSelf(Configuration.shunxu, true);
             cactboSelf.InitPlugin();

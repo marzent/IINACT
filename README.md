@@ -46,3 +46,4 @@ You will need to be able to reference Dalamud as well, meaning having an install
 **Are these logs compatible with FFLogs? Can I use the FFLogs Uploader?**
 
 - Yes! 100% compatible.
+国服使用加qq群：109483595

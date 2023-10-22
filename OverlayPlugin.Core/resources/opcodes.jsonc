@@ -364,5 +364,149 @@
             "opcode": 430,
             "size": 1080
         }
+    },
+    "2023.06.02.0000.0000": {
+        // Region: KR
+        // Version: 6.3
+        "MapEffect": {
+            "opcode": 629,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 777,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 115,
+            "size": 1080
+        }
+    },
+    "2023.06.14.0000.0000": {
+        // Region: Global
+        // Version: 6.41
+        "MapEffect": {
+            "opcode": 736,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 392,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 142,
+            "size": 1080
+        }
+    },
+    "2023.06.28.0000.0000": {
+        // Region: CN
+        // Version: 6.35
+        "MapEffect": {
+            "opcode": 782,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 998,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 783,
+            "size": 1080
+        }
+    },
+    "2023.07.06.0000.0000": {
+        // Region: Global
+        // Version: 6.45
+        "MapEffect": {
+            "opcode": 671,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 482,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 970,
+            "size": 1080
+        }
+    },
+    "2023.07.07.0000.0000": {
+        // Region: KR
+        // Version: 6.31
+        "MapEffect": {
+            "opcode": 697,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 391,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 361,
+            "size": 1080
+        }
+    },
+    "2023.07.22.0000.0000": {
+        // Region: CN
+        // Version: 6.38
+        "MapEffect": {
+            "opcode": 205,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 104,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 456,
+            "size": 1080
+        }
+    },
+    "2023.07.26.0000.0000": {
+        // Region: Global
+        // Version: 6.48
+        "MapEffect": {
+            "opcode": 311,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 327,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 530,
+            "size": 1080
+        }
+    },
+    "2023.08.03.0000.0000": {
+        // Region: KR
+        // Version: 6.35
+        "MapEffect": {
+            "opcode": 435,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 601,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 458,
+            "size": 1080
+        }
+    },
+    "2023.09.06.0000.0000": {
+        // Region: CN
+        // Version: 6.4
+        "MapEffect": {
+            "opcode": 286,
+            "size": 11
+        },
+        "CEDirector": {
+            "opcode": 847,
+            "size": 16
+        },
+        "RSVData": {
+            "opcode": 364,
+            "size": 1080
+        }
     }
 }

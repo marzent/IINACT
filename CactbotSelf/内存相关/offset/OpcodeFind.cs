@@ -24,7 +24,7 @@ namespace CactbotSelf.内存相关.offset
 		public static int ObjectOpcode { get; set; }
 		public void findNetDown()
 		{
-			var netDown = FindPattern("40 55 56 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 37 8B FA");
+			var netDown = FindPattern("40 55 56 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 8B ?? 49 8B ??");
 			if (netDown.Count >= 1)
 			{
 				NetworkAdress = netDown[0];

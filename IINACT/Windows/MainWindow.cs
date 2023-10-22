@@ -80,9 +80,13 @@ public class MainWindow : Window, IDisposable
         }
 
         var selectedOverlay = OverlayPresets?[selectedOverlayIndex];
+
         var overlayUri = selectedOverlay?.ToOverlayUri(new Uri($"ws://{Server?.Address}:{Server?.Port}/ws"));
         var overlayUriString = overlayUri?.ToString() ?? "<Error generating URI>";
-
+        if (overlayUriString.Contains("ff14-overlay-dungeon-cn"))
+        {
+            var abc = 1;
+        }
         ImGui.SetNextItemWidth(comboWidth);
         ImGui.InputText("URI", ref overlayUriString, 1000, ImGuiInputTextFlags.ReadOnly);
 

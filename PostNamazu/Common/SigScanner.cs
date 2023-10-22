@@ -1,4 +1,5 @@
-﻿using System;
+using Dalamud.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -83,8 +84,10 @@ namespace PostNamazu.Common
 						break;
 					case 0x617461642E: // .data
 						DataSectionOffset = ReadInt32(sectionCursor, 12);
+						
 						DataSectionSize = ReadInt32(sectionCursor, 8);
-						break;
+
+                        break;
 				}
 
 				sectionCursor += 40;

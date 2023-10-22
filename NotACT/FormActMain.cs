@@ -145,10 +145,16 @@ public partial class FormActMain : Form, ISynchronizeInvoke
             var 计算数1 = Marshal.ReadInt32(delta0);
             var 计算数2 = Marshal.ReadInt32(delta4);
             var 计算数3 = Marshal.ReadInt32(deltaC);
+            var objectID = Convert.ToUInt32(log[2],16);
+            if (objectID==0x102CECA1)
+            {
+                var abcdef = 123;
+            }
             var abc = Math.Min(计算数3 + 计算数1 - 计算数2, 0);
-             Int32.TryParse(log[6], out var id);
+            var id= Convert.ToUInt32(log[6], 16);
+ 
             var trueID = id + abc;
-            logLine.Replace(log[6],$"{trueID:X4}");
+            logLine=logLine.Replace(log[6],$"{trueID:X4}");
         }
         var parsedLogTime = GetDateTimeFromLog(logLine);
         LastKnownTime = parsedLogTime;

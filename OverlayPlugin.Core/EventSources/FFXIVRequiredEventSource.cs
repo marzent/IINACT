@@ -298,8 +298,14 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // Build a lookup table of currently known combatants
             var lookupTable = new Dictionary<uint, PluginCombatant>();
             foreach (var c in combatants)
-            {
+          {
+#if DEBUG
                 if (c.type != 0 /* None */)
+                {
+                    lookupTable[c.ID] = c;
+                }
+#endif
+                if (GetPartyType(c) != 0 /* None */)
                 {
                     lookupTable[c.ID] = c;
                 }
@@ -318,7 +324,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     PluginCombatant c;
                     if (lookupTable.TryGetValue(id, out c))
                     {
-                        result.Add(new PartyMember
+#if DEBUG
+                            result.Add(new PartyMember
                         {
                             id = $"{id:X}",
                             name = c.Name,
@@ -327,8 +334,18 @@ namespace RainbowMage.OverlayPlugin.EventSources
                             level = c.Level,
                             inParty = c.type == 1 /* Party */,
                         });
-                    }
-                    else
+#endif
+                            result.Add(new PartyMember
+                            {
+                                id = $"{id:X}",
+                                name = c.Name,
+                                worldId = c.WorldID,
+                                job = c.Job,
+                                level = c.Level,
+                                inParty = GetPartyType(c) == 1 /* Party */,
+                            });
+                        }
+                        else
                     {
                         missingPartyMembers.Add(id);
                     }

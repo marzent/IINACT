@@ -38,7 +38,7 @@
         "ID": 260,
         "Name":  "InCombat",
         "Source": "OverlayPlugin",
-        "Version": 1,
+        "Version": 2,
         "Comment": "Combat beginning / ending"
     },
     {

@@ -93,6 +93,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                     IsCasting2 = mem.IsCasting2,
                     CastBuffID = mem.CastBuffID,
                     CastTargetID = mem.CastTargetID,
+                    // Y and Z are deliberately swapped to match FFXIV_ACT_Plugin's data model
+                    CastGroundTargetX = mem.CastGroundTargetX,
+                    CastGroundTargetY = mem.CastGroundTargetZ,
+                    CastGroundTargetZ = mem.CastGroundTargetY,
                     CastDurationCurrent = mem.CastDurationCurrent,
                     CastDurationMax = mem.CastDurationMax,
 
@@ -235,6 +239,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
             [FieldOffset(0x1CF0)]
             public uint CastTargetID;
+            
+            [FieldOffset(0x1D00)]
+            public float CastGroundTargetX;
+
+            [FieldOffset(0x1D04)]
+            public float CastGroundTargetY;
+
+            [FieldOffset(0x1D08)]
+            public float CastGroundTargetZ;
 
             [FieldOffset(0x1DF4)]
             public float CastDurationCurrent;

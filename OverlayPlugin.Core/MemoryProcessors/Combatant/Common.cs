@@ -148,6 +148,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         public byte IsCasting2;
         public uint CastBuffID;
         public uint CastTargetID;
+        public float CastGroundTargetX;
+        public float CastGroundTargetY;
+        public float CastGroundTargetZ;
         public float CastDurationCurrent;
         public float CastDurationMax;
 

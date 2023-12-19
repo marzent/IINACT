@@ -117,6 +117,8 @@ public class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
+        Machina.FFXIV.Dalamud.DalamudClient.GetDate1970 = () => serverTimeProcessor.Date1970;
+        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => serverTimeProcessor.ServerTime;
 
         cancellationTokenSource = new CancellationTokenSource();
         scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))
@@ -260,7 +262,6 @@ public class FfxivActPluginWrapper : IDisposable
     private void ServerTimeRefresh()
     {
         serverTimeProcessor.Refresh();
-        // Machina.FFXIV.Dalamud.DalamudClient.ServerTime = serverTimeProcessor.ServerTime;
     }
 
     private unsafe void MobDataRefresh(IFramework _)

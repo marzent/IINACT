@@ -3,9 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
@@ -27,7 +25,7 @@ using ACTWrapper = FFXIV_ACT_Plugin.Common.ACTWrapper;
 
 namespace IINACT;
 
-public class FfxivActPluginWrapper : IDisposable
+public partial class FfxivActPluginWrapper : IDisposable
 {
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
@@ -264,6 +262,9 @@ public class FfxivActPluginWrapper : IDisposable
         serverTimeProcessor.Refresh();
     }
 
+    [LibraryImport("SafeMemoryReader.dll")]
+    private static partial int ReadMemory(nint dest, nint src, int size);
+
     private unsafe void MobDataRefresh(IFramework _)
     {
         if (settingsMediator.DataCollectionSettings == null)
@@ -292,7 +293,7 @@ public class FfxivActPluginWrapper : IDisposable
             return;
         }
 
-        Buffer.MemoryCopy((void*)*mobArrayAddress, mobDataOffsets[0].ToPointer(), combatantSize, combatantSize);
+        ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize);
         mobArray[0] = mobDataOffsets[0];
 
         for (var i = 1; i < mobArraySize; i++)
@@ -302,7 +303,7 @@ public class FfxivActPluginWrapper : IDisposable
                 mobArray[i] = nint.Zero;
                 continue;
             }
-            Buffer.MemoryCopy((void*)*(mobArrayAddress + i), mobDataOffsets[i].ToPointer(), combatantSize, combatantSize);
+            ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize);
             mobArray[i] = mobDataOffsets[i];
         }
 

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -298,20 +298,23 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public abstract JObject GetJobSpecificData(EntityJob job);
         internal abstract EntityData GetEntityData(IntPtr entity_ptr);
         public abstract EntityData GetSelfData();
-        
-        [LibraryImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool IsBadReadPtr(IntPtr lp, ulong ucb);
+
+        [LibraryImport("SafeMemoryReader.dll")]
+        private static partial int ReadMemory(nint dest, nint src, int size);
 
         /// Reads |count| bytes at |addr| in the |process_|. Returns null on error.
-        internal byte[] Read8(IntPtr addr, int count)
+        internal unsafe byte[] Read8(IntPtr addr, int count)
         {
             var data = new byte[count];
-            if (IsBadReadPtr(addr, (ulong)count))
-                return null;
-            Marshal.Copy(addr, data, 0, count);
-            return data;
+
+            fixed (byte* dataPtr = data)
+            {
+                var result = ReadMemory((nint)dataPtr, addr, count);
+                if (result != 0) return null;
             }
+
+            return data;
+        }
 
         /// Reads |addr| in the |process_| and returns it as a 16bit ints. Returns null on error.
         internal Int16[] Read16(IntPtr addr, int count)
@@ -376,7 +379,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// Reads |addr| in the |process_| and returns it as a 64bit pointer. Returns 0 on error.
         internal unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            return IsBadReadPtr(addr, 8) ? 0 : new IntPtr(*(long*)addr);
+            var buffer = Read8(addr, 8);
+            if (buffer == null)
+                return IntPtr.Zero;
+            return new IntPtr(BitConverter.ToInt64(buffer, 0));
         }
 
         /// <summary>

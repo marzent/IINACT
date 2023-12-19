@@ -63,8 +63,8 @@ public class MainWindow : Window, IDisposable
         ImGui.TextColored(ImGuiColors.DalamudGrey, "Overlay URI generator:");
 
         var comboWidth = ImGui.GetWindowWidth() * 0.8f;
-
-        var selectedOverlayName = OverlayNames?[selectedOverlayIndex] ?? "";
+        
+        var selectedOverlayName = Plugin.Configuration.SelectedOverlay ?? OverlayNames?[selectedOverlayIndex] ?? "";
         ImGui.SetNextItemWidth(comboWidth);
         if (ImGui.BeginCombo("Overlay", selectedOverlayName))
         {
@@ -72,7 +72,11 @@ public class MainWindow : Window, IDisposable
             {
                 var currentOverlayName = OverlayNames?[i] ?? "";
                 if (ImGui.Selectable(currentOverlayName, currentOverlayName == selectedOverlayName))
+                {
                     selectedOverlayIndex = i;
+                    Plugin.Configuration.SelectedOverlay = currentOverlayName;
+                    Plugin.Configuration.Save();
+                }
             }
 
             ImGui.EndCombo();

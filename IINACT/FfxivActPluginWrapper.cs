@@ -115,7 +115,6 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
-        Machina.FFXIV.Dalamud.DalamudClient.GetDate1970 = () => serverTimeProcessor.Date1970;
         Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => serverTimeProcessor.ServerTime;
 
         cancellationTokenSource = new CancellationTokenSource();

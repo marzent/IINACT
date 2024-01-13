@@ -64,16 +64,20 @@ public class MainWindow : Window, IDisposable
 
         var comboWidth = ImGui.GetWindowWidth() * 0.8f;
         
-        var selectedOverlayName = Plugin.Configuration.SelectedOverlay ?? OverlayNames?[selectedOverlayIndex] ?? "";
+        var selectedIndexOverlayName = OverlayNames?[selectedOverlayIndex] ?? "";
+        var selectedOverlayName = Plugin.Configuration.SelectedOverlay ?? selectedIndexOverlayName;
+        if (selectedOverlayName != selectedIndexOverlayName)
+            for (var i = 0; i < OverlayNames?.Length; i++)
+                if (OverlayNames?[i] == selectedOverlayName) 
+                    selectedOverlayIndex = i;
+        
         ImGui.SetNextItemWidth(comboWidth);
         if (ImGui.BeginCombo("Overlay", selectedOverlayName))
         {
             for (var i = 0; i < OverlayNames?.Length; i++)
             {
                 var currentOverlayName = OverlayNames?[i] ?? "";
-                var selected = currentOverlayName == selectedOverlayName;
-                if (selected) selectedOverlayIndex = i;
-                if (ImGui.Selectable(currentOverlayName, selected))
+                if (ImGui.Selectable(currentOverlayName, currentOverlayName == selectedOverlayName))
                 {
                     selectedOverlayIndex = i;
                     Plugin.Configuration.SelectedOverlay = currentOverlayName;

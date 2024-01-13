@@ -71,7 +71,9 @@ public class MainWindow : Window, IDisposable
             for (var i = 0; i < OverlayNames?.Length; i++)
             {
                 var currentOverlayName = OverlayNames?[i] ?? "";
-                if (ImGui.Selectable(currentOverlayName, currentOverlayName == selectedOverlayName))
+                var selected = currentOverlayName == selectedOverlayName;
+                if (selected) selectedOverlayIndex = i;
+                if (ImGui.Selectable(currentOverlayName, selected))
                 {
                     selectedOverlayIndex = i;
                     Plugin.Configuration.SelectedOverlay = currentOverlayName;

@@ -3,34 +3,34 @@
 // For more information, see comments on https://github.com/OverlayPlugin/OverlayPlugin/issues/235
 {
     // CN region
-    "2023.09.06.0000.0000": {
-        // Version: 6.4
+    "2023.12.07.0000.0000": {
+        // Version: 6.45 Hotfix
         "MapEffect": {
-            "opcode": 286,
+            "opcode": 888,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 847,
+            "opcode": 866,
             "size": 16
         },
         "RSVData": {
-            "opcode": 364,
+            "opcode": 582,
             "size": 1080
         }
     },
     // Global region
-    "2023.11.09.0000.0000": {
-        // Version: 6.51 Hotfix
+    "2024.01.06.0000.0000": {
+        // Version: 6.55
         "MapEffect": {
-            "opcode": 581,
+            "opcode": 544,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 907,
+            "opcode": 414,
             "size": 16
         },
         "RSVData": {
-            "opcode": 653,
+            "opcode": 806,
             "size": 1080
         }
     },

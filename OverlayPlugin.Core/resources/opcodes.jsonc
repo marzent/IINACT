@@ -19,34 +19,34 @@
         }
     },
     // Global region
-    "2024.01.06.0000.0000": {
-        // Version: 6.55
+    "2024.02.05.0000.0000": {
+        // Version: 6.57
         "MapEffect": {
-            "opcode": 544,
+            "opcode": 141,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 414,
+            "opcode": 984,
             "size": 16
         },
         "RSVData": {
-            "opcode": 806,
+            "opcode": 625,
             "size": 1080
         }
     },
     // KR region
-    "2023.11.01.0000.0000":{
-        // Version: 6.40 Hotfix
+    "2023.12.18.0000.0000":{
+        // Version: 6.45
         "MapEffect": {
-            "opcode": 217,
+            "opcode": 978,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 398,
+            "opcode": 540,
             "size": 16
         },
         "RSVData": {
-            "opcode": 199,
+            "opcode": 168,
             "size": 1080
         }
     }

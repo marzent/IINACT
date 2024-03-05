@@ -1,511 +1,97 @@
 {
-    "2022.05.27.0000.0000": {
+    // CN region
+    "2024.02.21.0000.0000": {
+        // Version: 6.5
         "MapEffect": {
-            "opcode": 736,
-            "size": 11
-        }
-    },
-    "2022.06.21.0000.0000": {
-        "MapEffect": {
-            "opcode": 635,
-            "size": 11
-        }
-    },
-    "2022.07.08.0000.0000": {
-        "MapEffect": {
-            "opcode": 123,
-            "size": 11
-        }
-    },
-    "2022.08.17.0000.0000": {
-        "MapEffect": {
-            "opcode": 405,
-            "size": 11
-        }
-    },
-    "2022.08.20.0000.0000": {
-        // Region CN
-        // Version 6.11
-        "MapEffect": {
-            "opcode": 154,
+            "opcode": 939,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 854,
-            "size": 16
-        }
-    },
-    "2022.08.25.0000.0000": {
-        "MapEffect": {
-            "opcode": 586,
-            "size": 11
-        }
-    },
-    "2022.09.07.0000.0000": {
-        // Region: Global
-        // Version: 6.21
-        "MapEffect": {
-            "opcode": 822,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 750,
-            "size": 16
-        }
-    },
-    "2022.09.15.0000.0000": {
-        // Region: KR
-        // Version: 6.1
-        "MapEffect": {
-            "opcode": 750,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 567,
-            "size": 16
-        }
-    },
-    "2022.09.28.0000.0000": {
-        // Region CN
-        // Version 6.15
-        "MapEffect": {
-            "opcode": 943,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 209,
-            "size": 16
-        }
-    },
-    "2022.10.05.0000.0000": {
-        // Region: Global
-        // Version: 6.25
-        "MapEffect": {
-            "opcode": 421,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 507,
-            "size": 16
-        }
-    },
-    "2022.10.14.0000.0000": {
-        // Region: KR
-        // Version: 6.11
-        "MapEffect": {
-            "opcode": 266,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 872,
-            "size": 16
-        }
-    },
-    "2022.10.26.0000.0000": {
-        // Region: Global
-        // Version: 6.28
-        "MapEffect": {
-            "opcode": 403,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 396,
-            "size": 16
-        }
-    },
-    "2022.11.01.0000.0000": {
-        // Region CN
-        // Version 6.18
-        "MapEffect": {
-            "opcode": 443,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 410,
-            "size": 16
-        }
-    },
-    "2022.11.09.0000.0000": {
-        // Region: Global
-        // Version: 6.28 Hotfix
-        "MapEffect": {
-            "opcode": 268,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 603,
-            "size": 16
-        }
-    },
-    "2022.11.10.0000.0000": {
-        // Region: KR
-        // Version: 6.15
-        "MapEffect": {
-            "opcode": 300,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 799,
-            "size": 16
-        }
-    },
-    "2022.12.07.0000.0000": {
-        // Region: CN
-        // Version: 6.2
-        "MapEffect": {
-            "opcode": 777,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 140,
-            "size": 16
-        }
-    },
-    "2022.12.09.0000.0000": {
-        // Region: KR
-        // Version: 6.18
-        "MapEffect": {
-            "opcode": 698,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 904,
-            "size": 16
-        }
-    },
-    "2022.12.23.0000.0000": {
-        // Region: Global
-        // Version: 6.3
-        "MapEffect": {
-            "opcode": 548,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 617,
-            "size": 16
-        }
-    },
-    "2023.01.11.0000.0000": {
-        // Region: Global
-        // Version: 6.3 Hotfix
-        "MapEffect": {
-            "opcode": 718,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 184,
-            "size": 16
-        }
-    },
-    "2023.01.17.0000.0000": {
-        // Region: Global
-        // Version: 6.31
-        "MapEffect": {
-            "opcode": 729,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 275,
+            "opcode": 208,
             "size": 16
         },
         "RSVData": {
-            "opcode": 631,
+            "opcode": 496,
             "size": 1080
-        }
-    },
-    "2023.01.25.0000.0000": {
-        // Region: CN
-        // Version: 6.2 Hotfix
-        "MapEffect": {
-            "opcode": 587,
-            "size": 11
         },
-        "CEDirector": {
-            "opcode": 228,
+        "NpcYell": {
+            "opcode": 578,
+            "size": 32
+        },
+        "BattleTalk2": {
+            "opcode": 436,
+            "size": 40
+        },
+        "Countdown": {
+            "opcode": 935,
+            "size": 48
+        },
+        "CountdownCancel": {
+            "opcode": 559,
+            "size": 40
+        },
+        "ActorMove": {
+            "opcode": 547,
             "size": 16
+        },
+        "ActorSetPos": {
+            "opcode": 792,
+            "size": 24
         }
     },
-    "2023.02.01.0000.0000": {
-        // Region: KR
-        // Version: 6.2
+    // Global region
+    "2024.02.05.0000.0000": {
+        // Version: 6.57
         "MapEffect": {
-            "opcode": 762,
+            "opcode": 141,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 949,
-            "size": 16
-        }
-    },
-    "2023.02.03.0000.0000": {
-        // Region: Global
-        // Version: 6.31 Hotfix
-        "MapEffect": {
-            "opcode": 239,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 112,
-            "size": 16
-        }
-    },
-    "2023.02.16.0000.0000": {
-        // Region: CN
-        // Version: 6.25
-        "MapEffect": {
-            "opcode": 307,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 925,
-            "size": 16
-        }
-    },
-    "2023.02.28.0000.0000": {
-        // Region: Global
-        // Version: 6.35
-        "MapEffect": {
-            "opcode": 294,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 647,
-            "size": 16
-        }
-    },
-    "2023.03.24.0000.0000": {
-        // Region: Global
-        // Version: 6.38
-        "MapEffect": {
-            "opcode": 280,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 685,
+            "opcode": 984,
             "size": 16
         },
         "RSVData": {
-            "opcode": 239,
+            "opcode": 625,
             "size": 1080
-        }
-    },
-    "2023.03.30.0000.0000": {
-        // Region: KR
-        // Version: 6.25
-        "MapEffect": {
-            "opcode": 744,
-            "size": 11
         },
-        "CEDirector": {
-            "opcode": 869,
-            "size": 16
-        }
-    },
-    "2023.04.21.0000.0000": {
-        // Region: CN
-        // Version: 6.3
-        "MapEffect": {
-            "opcode": 581,
-            "size": 11
+        "NpcYell": {
+            "opcode": 101,
+            "size": 32
         },
-        "CEDirector": {
-            "opcode": 569,
+        "BattleTalk2": {
+            "opcode": 475,
+            "size": 40
+        },
+        "Countdown": {
+            "opcode": 928,
+            "size": 48
+        },
+        "CountdownCancel": {
+            "opcode": 322,
+            "size": 40
+        },
+        "ActorMove": {
+            "opcode": 845,
             "size": 16
         },
-        "RSVData": {
-            "opcode": 642,
-            "size": 1080
+        "ActorSetPos": {
+            "opcode": 174,
+            "size": 24
         }
     },
-    "2023.05.18.0000.0000": {
-        // Region: Global
-        // Version: 6.40
-        "MapEffect": {
-            "opcode": 264,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 474,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 477,
-            "size": 1080
-        }
-    },
-    "2023.05.26.0000.0000": {
-        // Region: CN
-        // Version: 6.31
-        "MapEffect": {
-            "opcode": 539,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 974,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 651,
-            "size": 1080
-        }
-    },
-    "2023.05.31.0000.0000": {
-        // Region: Global
-        // Version: 6.40 Hotfix
-        "MapEffect": {
-            "opcode": 249,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 878,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 430,
-            "size": 1080
-        }
-    },
-    "2023.06.02.0000.0000": {
-        // Region: KR
-        // Version: 6.3
-        "MapEffect": {
-            "opcode": 629,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 777,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 115,
-            "size": 1080
-        }
-    },
-    "2023.06.14.0000.0000": {
-        // Region: Global
-        // Version: 6.41
-        "MapEffect": {
-            "opcode": 736,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 392,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 142,
-            "size": 1080
-        }
-    },
-    "2023.06.28.0000.0000": {
-        // Region: CN
-        // Version: 6.35
-        "MapEffect": {
-            "opcode": 782,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 998,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 783,
-            "size": 1080
-        }
-    },
-    "2023.07.06.0000.0000": {
-        // Region: Global
+    // KR region
+    "2023.12.18.0000.0000": {
         // Version: 6.45
         "MapEffect": {
-            "opcode": 671,
+            "opcode": 978,
             "size": 11
         },
         "CEDirector": {
-            "opcode": 482,
+            "opcode": 540,
             "size": 16
         },
         "RSVData": {
-            "opcode": 970,
-            "size": 1080
-        }
-    },
-    "2023.07.07.0000.0000": {
-        // Region: KR
-        // Version: 6.31
-        "MapEffect": {
-            "opcode": 697,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 391,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 361,
-            "size": 1080
-        }
-    },
-    "2023.07.22.0000.0000": {
-        // Region: CN
-        // Version: 6.38
-        "MapEffect": {
-            "opcode": 205,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 104,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 456,
-            "size": 1080
-        }
-    },
-    "2023.07.26.0000.0000": {
-        // Region: Global
-        // Version: 6.48
-        "MapEffect": {
-            "opcode": 311,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 327,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 530,
-            "size": 1080
-        }
-    },
-    "2023.08.03.0000.0000": {
-        // Region: KR
-        // Version: 6.35
-        "MapEffect": {
-            "opcode": 435,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 601,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 458,
-            "size": 1080
-        }
-    },
-    "2023.09.06.0000.0000": {
-        // Region: CN
-        // Version: 6.4
-        "MapEffect": {
-            "opcode": 286,
-            "size": 11
-        },
-        "CEDirector": {
-            "opcode": 847,
-            "size": 16
-        },
-        "RSVData": {
-            "opcode": 364,
+            "opcode": 168,
             "size": 1080
         }
     }

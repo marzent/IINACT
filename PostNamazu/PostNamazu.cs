@@ -1,4 +1,5 @@
 using Advanced_Combat_Tracker;
+using Dalamud.Plugin.Services;
 using PostNamazu.Attributes;
 using PostNamazu.Common;
 using System;
@@ -17,9 +18,9 @@ namespace PostNamazu
 {
 	public class PostNamazu 
 	{
-        public static Dalamud.Game.Command.CommandManager commandManager;
+        public static ICommandManager commandManager;
 
-        public PostNamazu(Dalamud.Game.Command.CommandManager com)
+        public PostNamazu(ICommandManager com)
 		{
 			var process = Process.GetProcessesByName("ffxiv_dx11")[0];
             commandManager = com;

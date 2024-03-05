@@ -17,7 +17,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,11 +27,11 @@
 
   <ItemGroup>
     <Reference Include="Dalamud">
-      <HintPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
+      <HintPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
         <Private>False</Private>
     </Reference>
     <Reference Include="FFXIVClientStructs">
-      <HintPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+      <HintPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
         <Private>False</Private>
     </Reference>
     <Reference Include="FFXIV_ACT_Plugin">
@@ -67,11 +67,11 @@
 		<Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
-      <HintPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
+      <HintPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
         <Private>False</Private>
     </Reference>
     <Reference Include="ImGuiScene">
-      <HintPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
+      <HintPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
         <Private>False</Private>
     </Reference>
   </ItemGroup>

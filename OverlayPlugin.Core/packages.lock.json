@@ -10,9 +10,9 @@
       },
       "NetCoreServer": {
         "type": "Direct",
-        "requested": "[6.7.0, )",
-        "resolved": "6.7.0",
-        "contentHash": "chLd65iEmnD2n+H/Kv6ZR9QrDvCE045t8+LHK5enNq26iPXFkg45mJb3YZVFZuH5QHgv/7Fd63LB0MIn24bwEA=="
+        "requested": "[7.0.0, )",
+        "resolved": "7.0.0",
+        "contentHash": "5RFgorlI297p25MTM5j0omCqoyddLWTwuJnpK7F0ytMJ4cL80vYaJ3C+C1Kticrc0LnY0j/w9mirLju6KJW20w=="
       },
       "System.Data.DataSetExtensions": {
         "type": "Direct",

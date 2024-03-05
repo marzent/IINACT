@@ -97,8 +97,8 @@ public class FetchDependencies
         {
             using var plugin = new TargetAssembly(dllPath);
 
-            if (!plugin.ApiVersionMatches())
-                return true;
+            //if (!plugin.ApiVersionMatches())
+            //    return true;
 
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             string remoteVersionString="";

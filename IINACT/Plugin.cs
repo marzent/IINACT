@@ -7,6 +7,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using FFXIV_ACT_Plugin.Logfile;
 using IINACT.Windows;
@@ -60,8 +61,9 @@ public sealed class Plugin : IDalamudPlugin
         FileDialogManager = new FileDialogManager();
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = DalamudApi.Network;
 
+        HttpClient = new HttpClient();
         var fetchDeps = new FetchDependencies.FetchDependencies(
-            DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, Util.HttpClient, DalamudApi.ClientState.ClientLanguage);
+            DalamudApi.PluginInterface.AssemblyLocation.Directory!.FullName, HttpClient, DalamudApi.ClientState.ClientLanguage);
         
         fetchDeps.GetFfxivPlugin();
         
@@ -85,12 +87,12 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         DalamudApi.Framework.Update += Updata;
-        onUpdateInputUIHook= Hook<OnUpdateInputUI>.FromAddress(
+        onUpdateInputUIHook= DalamudApi.Hook.HookFromAddress<OnUpdateInputUI>(
                     DalamudApi.SigScanner.ScanText("4C 8B DC 53 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 83 B9"), OnUpdateInputUIDo);
         onUpdateInputUIHook.Enable();
-        this.replayZonePacketDownHook = Hook<ReplayZonePacketDownDelegate>.FromAddress(DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 80 BB ?? ?? ?? ?? ?? 77 93"), ReplayZonePacketDownDetour);
+        this.replayZonePacketDownHook = DalamudApi.Hook.HookFromAddress<ReplayZonePacketDownDelegate>(DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 80 BB ?? ?? ?? ?? ?? 77 93"), ReplayZonePacketDownDetour);
         replayZonePacketDownHook.Enable();
-        UpdatePartyHook = Hook<UpdateParty>.FromAddress(DalamudApi.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ??"), UpdatePartyDetor);
+        UpdatePartyHook = DalamudApi.Hook.HookFromAddress<UpdateParty>(DalamudApi.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ??"), UpdatePartyDetor);
         UpdatePartyHook.Enable();
         this.NextClick = DateTime.Now;
         DalamudApi.Commands.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
@@ -156,7 +158,7 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    private void Updata(Framework framework)
+    private void Updata(IFramework framework)
     {
 
     }

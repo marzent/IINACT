@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <DalamudLibPath>C:\Users\Administrator\AppData\Roaming\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 

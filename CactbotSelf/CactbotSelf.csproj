@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="H.Pipes" Version="2.0.47" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="H.Pipes" Version="2.0.59" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,7 +60,7 @@
 		<Private>False</Private>
     </Reference>
     <Reference Include="Iced">
-      <HintPath>E:\Dalamud\addon\Hooks\dev\Iced.dll</HintPath>
+      <HintPath>E:\Dalamud\XIVLauncher\addon\Hooks\dev\Iced.dll</HintPath>
         <Private>False</Private>
     </Reference>
   </ItemGroup>

@@ -4,14 +4,21 @@ namespace FetchDependencies;
 
 public class FetchDependencies
 {
+    private const string VersionUrlGlobal = "https://www.iinact.com/updater/version";
+    private const string VersionUrlChinese = "https://cninact.diemoe.net/CN解析/版本.txt";
+    private const string PluginUrlGlobal = "https://www.iinact.com/updater/download";
+    private const string PluginUrlChinese = "https://cninact.diemoe.net/CN解析/FFXIV_ACT_Plugin.dll";
+
     private Version PluginVersion { get; }
     private string DependenciesDir { get; }
+    private bool IsChinese { get; }
     private HttpClient HttpClient { get; }
 
-    public FetchDependencies(Version version, string assemblyDir, HttpClient httpClient)
+    public FetchDependencies(Version version, string assemblyDir, bool isChinese, HttpClient httpClient)
     {
         PluginVersion = version;
         DependenciesDir = assemblyDir;
+        IsChinese = isChinese;
         HttpClient = httpClient;
     }
 
@@ -23,21 +30,24 @@ public class FetchDependencies
         if (!NeedsUpdate(pluginPath))
             return;
 
-        if (!File.Exists(pluginZipPath))
-            DownloadPlugin(pluginZipPath);
-
-        try
+        if (IsChinese)
+            DownloadFile(PluginUrlChinese, pluginPath);
+        else
         {
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
-        }
-        catch (InvalidDataException) 
-        {
+            if (!File.Exists(pluginZipPath))
+                DownloadFile(PluginUrlGlobal, pluginZipPath);
+            try
+            {
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
+            catch (InvalidDataException)
+            {
+                File.Delete(pluginZipPath);
+                DownloadFile(PluginUrlGlobal, pluginZipPath);
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
             File.Delete(pluginZipPath);
-            DownloadPlugin(pluginZipPath);
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
-
-        File.Delete(pluginZipPath);
 
         var patcher = new Patcher(PluginVersion, DependenciesDir);
         patcher.MainPlugin();
@@ -57,7 +67,7 @@ public class FetchDependencies
             
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             var remoteVersionString = HttpClient
-                                      .GetStringAsync("https://www.iinact.com/updater/version",
+                                      .GetStringAsync(IsChinese ? VersionUrlChinese : VersionUrlGlobal,
                                                       cancelAfterDelay.Token).Result;
             var remoteVersion = new Version(remoteVersionString);
             return remoteVersion > plugin.Version;
@@ -68,11 +78,11 @@ public class FetchDependencies
         }
     }
 
-    private void DownloadPlugin(string path)
+    private void DownloadFile(string url, string path)
     {
         using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         using var downloadStream = HttpClient
-                                   .GetStreamAsync("https://www.iinact.com/updater/download",
+                                   .GetStreamAsync(url,
                                                    cancelAfterDelay.Token).Result;
         using var zipFileStream = new FileStream(path, FileMode.Create);
         downloadStream.CopyTo(zipFileStream);

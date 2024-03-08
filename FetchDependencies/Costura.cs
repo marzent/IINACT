@@ -7,7 +7,7 @@ internal static class Costura
 {
     public static bool CheckForPlugin(string name)
     {
-        return name.Contains("act");
+        return name.Contains("act") || name.Contains("machina");
     }
 
     public static string Fix(string name)
@@ -16,6 +16,8 @@ internal static class Costura
             return "FFXIV_ACT_" + name.Substring(18, name.Length - 33).ToTitleCase() + ".dll";
         if (name.Contains("machina.ffxiv"))
             return "Machina.FFXIV.dll";
+        if (name.Contains("machina"))
+            return "Machina.dll";
         return name.Substring(8, name.Length - 23).ToTitleCase() + ".dll";
     }
 

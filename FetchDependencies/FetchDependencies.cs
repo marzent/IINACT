@@ -43,6 +43,7 @@ public class FetchDependencies
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();
+        patcher.MachinaFFXIV();
     }
 
     private bool NeedsUpdate(string dllPath)

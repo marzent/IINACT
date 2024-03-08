@@ -70,10 +70,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
-        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
-        <ProjectReference Include="..\machina\Machina\Machina.csproj" />
         <ProjectReference Include="..\NotACT\NotACT.csproj" />
         <ProjectReference Include="..\OverlayPlugin.Core\OverlayPlugin.Core.csproj" />
+        <ProjectReference Include="..\Machina.FFXIV.Dalamud\Machina.FFXIV.Dalamud.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -107,6 +106,14 @@
         </Reference>
         <Reference Include="FFXIV_ACT_Plugin.Resource">
             <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Resource.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Machina">
+            <HintPath>..\external_dependencies\SDK\Machina.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Machina.FFXIV">
+            <HintPath>..\external_dependencies\SDK\Machina.FFXIV.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

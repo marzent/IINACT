@@ -56,8 +56,6 @@
         <EmbeddedResource Include="resources\reserved_log_lines.json" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
-        <ProjectReference Include="..\machina\Machina\Machina.csproj" />
         <ProjectReference Include="..\OverlayPlugin.Common\OverlayPlugin.Common.csproj" />
     </ItemGroup>
     <ItemGroup>
@@ -77,6 +75,14 @@
         </Reference>
         <Reference Include="FFXIV_ACT_Plugin.Logfile">
             <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
+        </Reference>
+        <Reference Include="Machina">
+            <HintPath>..\external_dependencies\SDK\Machina.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Machina.FFXIV">
+            <HintPath>..\external_dependencies\SDK\Machina.FFXIV.dll</HintPath>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
     <ItemGroup>

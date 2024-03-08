@@ -13,10 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OverlayPlugin.Core", "Overl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FetchDependencies", "FetchDependencies\FetchDependencies.csproj", "{4EDF0EAF-0BC8-40CB-A2D1-F4A207770002}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina", "machina\Machina\Machina.csproj", "{38F9CA44-D795-4F78-8DFC-5D555CDEC4F5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina.FFXIV", "machina\Machina.FFXIV\Machina.FFXIV.csproj", "{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

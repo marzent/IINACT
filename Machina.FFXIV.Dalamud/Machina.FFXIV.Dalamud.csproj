@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -16,6 +15,7 @@
     <PropertyGroup>
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
@@ -34,22 +34,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Mono.Cecil">
-            <HintPath>$(DalamudLibPath)Mono.Cecil.dll</HintPath>
-            <Private>false</Private>
+        <Reference Include="Machina">
+            <HintPath>..\external_dependencies\SDK\Machina.dll</HintPath>
+            <Private>False</Private>
         </Reference>
-        <Reference Include="Mono.Cecil.Mdb">
-            <HintPath>$(DalamudLibPath)Mono.Cecil.Mdb.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Mono.Cecil.Pdb">
-            <HintPath>$(DalamudLibPath)Mono.Cecil.Pdb.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Mono.Cecil.Rocks">
-            <HintPath>$(DalamudLibPath)Mono.Cecil.Rocks.dll</HintPath>
-            <Private>false</Private>
+        <Reference Include="Machina.FFXIV">
+            <HintPath>..\external_dependencies\SDK\Machina.FFXIV.dll</HintPath>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
-
 </Project>

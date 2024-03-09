@@ -196,4 +196,112 @@ internal class Patcher
         
         memory.WriteOut();
     }
+
+    public void MachinaFFXIV()
+    {
+        var machinaDalamud = new TargetAssembly(Path.Combine(WorkPath, "Machina.FFXIV.Dalamud.dll"));
+
+        var machina = new TargetAssembly(Path.Combine(WorkPath, "Machina.FFXIV.dll"));
+        machina.RemoveStrongNaming();
+
+        // For the Machina library, we want to replace all usages of `DeucalionClient` with our reimplemented
+        // `NotDeucalionClient`. That class is used only in `Machina.FFXIV.FFXIVNetworkMonitor` class. So we need
+        // to do the following modifications:
+        //
+        // 1. Replace its private member `_deucalionClient`'s type.
+        // 2. In its every method:
+        //   - Replace all its `ldfld` and `stfld` instructions of the current class's `_deucalionClient` member.
+        //   - Replace all its `ldfld` and `stfld` instructions of `DeucalionClient`'s members with `NotDeucalionClient`'s
+        //     corresponding members. Thay have the same names and types, so we can just replace the type references.
+        //   - Replace all its `newobj` and `call*` instructions of `DeucalionClient`'s methods with `NotDeucalionClient`'s
+        //     corresponding methods.
+        //   - To prevent the Deucalion library from being really injected, replace all its `call*` instructions that to
+        //     class `DeucalionInjector` with `NotDeucalionInjector`.
+        // 3. Safely remove the `DeucalionClient` and `DeucalionInjector` classes from the Machina library.
+
+        var oldClientFullName = "Machina.FFXIV.Deucalion.DeucalionClient";
+        var newClientFullName = "Machina.FFXIV.Dalamud.NotDeucalionClient";
+        var oldClientDefiniton = machina.Assembly.MainModule.Types.First(type => type.FullName == oldClientFullName);
+        var newClientDefiniton = machinaDalamud.Assembly.MainModule.Types.First(type => type.FullName == newClientFullName);
+
+        var oldInjectorFullName = "Machina.FFXIV.Deucalion.DeucalionInjector";
+        var newInjectorFullName = "Machina.FFXIV.Dalamud.NotDeucalionInjector";
+        var oldInjectorDefiniton = machina.Assembly.MainModule.Types.First(type => type.FullName == oldInjectorFullName);
+        var newInjectorDefiniton = machinaDalamud.Assembly.MainModule.Types.First(type => type.FullName == newInjectorFullName);
+
+        // For method replacements, also replace for the nested types of `DeucalionClient`.
+        // (i.e. `MessageReceivedHandler` / `MessageSentHandler` delegates)
+        var typeReplacements = new Dictionary<string, TypeDefinition>
+        {
+            {oldClientFullName, newClientDefiniton},
+            {oldInjectorFullName, newInjectorDefiniton},
+        };
+        foreach (var nestedType in oldClientDefiniton.NestedTypes)
+        {
+            var target = newClientDefiniton.NestedTypes.FirstOrDefault(
+                type => type.Name == nestedType.Name);
+            if (target != null)
+                typeReplacements[nestedType.FullName] = target;
+        }
+
+        // Get the `FFXIVNetworkMonitor` class.
+        var ffxivNetworkMonitor = machina.Assembly.MainModule.Types.First(type =>
+            type.FullName == "Machina.FFXIV.FFXIVNetworkMonitor");
+
+        {
+            // Step 1 - Replace its private member `_deucalionClient`'s type.
+            var deucalionClientField = ffxivNetworkMonitor.Fields.First(field => field.Name == "_deucalionClient");
+            deucalionClientField.FieldType = machina.Assembly.MainModule.ImportReference(newClientDefiniton);
+        }
+        {
+            // Step 2
+            foreach (var method in ffxivNetworkMonitor.Methods)
+            {
+                foreach (var instruction in method.Body.Instructions)
+                {
+                    if (instruction.OpCode == OpCodes.Newobj ||
+                        instruction.OpCode == OpCodes.Call ||
+                        instruction.OpCode == OpCodes.Calli ||
+                        instruction.OpCode == OpCodes.Callvirt)
+                    {
+                        var methodReference = (MethodReference)instruction.Operand;
+                        foreach (var (oldType, newType) in typeReplacements)
+                        {
+                            if (methodReference.DeclaringType.FullName == oldType)
+                            {
+                                var newMethodDefinition = newType.Methods.FirstOrDefault(m =>
+                                    m.Name == methodReference.Name && m.Parameters.Count == methodReference.Parameters.Count);
+                                if (newMethodDefinition != null)
+                                    instruction.Operand = machina.Assembly.MainModule.ImportReference(newMethodDefinition);
+                                else
+                                {
+                                    Dalamud.Logging.PluginLog.LogError($"[Patcher] Could not find method {methodReference.Name} in {newType.FullName}");
+                                }
+                            }
+                        }
+                    }
+                    else if (instruction.OpCode == OpCodes.Ldfld || instruction.OpCode == OpCodes.Stfld)
+                    {
+                        var fieldReference = (FieldReference)instruction.Operand;
+                        if (fieldReference.DeclaringType.FullName == ffxivNetworkMonitor.FullName &&
+                            fieldReference.FieldType.FullName == oldClientFullName)
+                        {
+                            fieldReference.FieldType = machina.Assembly.MainModule.ImportReference(newClientDefiniton);
+                        }
+                        else if (fieldReference.DeclaringType.FullName == oldClientFullName)
+                        {
+                            var newFieldDefiniton = newClientDefiniton.Fields.First(f => f.Name == fieldReference.Name);
+                            instruction.Operand = machina.Assembly.MainModule.ImportReference(newFieldDefiniton);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step 3 - Remove the unused classes.
+        machina.Assembly.MainModule.Types.Remove(oldClientDefiniton);
+        machina.Assembly.MainModule.Types.Remove(oldInjectorDefiniton);
+
+        machina.WriteOut();
+    }
 }

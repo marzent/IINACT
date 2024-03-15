@@ -237,7 +237,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             var customLogLines = container.Resolve<FFXIVCustomLogLines>();
             logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
             {
-                Name = "ActorCastExtra",
+                Name = "AbilityExtra",
                 Source = "OverlayPlugin",
                 ID = LogFileLineID,
                 Version = 1,

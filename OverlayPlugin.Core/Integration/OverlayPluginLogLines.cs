@@ -20,6 +20,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             container.Register(new LineInCombat(container));
             container.Register(new LineCombatant(container));
             container.Register(new LineRSV(container));
+            container.Register(new LineActorCastExtra(container));
+            container.Register(new LineAbilityExtra(container));
         }
     }
 

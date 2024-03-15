@@ -56,7 +56,21 @@
         "Comment": "RSV Key/Value data"
     },
     {
-        "StartID": 263,
+        "ID": 263,
+        "Name": "ActorCastExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorCast packets"
+    },
+    {
+        "ID": 264,
+        "Name": "AbilityExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActionEffect packets"
+    },
+    {
+        "StartID": 265,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

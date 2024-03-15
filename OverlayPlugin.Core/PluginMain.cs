@@ -8,6 +8,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Enmity;
 using RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud;
 using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Party;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
@@ -209,6 +210,7 @@ namespace RainbowMage.OverlayPlugin
                     _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
                     _container.Register<IInCombatMemory, InCombatMemoryManager>();
                     _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
+                    _container.Register<IPartyMemory, PartyMemoryManager>();
 
                     _container.Register(new OverlayPluginLogLines(_container));
                     

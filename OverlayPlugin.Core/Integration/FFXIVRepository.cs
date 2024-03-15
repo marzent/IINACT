@@ -77,7 +77,7 @@ namespace RainbowMage.OverlayPlugin
             logger = container.Resolve<ILogger>();
         }
 
-        private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetPluginData()
+        internal static FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetPluginData()
         {
             return ActGlobals.oFormActMain.FfxivPlugin;
         }

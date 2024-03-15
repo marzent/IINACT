@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using FFXIV_ACT_Plugin.Common;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Party;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
 using PluginCombatant = FFXIV_ACT_Plugin.Common.Models.Combatant;
 
@@ -15,9 +16,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 {
     partial class FFXIVRequiredEventSource : EventSourceBase
     {
-        private ReadOnlyCollection<uint> cachedPartyList = null;
-        private List<uint> missingPartyMembers = new List<uint>();
-        private bool ffxivPluginPresent = false;
+        private PartyListsStruct cachedPartyList = new PartyListsStruct();
 
         private static Dictionary<uint, string> StatusMap = new Dictionary<uint, string>
         {
@@ -35,6 +34,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private FFXIVRepository repository;
         private ICombatantMemory combatantMemory;
+        private IPartyMemory partyMemory;
 
         // Event Source
 
@@ -48,6 +48,11 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             if (haveRepository && haveCombatantMemory)
             {
+                if (!container.TryResolve(out partyMemory))
+                {
+                    Log(LogLevel.Error, "Could not construct FFXIVRequiredEventSource: Missing partyMemory");
+                }
+                
                 // These events need to deliver cached values to new subscribers.
                 RegisterCachedEventTypes(new List<string>
                 {
@@ -116,15 +121,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     });
                 });
 
-                try
-                {
-                    InitFFXIVIntegration();
-                }
-                catch (FileNotFoundException)
-                {
-                    // The FFXIV plugin hasn't been loaded.
-                }
-
                 container.Resolve<NetworkParser>().OnOnlineStatusChanged += (o, e) =>
                 {
                     var obj = new JObject();
@@ -136,13 +132,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     DispatchAndCacheEvent(obj);
                 };
             }
-        }
-
-        private void InitFFXIVIntegration()
-        {
-            repository.RegisterPartyChangeDelegate((partyList, partySize) =>
-                                                       DispatchPartyChangeEvent(partyList, partySize));
-            ffxivPluginPresent = true;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -230,6 +219,18 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             return filteredCombatants;
         }
+        
+        public enum PartyType
+        {
+            Solo,
+            Party,
+            AllianceA,
+            AllianceB,
+            AllianceC,
+            AllianceD,
+            AllianceE,
+            AllianceF,
+        }
 
         struct PartyMember
         {
@@ -244,8 +245,17 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             public int level;
 
-            // In immediate party (true), vs in alliance (false).
+            // @deprecated, please use partyType
             public bool inParty;
+            public long contentId;
+            // 0x1 = valid/present
+            // 0x2 = unknown but set for some alliance members?
+            // 0x4 = unknown but always set for current party and alliance members?
+            // 0x8 = unknown but always set for current party?
+            public byte flags;
+            public uint objectId;
+            public ushort territoryType;
+            public string partyType;
         }
 
         private int GetPartyType(PluginCombatant combatant)
@@ -264,82 +274,60 @@ namespace RainbowMage.OverlayPlugin.EventSources
             return null;
         }
 
-        private void DispatchPartyChangeEvent(ReadOnlyCollection<uint> partyList, int partySize)
+        private void DispatchPartyChangeEvent()
         {
-            cachedPartyList = partyList;
-            var combatants = repository.GetCombatants();
-            if (combatants == null)
-                return;
-
-            // This is a bit of a hack.  The goal is to return a set of party
-            // and alliance players, along with their jobs, ids, and names.
-            //
-            // |partySize| is only the size of your party, but the list of ids
-            // contains ids from both party and alliance members.
-            //
-            // Additionally, there is a race where |combatants| is not updated
-            // by the time this function is called.  However, this only seems
-            // to happen in the case of disconnects and never when zoning in.
-            // As a workaround, we use data retrieved from the NetworkAdd/RemoveCombatant
-            // lines and keep track of all combatants which are missing from
-            // the memory combatant list (the network lines are missing the
-            // party status). Once per second (in Update()) we check if all
-            // missing members have appeared and once they do, we dispatch
-            // a PartyChangedEvent. This should result in immediate events
-            // whenever the party changes and a second delayed event for each
-            // change that updates the inParty field.
-            //
-            // Alternatives:
-            // * poll GetCombatants until all party members exist (infinitely?)
-            // * find better memory location of party list
-            // * make this function only return the values from the delegate
-            // * make callers handle this via calling GetCombatants explicitly
-
-            // Build a lookup table of currently known combatants
-            var lookupTable = new Dictionary<uint, PluginCombatant>();
-            foreach (var c in combatants)
-            {
-                if (GetPartyType(c) != 0 /* None */)
-                {
-                    lookupTable[c.ID] = c;
-                }
-            }
-
-            // Accumulate party members from cached info.  If they don't exist,
-            // still send *something*, since it's better than nothing.
+            // TODO: We know how to detect alliance A/B/C. Need to verify alliance D/E/F
             List<PartyMember> result = new List<PartyMember>(24);
-            lock (missingPartyMembers)
-            lock (partyList)
+
+            List<PartyType> remainingAlliances = new List<PartyType>() {
+                PartyType.AllianceA,
+                PartyType.AllianceB,
+                PartyType.AllianceC,
+                PartyType.AllianceD,
+                PartyType.AllianceE,
+                PartyType.AllianceF,
+            };
+
+            PartyType currentAlliance;
+            if ((cachedPartyList.allianceFlags & 0x1) == 0)
             {
-                missingPartyMembers.Clear();
-
-                foreach (var id in partyList)
+                if (cachedPartyList.memberCount <= 1)
                 {
-                    PluginCombatant c;
-                    if (lookupTable.TryGetValue(id, out c))
-                    {
-                        result.Add(new PartyMember
-                        {
-                            id = $"{id:X}",
-                            name = c.Name,
-                            worldId = c.WorldID,
-                            job = c.Job,
-                            level = c.Level,
-                            inParty = GetPartyType(c) == 1 /* Party */,
-                        });
-                    }
-                    else
-                    {
-                        missingPartyMembers.Add(id);
-                    }
+                    currentAlliance = PartyType.Solo;
                 }
-
-                if (missingPartyMembers.Count > 0)
+                else
                 {
-                    Log(LogLevel.Debug, "Party changed event delayed until members are available");
-                    return;
+                    currentAlliance = PartyType.Party;
                 }
             }
+            else if ((cachedPartyList.currentPartyFlags & 0x100) == 0x100)
+            {
+                currentAlliance = remainingAlliances[0];
+                remainingAlliances.RemoveAt(0);
+            }
+            else if ((cachedPartyList.currentPartyFlags & 0x1) == 0x1)
+            {
+                currentAlliance = remainingAlliances[1];
+                remainingAlliances.RemoveAt(1);
+            }
+            else if ((cachedPartyList.currentPartyFlags & 0x10000) == 0x10000)
+            {
+                currentAlliance = remainingAlliances[2];
+                remainingAlliances.RemoveAt(2);
+            }
+            else
+            {
+                currentAlliance = remainingAlliances[2];
+                remainingAlliances.RemoveAt(2);
+                Log(LogLevel.Warning, $"Could not detect player alliance, value {cachedPartyList.currentPartyFlags:X8}");
+            }
+
+            BuildPartyMemberResults(result, cachedPartyList.partyMembers, currentAlliance, true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance1Members, remainingAlliances[0], true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance2Members, remainingAlliances[1], true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance3Members, remainingAlliances[2], true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance4Members, remainingAlliances[3], true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance5Members, remainingAlliances[4], true);
 
             Log(LogLevel.Debug, "party list: {0}", JObject.FromObject(new { party = result }).ToString());
 
@@ -347,7 +335,46 @@ namespace RainbowMage.OverlayPlugin.EventSources
             {
                 type = PartyChangedEvent,
                 party = result,
+                partyInfo = new
+                {
+                    cachedPartyList.allianceFlags,
+                    cachedPartyList.memberCount,
+                    cachedPartyList.partyId,
+                    cachedPartyList.partyId_2,
+                    cachedPartyList.partyLeaderIndex,
+
+                    cachedPartyList.currentPartyFlags,
+                },
+#if DEBUG
+                debugPartyStruct = cachedPartyList,
+#endif
             }));
+        }
+
+        private void BuildPartyMemberResults(List<PartyMember> result, PartyListEntry[] members, PartyType partyType, bool inParty)
+        {
+            foreach (var member in members)
+            {
+                if (member == null || (member.flags & 0x1) != 0x1)
+                {
+                    continue;
+                }
+
+                result.Add(new PartyMember
+                {
+                    id = $"{member.objectId:X}",
+                    name = member.name,
+                    worldId = member.homeWorld,
+                    job = member.classJob,
+                    level = member.level,
+                    inParty = inParty,
+                    contentId = member.contentId,
+                    flags = member.flags,
+                    objectId = member.objectId,
+                    territoryType = member.territoryType,
+                    partyType = partyType.ToString(),
+                });
+            }
         }
 
         public override void LoadConfig(IPluginConfig config)
@@ -361,43 +388,131 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         public override void Start()
         {
-            this.timer.Change(0, this.Config.UpdateInterval * 1000);
+            // Use the config update interval, but clamp an upper limit at 5000ms
+            var updateInterval = Math.Min(5000, this.Config.UpdateInterval * 1000);
+            this.timer.Change(0, updateInterval);
         }
 
         protected override void Update()
         {
-            if (ffxivPluginPresent)
+            if (partyMemory != null)
             {
-                UpdateMissingPartyMembers();
+                UpdateParty();
             }
         }
 
-        private void UpdateMissingPartyMembers()
+        private void UpdateParty()
         {
-            lock (missingPartyMembers)
+            if (!partyMemory.IsValid())
             {
-                // If we are looking for missing party members, check if they are present by now.
-                if (missingPartyMembers.Count > 0)
-                {
-                    var combatants = repository.GetCombatants();
-                    if (combatants != null)
-                    {
-                        foreach (var c in combatants)
-                        {
-                            if (missingPartyMembers.Contains(c.ID))
-                            {
-                                missingPartyMembers.Remove(c.ID);
-                            }
-                        }
-                    }
+                return;
+            }
+            var newParty = partyMemory.GetPartyLists();
 
-                    // Send an update event once all party members have been found.
-                    if (missingPartyMembers.Count == 0)
+            // If we don't have anyone in the party, "correct" it by making sure the current player is in the party
+            if (newParty.memberCount == 0)
+            {
+                var currentPlayer = combatantMemory.GetSelfCombatant();
+                if (currentPlayer == null)
+                {
+                    return;
+                }
+                newParty.memberCount = 1;
+                newParty.partyMembers = new PartyListEntry[] {
+                    new PartyListEntry() {
+                        x = currentPlayer.PosX,
+                        y = currentPlayer.PosY,
+                        z = currentPlayer.PosZ,
+                        objectId = currentPlayer.ID,
+                        currentHP = (uint) currentPlayer.CurrentHP,
+                        maxHP = (uint) currentPlayer.MaxHP,
+                        currentMP = (ushort) currentPlayer.CurrentMP,
+                        maxMP = (ushort) currentPlayer.MaxMP,
+                        homeWorld = currentPlayer.WorldID,
+                        name = currentPlayer.Name,
+                        classJob = currentPlayer.Job,
+                        level = currentPlayer.Level,
+                        flags = 0x13,
+                    },
+                };
+                newParty.partyLeaderIndex = 0;
+            }
+
+            var dispatchEvent = false;
+            // If the party member count has changed, dispatch the event
+            if (newParty.memberCount != cachedPartyList.memberCount)
+            {
+                dispatchEvent = true;
+            }
+            // Check each of party and alliances 1-5
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.partyMembers, newParty.partyMembers);
+            }
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.alliance1Members, newParty.alliance1Members);
+            }
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.alliance2Members, newParty.alliance2Members);
+            }
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.alliance3Members, newParty.alliance3Members);
+            }
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.alliance4Members, newParty.alliance4Members);
+            }
+            if (!dispatchEvent)
+            {
+                dispatchEvent = HasPartyCompChanged(cachedPartyList.alliance5Members, newParty.alliance5Members);
+            }
+            cachedPartyList = newParty;
+            if (dispatchEvent)
+            {
+                DispatchPartyChangeEvent();
+            }
+        }
+
+        private bool HasPartyCompChanged(PartyListEntry[] oldList, PartyListEntry[] newList)
+        {
+            // If the old list was null and the new list isn't null, they've changed, dispatch the event
+            if (oldList == null && oldList != newList)
+            {
+                return true;
+            }
+
+            for (var i = 0; i < newList.Length; ++i)
+            {
+                var newMember = newList[i];
+                var oldMember = oldList[i];
+                if (newMember == null || oldMember == null)
+                {
+                    // If one of these is null and the other isn't, they've changed, dispatch the event
+                    if (newMember != oldMember)
                     {
-                        DispatchPartyChangeEvent(cachedPartyList, 0);
+                        return true;
+                    }
+                    // Otherwise they're both null, we don't need to check them, continue
+                    else
+                    {
+                        continue;
                     }
                 }
+                // If the party list is in a different order, dispatch the event
+                if (newMember.objectId != oldMember.objectId)
+                {
+                    return true;
+                }
+                // If the party member's job or level changed, dispatch the event
+                if (newMember.classJob != oldMember.classJob || newMember.level != oldMember.level)
+                {
+                    return true;
+                }
             }
+            return false;
         }
     }
 }

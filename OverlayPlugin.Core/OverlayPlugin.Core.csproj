@@ -78,6 +78,9 @@
         <Reference Include="FFXIV_ACT_Plugin.Logfile">
             <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Logfile.dll</HintPath>
         </Reference>
+        <Reference Include="FFXIV_ACT_Plugin.Memory">
+            <HintPath>..\external_dependencies\SDK\FFXIV_ACT_Plugin.Memory.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Resources.Designer.cs">

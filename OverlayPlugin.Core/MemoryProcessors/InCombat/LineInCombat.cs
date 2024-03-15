@@ -61,8 +61,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.InCombat
             //
             // Add two boolean variables into the logline to indicate exactly which part was changed.
             // Useful if a plugin only cares about the change of in-game or ACT combat state to trigger other events.
-            bool isACTChanged = lastEventArgs == null ? true : lastEventArgs.InGameCombat != inGameCombat;
-            bool isGameChanged = lastEventArgs == null ? true : lastEventArgs.InGameCombat != inACTCombat;
+            bool isACTChanged = lastEventArgs == null ? true : lastEventArgs.InACTCombat != inACTCombat;
+            bool isGameChanged = lastEventArgs == null ? true : lastEventArgs.InGameCombat != inGameCombat;
             WriteLine(inACTCombat, inGameCombat, isACTChanged, isGameChanged);
 
             // TODO: backwards-compatible logic here for the internal OnInCombatChanged event args is to

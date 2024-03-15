@@ -323,11 +323,11 @@ namespace RainbowMage.OverlayPlugin.EventSources
             }
 
             BuildPartyMemberResults(result, cachedPartyList.partyMembers, currentAlliance, true);
-            BuildPartyMemberResults(result, cachedPartyList.alliance1Members, remainingAlliances[0], true);
-            BuildPartyMemberResults(result, cachedPartyList.alliance2Members, remainingAlliances[1], true);
-            BuildPartyMemberResults(result, cachedPartyList.alliance3Members, remainingAlliances[2], true);
-            BuildPartyMemberResults(result, cachedPartyList.alliance4Members, remainingAlliances[3], true);
-            BuildPartyMemberResults(result, cachedPartyList.alliance5Members, remainingAlliances[4], true);
+            BuildPartyMemberResults(result, cachedPartyList.alliance1Members, remainingAlliances[0], false);
+            BuildPartyMemberResults(result, cachedPartyList.alliance2Members, remainingAlliances[1], false);
+            BuildPartyMemberResults(result, cachedPartyList.alliance3Members, remainingAlliances[2], false);
+            BuildPartyMemberResults(result, cachedPartyList.alliance4Members, remainingAlliances[3], false);
+            BuildPartyMemberResults(result, cachedPartyList.alliance5Members, remainingAlliances[4], false);
 
             Log(LogLevel.Debug, "party list: {0}", JObject.FromObject(new { party = result }).ToString());
 

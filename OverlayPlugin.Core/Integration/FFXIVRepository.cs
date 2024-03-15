@@ -152,6 +152,26 @@ namespace RainbowMage.OverlayPlugin
         {
             return GetRepository() != null;
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private uint? GetCurrentTerritoryIDImpl()
+        {
+            return GetRepository()?.GetCurrentTerritoryID();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public uint? GetCurrentTerritoryID()
+        {
+            try
+            {
+                return GetCurrentTerritoryIDImpl();
+            }
+            catch (FileNotFoundException)
+            {
+                // The FFXIV plugin isn't loaded
+                return null;
+            }
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public bool IsFFXIVPluginPresent()
@@ -415,6 +435,13 @@ namespace RainbowMage.OverlayPlugin
                     if (process != null) handler(process);
                 }
             }
+        }
+        
+        public void RegisterZoneChangeDelegate(Action<uint, string> handler)
+        {
+            var sub = GetSubscription();
+            if (sub != null)
+                sub.ZoneChanged += new ZoneChangedDelegate(handler);
         }
         
         public DateTime GetServerTimestamp()

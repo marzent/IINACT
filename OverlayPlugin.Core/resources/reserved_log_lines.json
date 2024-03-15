@@ -70,7 +70,14 @@
         "Comment": "Extra info from ActionEffect packets"
     },
     {
-        "StartID": 265,
+        "ID": 265,
+        "Name": "ContentFinderSettings",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Current content finder settings"
+    },
+    {
+        "StartID": 266,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings;
 
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
@@ -22,6 +23,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             container.Register(new LineRSV(container));
             container.Register(new LineActorCastExtra(container));
             container.Register(new LineAbilityExtra(container));
+            container.Register(new LineContentFinderSettings(container));
         }
     }
 

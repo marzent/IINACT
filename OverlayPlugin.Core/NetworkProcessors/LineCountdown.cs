@@ -21,7 +21,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         public ushort countdownStarterWorldId;
 
         [FieldOffset(0x6)]
-        public ushort countdownTimeMS;
+        public ushort countdownTimeSeconds;
         [FieldOffset(0x8)]
         public byte countdownResultCode;
 
@@ -35,7 +35,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 return
                     $"{countdownStarterActorID:X8}|" +
                     $"{countdownStarterWorldId:X4}|" +
-                    $"{countdownTimeMS}|" +
+                    $"{countdownTimeSeconds}|" +
                     $"{countdownResultCode:X2}|" +
                     $"{FFXIVMemory.GetStringFromBytes(name, 32)}";
             }

@@ -105,7 +105,21 @@
         "Comment": "CountdownCancel packet data"
     },
     {
-        "StartID": 270,
+        "ID": 270,
+        "Name": "ActorMove",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "ActorMove packet data"
+    },
+    {
+        "ID": 271,
+        "Name": "ActorSetPos",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "ActorSetPos packet data"
+    },
+    {
+        "StartID": 272,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

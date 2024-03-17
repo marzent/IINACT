@@ -48,6 +48,14 @@
         "CountdownCancel": {
             "opcode": 322,
             "size": 40
+        },
+        "ActorMove": {
+            "opcode": 845,
+            "size": 16
+        },
+        "ActorSetPos": {
+            "opcode": 174,
+            "size": 24
         }
     },
     // KR region

@@ -119,7 +119,21 @@
         "Comment": "ActorSetPos packet data"
     },
     {
-        "StartID": 272,
+        "ID": 272,
+        "Name": "SpawnNpcExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from SpawnNpc packets"
+    },
+    {
+        "ID": 273,
+        "Name": "ActorControlExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorControl packets"
+    },
+    {
+        "StartID": 274,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

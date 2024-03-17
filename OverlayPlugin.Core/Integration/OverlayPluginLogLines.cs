@@ -30,6 +30,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             container.Register(new LineCountdownCancel(container));
             container.Register(new LineActorMove(container));
             container.Register(new LineActorSetPos(container));
+            container.Register(new LineSpawnNpcExtra(container));
+            container.Register(new LineActorControlExtra(container));
         }
     }
 

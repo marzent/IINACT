@@ -91,7 +91,21 @@
         "Comment": "BattleTalk2 packet data"
     },
     {
-        "StartID": 268,
+        "ID": 268,
+        "Name": "Countdown",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Countdown packet data"
+    },
+    {
+        "ID": 269,
+        "Name": "CountdownCancel",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "CountdownCancel packet data"
+    },
+    {
+        "StartID": 270,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

@@ -40,6 +40,14 @@
         "BattleTalk2": {
             "opcode": 475,
             "size": 40
+        },
+        "Countdown": {
+            "opcode": 928,
+            "size": 48
+        },
+        "CountdownCancel": {
+            "opcode": 322,
+            "size": 40
         }
     },
     // KR region

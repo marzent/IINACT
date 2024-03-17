@@ -26,6 +26,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             container.Register(new LineContentFinderSettings(container));
             container.Register(new LineNpcYell(container));
             container.Register(new LineBattleTalk2(container));
+            container.Register(new LineCountdown(container));
+            container.Register(new LineCountdownCancel(container));
         }
     }
 

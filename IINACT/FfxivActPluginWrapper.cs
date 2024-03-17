@@ -38,7 +38,8 @@ public partial class FfxivActPluginWrapper : IDisposable
     private ISettingsMediator settingsMediator = null!;
     private readonly ParseMediator parseMediator;
 
-    private readonly IServerTimeProcessor serverTimeProcessor;
+    private readonly ServerTimeProcessor serverTimeProcessor;
+    private readonly IReadServerTime readServerTime;
     private readonly MobArrayProcessor mobArrayProcessor;
     private readonly IZoneMapProcessor zoneMapProcessor;
     private readonly CombatantManager combatantManager;
@@ -99,7 +100,8 @@ public partial class FfxivActPluginWrapper : IDisposable
         var scanMemory = (ScanMemory)ffxivActPlugin._dataCollection._scanMemory;
 
         processManager = scanMemory._processManager;
-        serverTimeProcessor = scanMemory._serverTimeProcessor;
+        serverTimeProcessor = (ServerTimeProcessor)scanMemory._serverTimeProcessor;
+        readServerTime = serverTimeProcessor._readServerTime;
         mobArrayProcessor = (MobArrayProcessor)scanMemory._mobArrayProcessor;
         zoneMapProcessor = scanMemory._zoneProcessor;
         combatantManager = (CombatantManager)scanMemory._combatantManager;
@@ -119,7 +121,13 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
-        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => serverTimeProcessor.ServerTime;
+        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () =>
+        {
+            var timestamp = readServerTime.Read();
+            var seconds = timestamp & 0xFFFFFFFF;
+            var milliseconds = timestamp >> 32;
+            return (long)((seconds * 1000) + milliseconds);
+        };
 
         cancellationTokenSource = new CancellationTokenSource();
         scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))

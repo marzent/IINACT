@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -275,8 +276,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         {
             if (!HasProcess() || in_combat_addr_ == IntPtr.Zero)
                 return false;
-            var bytes = Read8(in_combat_addr_, 1);
-            return bytes[0] != 0;
+            var bytes = Read8Pooled(in_combat_addr_, 1);
+            var ret = bytes[0] != 0;
+            ArrayPool<byte>.Shared.Return(bytes);
+            return ret;
         }
 
         internal byte[] GetRawJobSpecificDataBytes()
@@ -306,6 +309,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         internal unsafe byte[] Read8(IntPtr addr, int count)
         {
             var data = new byte[count];
+
+            fixed (byte* dataPtr = data)
+            {
+                var result = ReadMemory((nint)dataPtr, addr, count);
+                if (result != 0) return null;
+            }
+
+            return data;
+        }
+        
+        internal unsafe byte[] Read8Pooled(IntPtr addr, int count)
+        {
+            var data = ArrayPool<byte>.Shared.Rent(count);
 
             fixed (byte* dataPtr = data)
             {
@@ -379,10 +395,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         /// Reads |addr| in the |process_| and returns it as a 64bit pointer. Returns 0 on error.
         internal unsafe IntPtr ReadIntPtr(IntPtr addr)
         {
-            var buffer = Read8(addr, 8);
+            var buffer = Read8Pooled(addr, 8);
             if (buffer == null)
                 return IntPtr.Zero;
-            return new IntPtr(BitConverter.ToInt64(buffer, 0));
+            var ret = new IntPtr(BitConverter.ToInt64(buffer, 0));
+            ArrayPool<byte>.Shared.Return(buffer);
+            return ret;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -119,7 +120,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 
             // Int64 pointer size
             const int sz = 8;
-            byte[] source = memory.GetByteArray(charmapAddress, sz * numMemoryCombatants);
+            byte[] source = memory.GetByteArrayPooled(charmapAddress, sz * numMemoryCombatants);
             if (source == null || source.Length == 0)
                 return result;
 
@@ -131,8 +132,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 if (p == IntPtr.Zero)
                     continue;
 
-                byte[] c = memory.GetByteArray(p, combatantSize);
-                Combatant combatant = GetMobFromByteArray(c, mychar == null ? 0 : mychar.ID);
+                byte[] c = memory.GetByteArrayPooled(p, combatantSize);
+                Combatant combatant = GetMobFromByteArray(c, mychar?.ID ?? 0);
+                ArrayPool<byte>.Shared.Return(c);
                 if (combatant == null)
                     continue;
                 if (seen.Contains(combatant.ID))
@@ -142,7 +144,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 result.Add(combatant);
                 seen.Add(combatant.ID);
             }
-
+            
+            ArrayPool<byte>.Shared.Return(source);
             return result;
         }
 
@@ -160,7 +163,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             int maxEffects = (type == ObjectType.PC) ? 30 : 60;
             var size = EffectMemory.Size * maxEffects;
 
-            var bytes = new byte[size];
+            var bytes = ArrayPool<byte>.Shared.Rent(size);
             Marshal.Copy((IntPtr)source, bytes, 0, size);
 
             for (int i = 0; i < maxEffects; i++)
@@ -178,6 +181,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 }
             }
 
+            ArrayPool<byte>.Shared.Return(bytes);
             return result;
         }
 

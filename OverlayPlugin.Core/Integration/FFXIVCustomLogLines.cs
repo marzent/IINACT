@@ -62,7 +62,11 @@ namespace RainbowMage.OverlayPlugin
                         {
                             if (registry.ContainsKey(ID))
                             {
-                                logger.Log(LogLevel.Error, $"Reserved log line entry already registered ({ID}).");
+                                var entry = registry[ID];
+                                if (entry.Source != Source)
+                                {
+                                    logger.Log(LogLevel.Error, $"Reserved log line entry already registered ({ID}).");
+                                }
                                 continue;
                             }
 
@@ -72,6 +76,7 @@ namespace RainbowMage.OverlayPlugin
                                 Name = Name,
                                 Source = Source,
                                 Version = Version,
+                                Range = true,
                             };
                         }
                     }
@@ -81,7 +86,12 @@ namespace RainbowMage.OverlayPlugin
                         var Name = reservedDataEntry.Name;
                         if (registry.ContainsKey(ID))
                         {
-                            logger.Log(LogLevel.Error, $"Reserved log line entry already registered ({ID}).");
+                            var entry = registry[ID];
+                            if (entry.Source != reservedDataEntry.Source || entry.Range == false)
+                            {
+                                logger.Log(LogLevel.Error, $"Reserved log line entry already registered ({ID}).");
+                                continue;
+                            }
                             continue;
                         }
 
@@ -100,6 +110,7 @@ namespace RainbowMage.OverlayPlugin
                             ID = ID,
                             Source = Source,
                             Version = Version,
+                            Range = false,
                         };
                     }
                 }
@@ -167,6 +178,7 @@ namespace RainbowMage.OverlayPlugin
         string Name { get; }
         string Source { get; }
         uint Version { get; }
+        bool Range { get; }
     }
 
     class LogLineRegistryEntry : ILogLineRegistryEntry
@@ -175,6 +187,7 @@ namespace RainbowMage.OverlayPlugin
         public string Name { get; set; }
         public string Source { get; set; }
         public uint Version { get; set; }
+        public bool Range { get; set; }
 
         public override string ToString()
         {
@@ -190,7 +203,7 @@ namespace RainbowMage.OverlayPlugin
 
             var otherEntry = (ILogLineRegistryEntry)obj;
 
-            return ID == otherEntry.ID && Source == otherEntry.Source;
+            return ID == otherEntry.ID && Source == otherEntry.Source && Range == otherEntry.Range;
         }
 
         public override int GetHashCode()

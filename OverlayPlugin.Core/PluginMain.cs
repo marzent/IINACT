@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
 using RainbowMage.OverlayPlugin.Handlers.Ipc;
-using RainbowMage.OverlayPlugin.Integration;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Aggro;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
@@ -220,9 +219,6 @@ namespace RainbowMage.OverlayPlugin
                     
                     Status = @"Init Phase 2: Addons";
                     LoadAddons();
-
-                    Status = @"Init Phase 2: Unstable new stuff";
-                    _container.Register(new UnstableNewLogLines(_container));
 
                     Status = @"Init Phase 2: UI";
                     try

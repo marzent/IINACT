@@ -9,6 +9,7 @@ using RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Enmity;
 using RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud;
 using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
+using RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Party;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
@@ -213,6 +214,7 @@ namespace RainbowMage.OverlayPlugin
                     _container.Register<IInCombatMemory, InCombatMemoryManager>();
                     _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
                     _container.Register<IPartyMemory, PartyMemoryManager>();
+                    _container.Register<IJobGaugeMemory, JobGaugeMemoryManager>();
 
                     _container.Register(new OverlayPluginLogLines(_container));
                     

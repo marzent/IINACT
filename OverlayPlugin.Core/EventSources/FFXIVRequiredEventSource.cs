@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 // For some reason this using is required by the github build?
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using FFXIV_ACT_Plugin.Common;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Party;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
 using PluginCombatant = FFXIV_ACT_Plugin.Common.Models.Combatant;
@@ -31,10 +34,17 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
         private const string OnlineStatusChangedEvent = "OnlineStatusChanged";
         private const string PartyChangedEvent = "PartyChanged";
+        private const string JobGaugeChangedEvent = "JobGaugeChanged";
 
         private FFXIVRepository repository;
         private ICombatantMemory combatantMemory;
         private IPartyMemory partyMemory;
+        private IJobGaugeMemory jobGaugeMemory;
+
+        private CancellationTokenSource cancellationToken;
+
+        // In milliseconds
+        private const int PollingRate = 50;
 
         // Event Source
 
@@ -53,11 +63,17 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     Log(LogLevel.Error, "Could not construct FFXIVRequiredEventSource: Missing partyMemory");
                 }
                 
+                if (!container.TryResolve(out jobGaugeMemory))
+                {
+                    Log(LogLevel.Error, "Could not construct FFXIVRequiredEventSource: Missing jobGaugeMemory");
+                }
+                
                 // These events need to deliver cached values to new subscribers.
                 RegisterCachedEventTypes(new List<string>
                 {
                     OnlineStatusChangedEvent,
                     PartyChangedEvent,
+                    JobGaugeChangedEvent,
                 });
 
                 RegisterEventHandler("getLanguage", (msg) =>
@@ -131,6 +147,10 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
                     DispatchAndCacheEvent(obj);
                 };
+                
+                cancellationToken = new CancellationTokenSource();
+
+                Task.Run(PollJobGauge, cancellationToken.Token);
             }
         }
 
@@ -391,6 +411,53 @@ namespace RainbowMage.OverlayPlugin.EventSources
             // Use the config update interval, but clamp an upper limit at 5000ms
             var updateInterval = Math.Min(5000, this.Config.UpdateInterval * 1000);
             this.timer.Change(0, updateInterval);
+        }
+        
+        public override void Stop()
+        {
+            base.Stop();
+            if (cancellationToken != null)
+            {
+                cancellationToken.Cancel();
+            }
+        }
+        
+        private void PollJobGauge()
+        {
+            IJobGauge lastJobGauge = null;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var now = DateTime.Now;
+
+                if (HasSubscriber(JobGaugeChangedEvent))
+                {
+                    var jobGauge = jobGaugeMemory.GetJobGauge();
+
+                    if (jobGauge != null)
+                    {
+                        if (!jobGauge.Equals(lastJobGauge))
+                        {
+                            lastJobGauge = jobGauge;
+                            var obj = JObject.FromObject(jobGauge);
+                            obj["type"] = JobGaugeChangedEvent;
+
+                            DispatchAndCacheEvent(obj);
+                        }
+                    }
+                }
+
+                // Wait for next poll
+                var delay = PollingRate - (int)Math.Ceiling((DateTime.Now - now).TotalMilliseconds);
+                if (delay > 0)
+                {
+                    Thread.Sleep(delay);
+                }
+                else
+                {
+                    // If we're lagging enough to not have a sleep duration, delay by PollingRate to reduce lag
+                    Thread.Sleep(PollingRate);
+                }
+            }
         }
 
         protected override void Update()

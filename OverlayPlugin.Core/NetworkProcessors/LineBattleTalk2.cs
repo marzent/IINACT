@@ -15,7 +15,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         // 0x80034E2B = instance content ID
         // 0x2CE = entry on `BNpcName` table
         // 33804 = entry on `InstanceContentTextData` table
-        // 5000 = display time in ms?
+        // 5000 = display time in ms
         // 2 = some sort of flags for display settings?
 
         public const int structSize = 40;
@@ -28,28 +28,28 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         [FieldOffset(0x10)]
         public uint instanceContentTextID;
         [FieldOffset(0x14)]
-        public uint param1;
+        public uint displayMS;
         [FieldOffset(0x18)]
-        public uint param2;
+        public uint param1;
         [FieldOffset(0x1C)]
-        public uint param3;
+        public uint param2;
         [FieldOffset(0x20)]
-        public uint param4;
+        public uint param3;
         [FieldOffset(0x24)]
-        public uint param5;
+        public uint param4;
 
         public override string ToString()
         {
             return
                 $"{actorID:X8}|" +
                 $"{instanceContentID:X8}|" +
-                $"{npcNameID:X8}|" +
-                $"{instanceContentTextID:X8}|" +
-                $"{param1:X8}|" +
-                $"{param2:X8}|" +
-                $"{param3:X8}|" +
-                $"{param4:X8}|" +
-                $"{param5:X8}";
+                $"{npcNameID:X4}|" +
+                $"{instanceContentTextID:X4}|" +
+                $"{displayMS}|" +
+                $"{param1:X}|" +
+                $"{param2:X}|" +
+                $"{param3:X}|" +
+                $"{param4:X}";
         }
     }
 

@@ -77,7 +77,21 @@
         "Comment": "Current content finder settings"
     },
     {
-        "StartID": 266,
+        "ID": 266,
+        "Name": "NpcYell",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "NpcYell packet data"
+    },
+    {
+        "ID": 267,
+        "Name": "BattleTalk2",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "BattleTalk2 packet data"
+    },
+    {
+        "StartID": 268,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

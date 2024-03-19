@@ -10,9 +10,9 @@
       },
       "System.Speech": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "7E0uB92Cx2sXR67HW9rMKJqDACdLuz9t3I3OwZUFDzAgwKXWuY6CYeRT/NiypHcyZO2be9+0H0w0M6fn7HQtgQ=="
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "CNuiA6vb95Oe5PRjClZEBiaju31vwB8OIeCgeSBXyZL6+MS4RVVB2X/C11z0xCkooHE3Vy91nM2z76emIzR+sg=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -67,9 +67,9 @@
     "net7.0-windows7.0/win-x64": {
       "System.Speech": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "7E0uB92Cx2sXR67HW9rMKJqDACdLuz9t3I3OwZUFDzAgwKXWuY6CYeRT/NiypHcyZO2be9+0H0w0M6fn7HQtgQ=="
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "CNuiA6vb95Oe5PRjClZEBiaju31vwB8OIeCgeSBXyZL6+MS4RVVB2X/C11z0xCkooHE3Vy91nM2z76emIzR+sg=="
       }
     }
   }

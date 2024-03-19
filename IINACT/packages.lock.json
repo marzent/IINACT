@@ -21,8 +21,8 @@
       },
       "NetCoreServer": {
         "type": "Transitive",
-        "resolved": "7.0.0",
-        "contentHash": "5RFgorlI297p25MTM5j0omCqoyddLWTwuJnpK7F0ytMJ4cL80vYaJ3C+C1Kticrc0LnY0j/w9mirLju6KJW20w=="
+        "resolved": "8.0.7",
+        "contentHash": "BhNiJ6EVxKS1eKqlHINy7BruLDc+xCH59oZxu7d2Hve8CzFki69PumVlf6vyAQvIVfxbZiHw/FI3UHNnMajuVg=="
       },
       "System.Data.DataSetExtensions": {
         "type": "Transitive",
@@ -58,7 +58,7 @@
           "Machina": "[2.3.1.3, )",
           "Machina.FFXIV": "[2.3.8.5, )",
           "Microsoft.CSharp": "[4.7.0, )",
-          "NetCoreServer": "[7.0.0, )",
+          "NetCoreServer": "[8.0.7, )",
           "OverlayPlugin.Common": "[1.0.0, )",
           "System.Data.DataSetExtensions": "[4.5.0, )"
         }

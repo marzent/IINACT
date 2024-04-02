@@ -27,7 +27,7 @@ public class ServerController
     public string? Address => Server?.Address;
     public int? Port => Server?.Port;
     public bool Secure => false;
-    public Uri Uri => new Uri($"{(Secure ? "wss" : "ws")}//{Address}:{Port}");
+    public Uri Uri => new($"{(Secure ? "wss" : "ws")}://{Address}:{Port}");
 
     public void Stop()
     {

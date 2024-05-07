@@ -133,6 +133,13 @@
         "Comment": "Extra info from ActorControl packets"
     },
     {
+        "ID": 274,
+        "Name": "ActorControlSelfExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorControlSelf packets"
+    },
+    {
         "StartID": 256,
         "EndID": 512,
         "Source": "OverlayPlugin",

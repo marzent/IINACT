@@ -7,9 +7,15 @@ using System.Reflection;
 using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
 using RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings;
+using MachinaRegion = System.String;
+using OpcodeName = System.String;
+using OpcodeVersion = System.String;
+
 
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
+    using Opcodes = Dictionary<MachinaRegion, Dictionary<OpcodeVersion, Dictionary<OpcodeName, OpcodeConfigEntry>>>;
+
     class OverlayPluginLogLines
     {
         public OverlayPluginLogLines(TinyIoCContainer container)
@@ -38,8 +44,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
 
     class OverlayPluginLogLineConfig
     {
-        private Dictionary<string, Dictionary<string, OpcodeConfigEntry>> config =
-            new Dictionary<string, Dictionary<string, OpcodeConfigEntry>>();
+        private Opcodes config = new();
 
         private ILogger logger;
         private FFXIVRepository repository;
@@ -67,12 +72,47 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             }
             catch (Exception ex)
             {
-                if (exceptionCount < maxExceptionsLogged)
+                LogException($"FFXIVCustomLogLines: Failed to load reserved log line: {ex}");
+            }
+        }
+        
+        private void LogException(string message)
+        {
+            if (exceptionCount >= maxExceptionsLogged)
+                return;
+            exceptionCount++;
+            logger.Log(LogLevel.Error, message);
+        }
+
+        private IOpcodeConfigEntry GetOpcode(string name, Opcodes opcodes, string version, string opcodeType)
+        {
+            if (opcodes == null)
+                return null;
+
+            var machinaRegion = repository.GetMachinaRegion().ToString();
+
+            if (opcodes.TryGetValue(machinaRegion, out var regionOpcodes))
+            {
+                if (regionOpcodes.TryGetValue(version, out var versionOpcodes))
                 {
-                    exceptionCount++;
-                    logger.Log(LogLevel.Error, $"FFXIVCustomLogLines: Failed to load reserved log line: {ex}");
+                    if (versionOpcodes.TryGetValue(name, out var opcode))
+                    {
+                        return opcode;
+                    }
+
+                    LogException($"No {opcodeType} opcode for game region {machinaRegion}, version {version}, opcode name {name}");
+                }
+                else
+                {
+                    LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
                 }
             }
+            else
+            {
+                LogException($"No {opcodeType} opcodes for game region {machinaRegion}");
+            }
+
+            return null;
         }
 
         public IOpcodeConfigEntry this[string name]
@@ -82,39 +122,11 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 var version = repository.GetGameVersion();
                 if (version == null)
                 {
-                    if (exceptionCount < maxExceptionsLogged)
-                    {
-                        exceptionCount++;
-                        logger.Log(LogLevel.Error, "Could not detect game version from FFXIV_ACT_Plugin");
-                    }
-
+                    LogException("Could not detect game version from FFXIV_ACT_Plugin");
                     return null;
                 }
-
-                if (!config.ContainsKey(version))
-                {
-                    if (exceptionCount < maxExceptionsLogged)
-                    {
-                        exceptionCount++;
-                        logger.Log(LogLevel.Error, $"No opcodes for game version {version}");
-                    }
-
-                    return null;
-                }
-
-                var versionOpcodes = config[version];
-                if (!versionOpcodes.ContainsKey(name))
-                {
-                    if (exceptionCount < maxExceptionsLogged)
-                    {
-                        exceptionCount++;
-                        logger.Log(LogLevel.Error, $"No opcode for game version {version}, opcode name {name}");
-                    }
-
-                    return null;
-                }
-
-                return versionOpcodes[name];
+                
+                return GetOpcode(name, config, version, "resource");
             }
         }
     }

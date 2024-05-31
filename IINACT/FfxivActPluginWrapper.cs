@@ -1,9 +1,7 @@
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
@@ -30,8 +28,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
     private readonly IChatGui chatGui;
-    private readonly IFramework framework;
-    private readonly ICondition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly Container iocContainer;
@@ -51,8 +47,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly int combatantBufferSize;
     private readonly nint mobData;
     private readonly nint[] mobDataOffsets;
-    private readonly SemaphoreSlim refreshSemaphore = new(0);
-    private byte mobDataAge = byte.MaxValue;
 
     private readonly Thread scanThread;
     private readonly CancellationTokenSource cancellationTokenSource;
@@ -67,14 +61,11 @@ public partial class FfxivActPluginWrapper : IDisposable
     public readonly IDataSubscription Subscription;
 
     public unsafe FfxivActPluginWrapper(
-        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui, IFramework framework,
-        ICondition condition)
+        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
         this.chatGui = chatGui;
-        this.framework = framework;
-        this.condition = condition;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -148,8 +139,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         mobDataOffsets = new nint[mobArraySize];
         for (var i = 0; i < mobArraySize; i++)
             mobDataOffsets[i] = mobData + (i * combatantSize);
-
-        this.framework.Update += MobDataRefresh;
     }
 
     private Language ClientLanguage =>
@@ -166,7 +155,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     {
         cancellationTokenSource.Cancel();
         cancellationTokenSource.Dispose();
-        framework.Update -= MobDataRefresh;
         chatGui.ChatMessage -= OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead -= OFormActMain_BeforeLogLineRead;
         ffxivActPlugin.DeInitPlugin();
@@ -275,32 +263,26 @@ public partial class FfxivActPluginWrapper : IDisposable
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
 
-    private unsafe void MobDataRefresh(IFramework _)
+    private unsafe bool MobDataRefresh()
     {
         if (settingsMediator.DataCollectionSettings == null)
-            return;
-
-        if (mobDataAge < 3 || (!condition[ConditionFlag.BoundByDuty56] && mobDataAge < 10))
-        {
-            mobDataAge++;
-            if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
-                return;
-
-            refreshSemaphore.Release();
-            return;
-        }
-
-        mobDataAge = 0;
+            return false;
+        
         var mobArrayAddress = (ulong*)mobArrayProcessor._readMobArray.Read64();
         var mobArray = mobArrayProcessor._internalMmobArray;
 
         if (*mobArrayAddress == 0)
         {
             Array.Clear(mobArray);
-            return;
+            return false;
         }
 
-        ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize);
+        if (ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize) != 0)
+        {
+            Array.Clear(mobArray);
+            return false;
+        }
+        
         mobArray[0] = mobDataOffsets[0];
 
         for (var i = 1; i < mobArraySize; i++)
@@ -310,20 +292,28 @@ public partial class FfxivActPluginWrapper : IDisposable
                 mobArray[i] = nint.Zero;
                 continue;
             }
-            ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize);
+            if (ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize) != 0)
+            {
+                Array.Clear(mobArray);
+                return false;
+            }
             mobArray[i] = mobDataOffsets[i];
         }
 
-        refreshSemaphore.Release();
+        return true;
     }
 
     private void ScanMemory(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        while (true)
         {
             try
             {
-                refreshSemaphore.Wait(token);
+                if (token.WaitHandle.WaitOne(10))
+                    return;
+
+                if (!MobDataRefresh())
+                    continue;
 
                 var zoneId = zoneMapProcessor.ZoneID;
                 zoneMapProcessor.Refresh();

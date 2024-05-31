@@ -37,6 +37,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             repository.RegisterProcessChangedHandler(UpdateProcess);
         }
 
+        [SuppressGCTransition]
         [LibraryImport("SafeMemoryReader.dll")]
         private static partial int ReadMemory(nint dest, nint src, int size);
 

@@ -302,6 +302,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         internal abstract EntityData GetEntityData(IntPtr entity_ptr);
         public abstract EntityData GetSelfData();
 
+        [SuppressGCTransition]
         [LibraryImport("SafeMemoryReader.dll")]
         private static partial int ReadMemory(nint dest, nint src, int size);
 

@@ -271,6 +271,7 @@ public partial class FfxivActPluginWrapper : IDisposable
         PluginLog.Debug(text);
     }
 
+    [SuppressGCTransition]
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
 

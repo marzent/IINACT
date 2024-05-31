@@ -121,12 +121,16 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
+        serverTimeProcessor.ServerTime = DateTime.Now;
         Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () =>
         {
             var timestamp = readServerTime.Read();
             var seconds = timestamp & 0xFFFFFFFF;
             var milliseconds = timestamp >> 32;
-            return (long)((seconds * 1000) + milliseconds);
+            var totalMilliseconds = (long)((seconds * 1_000L) + milliseconds);
+            serverTimeProcessor.ServerTime =
+                serverTimeProcessor.Date1970.AddTicks(totalMilliseconds * 10_000L).ToLocalTime();
+            return totalMilliseconds;
         };
 
         cancellationTokenSource = new CancellationTokenSource();
@@ -267,12 +271,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         PluginLog.Debug(text);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ServerTimeRefresh()
-    {
-        serverTimeProcessor.Refresh();
-    }
-
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
 
@@ -285,10 +283,8 @@ public partial class FfxivActPluginWrapper : IDisposable
         {
             mobDataAge++;
             if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
-            {
-                ServerTimeRefresh();
                 return;
-            }
+
             refreshSemaphore.Release();
             return;
         }
@@ -300,7 +296,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         if (*mobArrayAddress == 0)
         {
             Array.Clear(mobArray);
-            ServerTimeRefresh();
             return;
         }
 
@@ -328,8 +323,6 @@ public partial class FfxivActPluginWrapper : IDisposable
             try
             {
                 refreshSemaphore.Wait(token);
-
-                serverTimeProcessor.Refresh();
 
                 var zoneId = zoneMapProcessor.ZoneID;
                 zoneMapProcessor.Refresh();

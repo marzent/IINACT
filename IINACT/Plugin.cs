@@ -23,6 +23,7 @@ public sealed class Plugin : IDalamudPlugin
     internal DalamudPluginInterface PluginInterface { get; }
     internal ICommandManager CommandManager { get; }
     internal IGameNetwork GameNetwork { get; }
+    internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
 
@@ -42,6 +43,7 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
                   [RequiredVersion("1.0")] ICommandManager commandManager,
                   [RequiredVersion("1.0")] IGameNetwork gameNetwork,
+                  [RequiredVersion("1.0")] IClientState clientState,
                   [RequiredVersion("1.0")] IDataManager dataManager,
                   [RequiredVersion("1.0")] IChatGui chatGui)
     {
@@ -49,6 +51,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager = commandManager;
         GameNetwork = gameNetwork;
         DataManager = dataManager;
+        ClientState = clientState;
         ChatGui = chatGui;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
@@ -96,10 +99,14 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        ClientState.EnterPvP += EnterPvP;
+        ClientState.LeavePvP += LeavePvP;
     }
 
     public void Dispose()
     {
+        ClientState.EnterPvP -= EnterPvP;
+        ClientState.LeavePvP -= LeavePvP;
         IpcProviders.Dispose();
         
         FfxivActPluginWrapper.Dispose();
@@ -173,6 +180,14 @@ public sealed class Plugin : IDalamudPlugin
                 Configuration.WriteLogFile = false;
                 Configuration.Save();
                 break;
+            case "log pvp start":
+                Configuration.DisablePvp = false;
+                Configuration.Save();
+                break;
+            case "log pvp stop":
+                Configuration.DisablePvp = true;
+                Configuration.Save();
+                break;
             default:
                 MainWindow.IsOpen = true;
                 break;
@@ -188,5 +203,18 @@ public sealed class Plugin : IDalamudPlugin
     public void DrawConfigUI()
     {
         MainWindow.IsOpen = true;
+    }
+
+    private void EnterPvP()
+    {
+        if (Configuration is not { DisablePvp: true, DisableWritingPvpLogFile: false })
+            return;
+
+        Configuration.DisableWritingPvpLogFile = true;
+    }
+
+    private void LeavePvP()
+    {
+        Configuration.DisableWritingPvpLogFile = false;
     }
 }

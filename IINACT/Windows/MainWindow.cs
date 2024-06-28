@@ -177,6 +177,15 @@ public class MainWindow : Window, IDisposable
             Plugin.Configuration.Save();
         }
 
+        var disablePvp = Plugin.Configuration.DisablePvp;
+        if (ImGui.Checkbox("Disable writing out network log file in PvP", ref disablePvp))
+        {
+            if (Plugin.ClientState.IsPvP && disablePvp) Plugin.Configuration.DisableWritingPvpLogFile = true;
+
+            Plugin.Configuration.DisablePvp = disablePvp;
+            Plugin.Configuration.Save();
+        }
+
         var disableDamageShield = Plugin.Configuration.DisableDamageShield;
         if (ImGui.Checkbox("Disable Damage Shield Estimates", ref disableDamageShield))
         {

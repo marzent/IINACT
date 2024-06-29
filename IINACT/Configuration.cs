@@ -19,6 +19,8 @@ public class Configuration : IPluginConfiguration
 
     public bool DisableCombinePets { get; set; }
 
+    public bool DisablePvp { get; set; }
+    
     public bool SimulateIndividualDoTCrits { get; set; }
 
     public bool ShowRealDoTTicks { get; set; }
@@ -35,6 +37,12 @@ public class Configuration : IPluginConfiguration
     {
         get => Advanced_Combat_Tracker.ActGlobals.oFormActMain.WriteLogFile;
         set => Advanced_Combat_Tracker.ActGlobals.oFormActMain.WriteLogFile = value;
+    }
+
+    public bool DisableWritingPvpLogFile
+    {
+        get => Advanced_Combat_Tracker.ActGlobals.oFormActMain.DisableWritingPvpLogFile;
+        set => Advanced_Combat_Tracker.ActGlobals.oFormActMain.DisableWritingPvpLogFile = value;
     }
 
     public int Version { get; set; } = 1;

@@ -134,7 +134,7 @@ public partial class FfxivActPluginWrapper : IDisposable
         mobArraySize = mobArrayProcessor._internalMmobArray.Length;
         var combatantProcessor = ((CombatantProcessor)combatantManager._combatantProcessor);
         combatantBufferSize = ((ReadCombatant)combatantProcessor._readCombatant)._buffer.Length;
-        combatantSize = sizeof(Combatant64Struct);
+        combatantSize = sizeof(CombatantStruct);
         mobData = Marshal.AllocHGlobal((mobArraySize * combatantSize) + (combatantBufferSize - combatantSize));
         mobDataOffsets = new nint[mobArraySize];
         for (var i = 0; i < mobArraySize; i++)

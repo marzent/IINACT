@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Dalamud.Logging;
 using static Advanced_Combat_Tracker.ActGlobals;
 
 namespace Advanced_Combat_Tracker.Resources;
@@ -2555,7 +2554,7 @@ public static class NotActMainFormatter
             if (ex is not InvalidOperationException)
                 oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
             else 
-                PluginLog.Verbose(ex, $"FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
+                oFormActMain.PluginLog.Verbose(ex, $"[NotAct] FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
             
             return "ERROR";
         }
@@ -2806,7 +2805,7 @@ public static class NotActMainFormatter
             if (ex is not InvalidOperationException)
                 oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
             else 
-                PluginLog.Verbose(ex, $"FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
+                oFormActMain.PluginLog.Verbose(ex, $"[NotAct] FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
             
             return "ERROR";
         }

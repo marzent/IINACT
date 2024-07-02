@@ -1,10 +1,10 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
-using Dalamud;
+using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using FFXIV_ACT_Plugin;
 using FFXIV_ACT_Plugin.Common;
@@ -144,10 +144,10 @@ public partial class FfxivActPluginWrapper : IDisposable
     private Language ClientLanguage =>
         dalamudClientLanguage switch
         {
-            Dalamud.ClientLanguage.Japanese => Language.Japanese,
-            Dalamud.ClientLanguage.English => Language.English,
-            Dalamud.ClientLanguage.German => Language.German,
-            Dalamud.ClientLanguage.French => Language.French,
+            Dalamud.Game.ClientLanguage.Japanese => Language.Japanese,
+            Dalamud.Game.ClientLanguage.English => Language.English,
+            Dalamud.Game.ClientLanguage.German => Language.German,
+            Dalamud.Game.ClientLanguage.French => Language.French,
             _ => dalamudClientLanguage.ToString() == "ChineseSimplified" ? Language.Chinese : Language.English
         };
 
@@ -214,7 +214,7 @@ public partial class FfxivActPluginWrapper : IDisposable
     }
 
     private void OnChatMessage(
-        XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
+        XivChatType type, int senderId, ref SeString sender, ref SeString message, ref bool isHandled)
     {
         var evenType = (uint)type;
         var player = sender.TextValue;
@@ -256,28 +256,47 @@ public partial class FfxivActPluginWrapper : IDisposable
 
     private static void OnProcessException(DateTime timestamp, string text)
     {
-        PluginLog.Debug(text);
+        Plugin.Log.Debug($"[FFXIV_ACT_Plugin] {text}");
     }
 
     [SuppressGCTransition]
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
+    
+    private static unsafe nint TryReadAddress(nint address)
+    {
+        Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+        var bufferPtr = (nint)Unsafe.AsPointer(ref buffer[0]);
 
-    private unsafe bool MobDataRefresh()
+        if (ReadMemory(bufferPtr, address, sizeof(ulong)) == 0)
+            return (nint)BitConverter.ToUInt64(buffer);
+
+        throw new AccessViolationException($"Attempted to read invalid memory location {address}.");
+    }
+
+    private bool MobDataRefresh()
     {
         if (settingsMediator.DataCollectionSettings == null)
             return false;
         
-        var mobArrayAddress = (ulong*)mobArrayProcessor._readMobArray.Read64();
+        var mobArrayAddress = mobArrayProcessor._readMobArray.Read64();
         var mobArray = mobArrayProcessor._internalMmobArray;
+        
+        if (mobArrayAddress == 0)
+        {
+            Array.Clear(mobArray);
+            return false;
+        }
+        
+        var mobArrayAddressValue = TryReadAddress(mobArrayAddress);
 
-        if (*mobArrayAddress == 0)
+        if (mobArrayAddressValue == 0)
         {
             Array.Clear(mobArray);
             return false;
         }
 
-        if (ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize) != 0)
+        if (ReadMemory(mobDataOffsets[0], mobArrayAddressValue, combatantSize) != 0)
         {
             Array.Clear(mobArray);
             return false;
@@ -287,12 +306,14 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         for (var i = 1; i < mobArraySize; i++)
         {
-            if (*(mobArrayAddress + i) == 0)
+            mobArrayAddressValue = TryReadAddress(mobArrayAddress + (i * IntPtr.Size));
+
+            if (mobArrayAddressValue == 0)
             {
                 mobArray[i] = nint.Zero;
                 continue;
             }
-            if (ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize) != 0)
+            if (ReadMemory(mobDataOffsets[i], mobArrayAddressValue, combatantSize) != 0)
             {
                 Array.Clear(mobArray);
                 return false;
@@ -334,7 +355,7 @@ public partial class FfxivActPluginWrapper : IDisposable
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, "[FFXIV_ACT_Plugin] ScanMemory failure");
+                Plugin.Log.Error(ex, "[FFXIV_ACT_Plugin] ScanMemory failure");
             }
         }
     }

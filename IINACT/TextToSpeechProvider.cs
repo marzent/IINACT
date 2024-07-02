@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
-using Dalamud.Logging;
 
 namespace IINACT;
 
@@ -21,7 +20,7 @@ internal class TextToSpeechProvider
         }
         catch (Exception ex)
         {
-            PluginLog.Warning(ex, "Failed to initialize SAPI TTS engine");
+            Plugin.Log.Warning(ex, "Failed to initialize SAPI TTS engine");
         }
         
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
@@ -58,7 +57,7 @@ internal class TextToSpeechProvider
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Error(ex, $"TTS failed to play back {message}");
+                    Plugin.Log.Error(ex, $"TTS failed to play back {message}");
                     return;
                 }
             }
@@ -70,7 +69,7 @@ internal class TextToSpeechProvider
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, $"TTS failed to play back {message}");
+                Plugin.Log.Error(ex, $"TTS failed to play back {message}");
             }
         });
     }

@@ -11,7 +11,7 @@ public class Configuration : IPluginConfiguration
     private string? logFilePath;
 
     [JsonIgnore]
-    private DalamudPluginInterface? PluginInterface { get; set; }
+    private IDalamudPluginInterface? PluginInterface { get; set; }
 
     public int ParseFilterMode { get; set; }
 
@@ -49,7 +49,7 @@ public class Configuration : IPluginConfiguration
     
     public string? SelectedOverlay { get; set; }
 
-    public void Initialize(DalamudPluginInterface pluginInterface)
+    public void Initialize(IDalamudPluginInterface pluginInterface)
     {
         PluginInterface = pluginInterface;
     }

@@ -3,7 +3,6 @@ using System.Reflection;
 using Dalamud.Game.Command;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using IINACT.Windows;
@@ -20,12 +19,13 @@ public sealed class Plugin : IDalamudPlugin
     private const string EndEncCommandName = "/endenc";
     public readonly WindowSystem WindowSystem = new("IINACT");
     
-    internal DalamudPluginInterface PluginInterface { get; }
+    internal IDalamudPluginInterface PluginInterface { get; }
     internal ICommandManager CommandManager { get; }
     internal IGameNetwork GameNetwork { get; }
     internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
+    public static IPluginLog Log { get; private set; } = null!;
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
@@ -40,12 +40,13 @@ public sealed class Plugin : IDalamudPlugin
     private PluginLogTraceListener PluginLogTraceListener { get; }
     private HttpClient HttpClient { get; }
 
-    public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-                  [RequiredVersion("1.0")] ICommandManager commandManager,
-                  [RequiredVersion("1.0")] IGameNetwork gameNetwork,
-                  [RequiredVersion("1.0")] IClientState clientState,
-                  [RequiredVersion("1.0")] IDataManager dataManager,
-                  [RequiredVersion("1.0")] IChatGui chatGui)
+    public Plugin(IDalamudPluginInterface pluginInterface,
+                  ICommandManager commandManager,
+                  IGameNetwork gameNetwork,
+                  IClientState clientState,
+                  IDataManager dataManager,
+                  IChatGui chatGui,
+                  IPluginLog pluginLog)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
@@ -53,6 +54,7 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ClientState = clientState;
         ChatGui = chatGui;
+        Log = pluginLog;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
@@ -70,7 +72,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);
 
-        Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain();
+        Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain(Log);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
@@ -125,7 +127,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         var container = new RainbowMage.OverlayPlugin.TinyIoCContainer();
         
-        var logger = new RainbowMage.OverlayPlugin.Logger();
+        var logger = new RainbowMage.OverlayPlugin.Logger(Log);
         container.Register(logger);
         container.Register<RainbowMage.OverlayPlugin.ILogger>(logger);
 

@@ -349,7 +349,7 @@ public partial class FfxivActPluginWrapper : IDisposable
                 playerProcessor.Refresh();
                 partyProcessor.Refresh();
             }
-            catch (Exception ex) when (ex is ThreadAbortException or OperationCanceledException)
+            catch (Exception ex) when (ex is ThreadAbortException or OperationCanceledException or ObjectDisposedException)
             {
                 return;
             }

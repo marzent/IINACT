@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Machina.FFXIV.Headers.Opcodes;
 
 namespace RainbowMage.OverlayPlugin
 {
@@ -331,6 +332,10 @@ namespace RainbowMage.OverlayPlugin
                     return null;
             }
         }
+        
+        public static Dictionary<GameRegion, Dictionary<string, ushort>> GetMachinaOpcodes() =>
+            (Dictionary<GameRegion, Dictionary<string, ushort>>)typeof(OpcodeManager).GetField(
+                "_opcodes", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(OpcodeManager.Instance);
 
         public GameRegion GetMachinaRegion() =>
             Machina.FFXIV.Headers.Opcodes.OpcodeManager.Instance.GameRegion;
@@ -343,7 +348,7 @@ namespace RainbowMage.OverlayPlugin
          *
          * See https://github.com/ravahn/FFXIV_ACT_Plugin/issues/298
          */
-        public float ConvertUInt16Coordinate(ushort value)
+        public static float ConvertUInt16Coordinate(ushort value)
         {
             return (value - 0x7FFF) / 32.767f;
         }
@@ -356,7 +361,7 @@ namespace RainbowMage.OverlayPlugin
          *
          * See https://github.com/ravahn/FFXIV_ACT_Plugin/issues/298
          */
-        public double ConvertHeading(ushort heading)
+        public static double ConvertHeading(ushort heading)
         {
             return heading
                    // Normalize to turns
@@ -371,7 +376,7 @@ namespace RainbowMage.OverlayPlugin
          * Reinterpret a float as a UInt16. Some fields in Machina, such as Server_ActorCast.Rotation, are
          * marked as floats when they really should be UInt16.
          */
-        public ushort InterpretFloatAsUInt16(float value)
+        public static ushort InterpretFloatAsUInt16(float value)
         {
             return BitConverter.ToUInt16(BitConverter.GetBytes(value), 0);
         }

@@ -105,8 +105,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         // In combat boolean.
         // This address is written to by "mov [rax+rcx],bl" and has three readers.
         // This reader is "cmp byte ptr [ffxiv_dx11.exe+????????],00 { (0),0 }"
-        private static String kInCombatSignature = "803D????????000F95C04883C428";
-        private static int kInCombatSignatureOffset = -12;
+        private static String kInCombatSignature = "803D??????????74??488B03488BCBFF50";
+        private static int kInCombatSignatureOffset = -15;
 
         private static bool kInCombatSignatureRIP = true;
 

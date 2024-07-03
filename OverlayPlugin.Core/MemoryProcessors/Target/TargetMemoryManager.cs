@@ -24,6 +24,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
             this.container = container;
             container.Register<ITargetMemory63, TargetMemory63>();
             container.Register<ITargetMemory60, TargetMemory60>();
+            container.Register<ITargetMemory70, TargetMemory70>();
             repository = container.Resolve<FFXIVRepository>();
 
             var memory = container.Resolve<FFXIVMemory>();
@@ -44,6 +45,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Target
         public void ScanPointers()
         {
             List<ITargetMemory> candidates = new List<ITargetMemory>();
+            candidates.Add(container.Resolve<ITargetMemory70>());
             candidates.Add(container.Resolve<ITargetMemory63>());
             candidates.Add(container.Resolve<ITargetMemory60>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());

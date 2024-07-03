@@ -578,6 +578,11 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 {
                     return true;
                 }
+                // If the member's flags have changed, dispatch the event. This covers players jumping zones properly.
+                if (newMember.flags != oldMember.flags)
+                {
+                    return true;
+                }
             }
             return false;
         }

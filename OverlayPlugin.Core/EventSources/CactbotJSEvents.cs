@@ -163,7 +163,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 pos = new Point3F(e.pos_x, e.pos_y, e.pos_z);
                 rotation = e.rotation;
                 jobDetail = null;
-                bait = e.bait;
                 debugJob = e.debug_job;
                 currentShield = e.shield_value;
             }
@@ -193,7 +192,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             public Point3F pos;
             public float rotation;
-            public int bait;
 
             // One of the FooJobDetails structures, depending on the value of |job|.
             public object jobDetail;

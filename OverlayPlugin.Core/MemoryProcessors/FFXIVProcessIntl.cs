@@ -121,9 +121,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // A piece of code that reads the job data.
         // The pointer of interest is the first ???????? in the signature.
-        private static String kJobDataSignature = "488B0D????????4885C90F84????????488B05????????3C03";
-
-        private static int kJobDataSignatureOffset = -22;
+        private static String kJobDataSignature = "488B3D????????33ED";
+        private static int kJobDataSignatureOffset = -6;
 
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kJobDataSignatureRIP = true;

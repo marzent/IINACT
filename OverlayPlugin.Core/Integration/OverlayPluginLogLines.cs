@@ -102,7 +102,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 }
                 else
                 {
-                    LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
+                    if (repository.GetMachinaRegion().ToString() == machinaRegion)
+                        LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
                 }
             }
             else

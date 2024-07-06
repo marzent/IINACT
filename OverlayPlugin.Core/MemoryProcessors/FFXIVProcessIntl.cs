@@ -252,7 +252,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var entity_ptr = ReadIntPtr(player_ptr_addr_);
             if (entity_ptr == IntPtr.Zero)
                 return null;
-            return GetEntityData(entity_ptr);;
+            return GetEntityData(entity_ptr);
         }
 
         public override unsafe JObject GetJobSpecificData(EntityJob job)
@@ -297,6 +297,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     EntityJob.SAM => JObject.FromObject(*(SamuraiJobMemory*)&p[0]),
                     EntityJob.SGE => JObject.FromObject(*(SageJobMemory*)&p[0]),
                     EntityJob.RPR => JObject.FromObject(*(ReaperJobMemory*)&p[0]),
+                    EntityJob.PCT => JObject.FromObject(*(PictomancerJobMemory*)&p[0]),
                     _ => null
                 };
             }
@@ -877,6 +878,84 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [FieldOffset(0x05)]
             public byte voidShroud;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct PictomancerJobMemory
+        {
+            [Flags]
+            private enum CanvasFlags : byte
+            {
+                Pom = 1,
+                Wing = 1 << 1,
+                Claw = 1 << 2,
+                Maw = 1 << 3,
+                Weapon = 1 << 4,
+                Landscape = 1 << 5,
+            }
+
+            [Flags]
+            private enum CreatureFlags : byte
+            {
+                Pom = 1,
+                Wing = 1 << 1,
+                Claw = 1 << 2,
+
+                // Maw = 1 << 3, // Once you paint the Maw motif, it becomes a Madeen portrait.
+                MooglePortrait = 1 << 4,
+                MadeenPortrait = 1 << 5,
+            }
+
+            [FieldOffset(0x00)]
+            public byte palleteGauge;
+
+            [FieldOffset(0x02)]
+            public byte paint;
+
+            [NonSerialized]
+            [FieldOffset(0x03)]
+            private CanvasFlags canvasFlags;
+
+            public string creatureMotif
+            {
+                get
+                {
+                    if (canvasFlags.HasFlag(CanvasFlags.Pom))
+                        return "Pom";
+                    if (canvasFlags.HasFlag(CanvasFlags.Wing))
+                        return "Wing";
+                    if (canvasFlags.HasFlag(CanvasFlags.Claw))
+                        return "Claw";
+                    if (canvasFlags.HasFlag(CanvasFlags.Maw))
+                        return "Maw";
+                    return "None";
+                }
+            }
+
+            public bool weaponMotif => canvasFlags.HasFlag(CanvasFlags.Weapon);
+            public bool landscapeMotif => canvasFlags.HasFlag(CanvasFlags.Landscape);
+
+            [NonSerialized]
+            [FieldOffset(0x04)]
+            private CreatureFlags creatureFlags;
+
+            public string[] depictions
+            {
+                get
+                {
+                    var motifs = new List<string>();
+                    if (creatureFlags.HasFlag(CreatureFlags.Pom))
+                        motifs.Add("Pom");
+                    if (creatureFlags.HasFlag(CreatureFlags.Wing))
+                        motifs.Add("Wing");
+                    if (creatureFlags.HasFlag(CreatureFlags.Claw))
+                        motifs.Add("Claw");
+                    return motifs.ToArray();
+                }
+            }
+
+            public bool mooglePortrait => creatureFlags.HasFlag(CreatureFlags.MooglePortrait);
+            public bool madeenPortrait => creatureFlags.HasFlag(CreatureFlags.MadeenPortrait);
         }
     }
 }

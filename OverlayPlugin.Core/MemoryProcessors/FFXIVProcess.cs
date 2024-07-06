@@ -100,6 +100,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             DNC = 38,
             RPR = 39,
             SGE = 40,
+            VPR = 41,
+            PCT = 42,
         };
 
         static internal bool IsGatherer(EntityJob job)

@@ -19,6 +19,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     public DateTimeLogParser GetDateTimeFromLog;
     private volatile bool inCombat;
     private DateTime lastKnownTime;
+    private long lastKnownTickCount;
     private DateTime lastSetEncounter;
     private HistoryRecord lastZoneRecord;
     private Thread logReaderThread;
@@ -74,7 +75,20 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         get => lastKnownTime;
         set
         {
-            if (!(value == DateTime.MinValue)) lastKnownTime = value;
+            if (!(value == DateTime.MinValue))
+            {
+                lastKnownTime = value;
+                lastKnownTickCount = Environment.TickCount64;
+            }
+        }
+    }
+    
+    public DateTime LastEstimatedTime
+    {
+        get
+        {
+            var ticksPassed = Environment.TickCount64 - lastKnownTickCount;
+            return LastKnownTime.AddMilliseconds(ticksPassed);
         }
     }
 

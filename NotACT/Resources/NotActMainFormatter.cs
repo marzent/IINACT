@@ -2174,8 +2174,29 @@ public static class NotActMainFormatter
                 case "MAXHIT-*":
                     return data.GetMaxHit(ShowType: false);
                 case "duration":
+                    if (data.Active)
+                    {
+                        if (oFormActMain.LastEstimatedTime > data.StartTime)
+                        {
+                            var timeSpan = oFormActMain.LastEstimatedTime - data.StartTime;
+                            return timeSpan.Hours == 0
+                                       ? $"{timeSpan.Minutes:00}:{timeSpan.Seconds:00}"
+                                       : $"{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+                        }
+                        return "00:00";
+                    }
                     return data.DurationS;
                 case "DURATION":
+                    if (data.Active)
+                    {
+                        if (oFormActMain.LastEstimatedTime > data.StartTime)
+                        {
+                            return ((int)(oFormActMain.LastEstimatedTime - data.StartTime).TotalSeconds)
+                                .ToString("0");
+                        }
+
+                        return "0";
+                    }
                     return data.Duration.TotalSeconds.ToString("0");
                 case "damage":
                     foreach (var SelectiveAlly in selectiveAllies)

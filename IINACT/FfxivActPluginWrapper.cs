@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -60,6 +61,41 @@ public partial class FfxivActPluginWrapper : IDisposable
     public readonly IDataRepository Repository;
     public readonly IDataSubscription Subscription;
 
+    private bool serverTimeInitialized;
+    private readonly ReaderWriterLockSlim serverTimeLock = new(LockRecursionPolicy.SupportsRecursion);
+    private DateTime lastServerTime;
+    private readonly Stopwatch elapsedServerTime = new();
+    
+    private DateTime ServerTime
+    {
+        get
+        {
+            serverTimeLock.EnterReadLock();
+            try
+            {
+                return lastServerTime + elapsedServerTime.Elapsed;
+            }
+            finally
+            {
+                serverTimeLock.ExitReadLock();
+            }
+        }
+        set
+        {
+            serverTimeLock.EnterWriteLock();
+            try
+            {
+                elapsedServerTime.Restart();
+                lastServerTime = value;
+            }
+            finally
+            {
+                serverTimeLock.ExitWriteLock();
+            }
+        }
+    }
+
+
     public unsafe FfxivActPluginWrapper(
         Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui)
     {
@@ -112,16 +148,21 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
-        serverTimeProcessor.ServerTime = DateTime.Now;
+        ServerTime = DateTime.Now;
         Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () =>
         {
-            var timestamp = readServerTime.Read();
-            var seconds = timestamp & 0xFFFFFFFF;
-            var milliseconds = timestamp >> 32;
-            var totalMilliseconds = (long)((seconds * 1_000L) + milliseconds);
-            serverTimeProcessor.ServerTime =
-                serverTimeProcessor.Date1970.AddTicks(totalMilliseconds * 10_000L).ToLocalTime();
-            return totalMilliseconds;
+            if (!serverTimeInitialized)
+            {
+                var timestamp = readServerTime.Read();
+                var seconds = timestamp & 0xFFFFFFFF;
+                var milliseconds = timestamp >> 32;
+                var totalMilliseconds = (long)((seconds * 1_000L) + milliseconds);
+                ServerTime = serverTimeProcessor.Date1970.AddTicks(totalMilliseconds * 10_000L).ToLocalTime();
+                serverTimeInitialized = true;
+                return totalMilliseconds;
+            }
+            var timeSpan = ServerTime.ToUniversalTime() - serverTimeProcessor.Date1970;
+            return timeSpan.Ticks / 10_000L;
         };
 
         cancellationTokenSource = new CancellationTokenSource();
@@ -222,7 +263,7 @@ public partial class FfxivActPluginWrapper : IDisposable
                                     .Replace('|', '❘');
         var line = logFormat.FormatChatMessage(evenType, player, text);
 
-        logOutput.WriteLine(LogMessageType.ChatLog, serverTimeProcessor.ServerTime, line);
+        logOutput.WriteLine(LogMessageType.ChatLog, ServerTime, line);
     }
 
     private void SetupActWrapper()
@@ -332,6 +373,8 @@ public partial class FfxivActPluginWrapper : IDisposable
             {
                 if (token.WaitHandle.WaitOne(10))
                     return;
+
+                serverTimeProcessor.ServerTime = ServerTime;
 
                 if (!MobDataRefresh())
                     continue;

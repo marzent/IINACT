@@ -383,7 +383,6 @@ namespace RainbowMage.OverlayPlugin.EventSources
                                                       .ContainsKey("All")))
                         {
                             encounterDict.Add(exportValuePair.Key, "");
-                            // Log(LogLevel.Debug, $"Encounter: {exportValuePair.Key}: {varStopwatch.ElapsedMilliseconds}ms");
                             continue;
                         }
                     }

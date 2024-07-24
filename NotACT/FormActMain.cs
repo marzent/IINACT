@@ -18,8 +18,9 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     private Thread afterActionQueueThread;
     public DateTimeLogParser GetDateTimeFromLog;
     private volatile bool inCombat;
+    private readonly ReaderWriterLockSlim lastKnownLock = new(LockRecursionPolicy.SupportsRecursion);
     private DateTime lastKnownTime;
-    private long lastKnownTickCount;
+    private long lastKnownTicks;
     private DateTime lastSetEncounter;
     private HistoryRecord lastZoneRecord;
     private Thread logReaderThread;
@@ -72,13 +73,32 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public DateTime LastKnownTime
     {
-        get => lastKnownTime;
+        get
+        {
+            lastKnownLock.EnterReadLock();
+            try
+            {
+                return lastKnownTime;
+            }
+            finally
+            {
+                lastKnownLock.ExitReadLock();
+            }
+        }
         set
         {
-            if (!(value == DateTime.MinValue))
+            if (value == DateTime.MinValue)
+                return;
+
+            lastKnownLock.EnterWriteLock();
+            try
             {
                 lastKnownTime = value;
-                lastKnownTickCount = Environment.TickCount64;
+                lastKnownTicks = Environment.TickCount64;
+            }
+            finally
+            {
+                lastKnownLock.ExitWriteLock();
             }
         }
     }
@@ -87,8 +107,16 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     {
         get
         {
-            var ticksPassed = Environment.TickCount64 - lastKnownTickCount;
-            return LastKnownTime.AddMilliseconds(ticksPassed);
+            lastKnownLock.EnterReadLock();
+            try
+            {
+                var ticksPassed = Environment.TickCount64 - lastKnownTicks;
+                return lastKnownTime.AddMilliseconds(ticksPassed);;
+            }
+            finally
+            {
+                lastKnownLock.ExitReadLock();
+            }
         }
     }
 

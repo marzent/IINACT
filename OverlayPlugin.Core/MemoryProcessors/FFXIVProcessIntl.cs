@@ -604,67 +604,109 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x04)]
             public byte aetherflowStacks;
         };
-
+        
         [StructLayout(LayoutKind.Explicit)]
-        public struct SummonerJobMemory
-        {
-            [FieldOffset(0x00)]
-            public ushort tranceMilliseconds;
+         public struct SummonerJobMemory {
+           public enum ActiveArcanum : byte {
+             None = 0,
+             Ifrit = 1,
+             Titan = 2,
+             Garuda = 3,
+           }
 
-            [FieldOffset(0x02)]
-            public ushort attunementMilliseconds;
+           [Flags]
+           public enum Stance : byte {
+             None = 0,
+             // 0-1 bits: AetherFlows
+             AetherFlow1 = 1 << 0,
+             AetherFlow2 = 1 << 1,
+             AetherFlow3 = AetherFlow1 | AetherFlow2,
+             // 2 bit: Phoenix Ready
+             Phoenix = 1 << 2,
+             // 3 bit: Solar Bahamut Ready
+             // FIXME: guessed, not tested
+             SolarBahamut = 1 << 3,
+             // 4 bit: Unknown
+             // 5-7 bits: Usable Arcanum
+             Ruby = 1 << 5, // Fire/Ifrit
+             Topaz = 1 << 6, // Earth/Titan
+             Emerald = 1 << 7, // Wind/Garuda
+           }
 
-            [FieldOffset(0x06)]
-            public byte attunement;
+           [FieldOffset(0x00)]
+           public ushort tranceMilliseconds;
 
-            [NonSerialized]
-            [FieldOffset(0x07)]
-            private byte stance;
+           [FieldOffset(0x02)]
+           public ushort attunementMilliseconds;
 
-            public string[] usableArcanum
-            {
-                get
-                {
-                    var arcanums = new List<string>();
-                    if ((stance & 0x20) != 0)
-                        arcanums.Add("Ruby"); // Fire/Ifrit
-                    if ((stance & 0x40) != 0)
-                        arcanums.Add("Topaz"); // Earth/Titan
-                    if ((stance & 0x80) != 0)
-                        arcanums.Add("Emerald"); // Wind/Garuda
+           /// <summary>
+           /// 0x04: 0x17 = Summoned other than Carbuncle, 0x00 = Other Condition
+           /// </summary>
+           [NonSerialized]
+           [FieldOffset(0x04)]
+           private byte _summonStatus;
 
-                    return arcanums.ToArray();
-                }
-            }
+           /// <summary>
+           /// (From right to left)
+           /// 1-2 bits: Active Primal
+           /// 3-5 bits: Counts of Attunement Stacks
+           [NonSerialized]
+           [FieldOffset(0x06)]
+           private byte _attunement;
 
-            public string activePrimal
-            {
-                get
-                {
-                    if ((stance & 0xC) == 0x4)
-                        return "Ifrit";
-                    else if ((stance & 0xC) == 0x8)
-                        return "Titan";
-                    else if ((stance & 0xC) == 0xC)
-                        return "Garuda";
-                    else
-                        return null;
-                }
-            }
+           [NonSerialized]
+           [FieldOffset(0x07)]
+           private Stance stance;
 
-            public String nextSummoned
-            {
-                get
-                {
-                    if ((stance & 0x10) == 0)
-                        return "Bahamut";
-                    else
-                        return "Phoenix";
-                }
-            }
+           public bool summonStatus {
+             get {
+               return _summonStatus != 0;
+             }
+           }
 
-            public int aetherflowStacks => stance & 0x3;
-        };
+           public int attunement {
+             get {
+               return (_attunement >> 2) & 0x7; // = 0b111, to get the last 3 bits.
+             }
+           }
+
+           public string activePrimal {
+             get {
+               return ((ActiveArcanum)(_attunement & 0x3)).ToString();
+             }
+           }
+
+           public string[] usableArcanum {
+             get {
+               var arcanums = new List<string>();
+               foreach (var flag in new List<Stance> { Stance.Ruby, Stance.Topaz, Stance.Emerald }) {
+                 if (stance.HasFlag(flag))
+                   arcanums.Add(flag.ToString());
+               }
+
+               return arcanums.ToArray();
+             }
+           }
+
+           public string nextSummoned {
+             get {
+               foreach (var flag in new List<Stance> { Stance.SolarBahamut, Stance.Phoenix }) {
+                 if (stance.HasFlag(flag))
+                   return flag.ToString();
+               }
+               return "Bahamut";
+             }
+           }
+
+           public int aetherflowStacks {
+             get {
+               return stance.HasFlag(Stance.AetherFlow3) ? 3 :
+                      stance.HasFlag(Stance.AetherFlow2) ? 2 :
+                      stance.HasFlag(Stance.AetherFlow1) ? 1 :
+                      0;
+             }
+           }
+         };
 
         [StructLayout(LayoutKind.Explicit)]
         public struct ScholarJobMemory

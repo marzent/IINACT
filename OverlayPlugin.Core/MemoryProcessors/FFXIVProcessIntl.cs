@@ -297,6 +297,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     EntityJob.SAM => JObject.FromObject(*(SamuraiJobMemory*)&p[0]),
                     EntityJob.SGE => JObject.FromObject(*(SageJobMemory*)&p[0]),
                     EntityJob.RPR => JObject.FromObject(*(ReaperJobMemory*)&p[0]),
+                    EntityJob.VPR => JObject.FromObject(*(ViperJobMemory*)&p[0]),
                     EntityJob.PCT => JObject.FromObject(*(PictomancerJobMemory*)&p[0]),
                     _ => null
                 };
@@ -955,6 +956,45 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [FieldOffset(0x05)]
             public byte voidShroud;
+        }
+        
+        [StructLayout(LayoutKind.Explicit)]
+        public struct ViperJobMemory {
+            public enum AdvancedCombo : byte {
+                Dreadwinder = 1,
+                HuntersCoil = 2,
+                SwiftskinsCoil = 3,
+                PitOfDread = 4,
+                HuntersDen = 5,
+                SwiftskinsDen = 6,
+                Reawaken = 7,
+                FirstGeneration = 8,
+                SecondGeneration = 9,
+                ThirdGeneration = 10,
+                FourthGeneration = 11,
+            }
+
+            [FieldOffset(0x00)]
+            public byte rattlingCoilStacks;
+
+            [FieldOffset(0x01)]
+            public byte anguineTribute;
+
+            [FieldOffset(0x02)]
+            public byte serpentOffering;
+
+            [NonSerialized]
+            [FieldOffset(0x03)]
+            private AdvancedCombo _advancedCombo;
+
+            public string advancedCombo {
+                get {
+                    return _advancedCombo.ToString();
+                }
+            }
+
+            [FieldOffset(0x06)]
+            public ushort reawakenedTimer;
         }
 
         [StructLayout(LayoutKind.Explicit)]

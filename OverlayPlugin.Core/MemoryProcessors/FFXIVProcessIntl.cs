@@ -584,6 +584,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public bool enochian => enochian_state.HasFlag(EnochianFlags.Enochian);
 
             public bool paradox => enochian_state.HasFlag(EnochianFlags.Paradox);
+            
+            public int astralSoulStacks {
+                get {
+                    return ((int)enochian_state >> 2) & 0x7; // = 0b111, to get the last 3 bits.
+                }
+            }
         };
 
         [StructLayout(LayoutKind.Explicit)]

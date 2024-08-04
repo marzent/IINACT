@@ -690,9 +690,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public enum Beast : byte
             {
                 None = 0,
-                Coeurl = 1,
-                Opo = 2,
-                Raptor = 3,
+                Opo = 1,
+                Raptor = 2,
+                Coeurl = 3,
             }
 
             [FieldOffset(0x00)]
@@ -712,7 +712,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [NonSerialized]
             [FieldOffset(0x04)]
+            private byte Fury;
+
+            [NonSerialized]
+            [FieldOffset(0x05)]
             private byte Nadi;
+            
+            [FieldOffset(0x06)]
+            public ushort MasterfulReadyMilisecond;
 
             public string[] beastChakra
             {
@@ -738,10 +745,28 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             {
                 get
                 {
-                    if ((Nadi & 0x2) == 0x2)
+                    if ((Nadi & 0x1) == 0x1)
                         return true;
                     else
                         return false;
+                }
+            }
+            
+            public int opoopoFury {
+                get {
+                    return Fury & 0x3;
+                }
+            }
+
+            public int raptorFury {
+                get {
+                    return (Fury >> 2) & 0x3;
+                }
+            }
+
+            public int coeurlFury {
+                get {
+                    return (Fury >> 4) & 0x3;
                 }
             }
         };

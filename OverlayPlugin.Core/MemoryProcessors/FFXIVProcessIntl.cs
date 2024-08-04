@@ -967,10 +967,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         [StructLayout(LayoutKind.Explicit)]
         public struct ViperJobMemory {
             public enum AdvancedCombo : byte {
-                Dreadwinder = 1,
+                Vicewinder = 1,
                 HuntersCoil = 2,
                 SwiftskinsCoil = 3,
-                PitOfDread = 4,
+                Vicepit = 4,
                 HuntersDen = 5,
                 SwiftskinsDen = 6,
                 Reawaken = 7,

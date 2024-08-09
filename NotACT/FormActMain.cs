@@ -111,7 +111,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
             try
             {
                 var ticksPassed = Environment.TickCount64 - lastKnownTicks;
-                return lastKnownTime.AddMilliseconds(ticksPassed);;
+                return lastKnownTime.AddMilliseconds(ticksPassed);
             }
             finally
             {

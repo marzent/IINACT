@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using Dalamud.Game;
 using Dalamud.Game.Command;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
@@ -25,12 +26,15 @@ public sealed class Plugin : IDalamudPlugin
     internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
+    internal IGameInteropProvider GameInteropProvider { get; }
+    internal ISigScanner SigScanner { get; }
     public static IPluginLog Log { get; private set; } = null!;
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
+    private GameServerTime GameServerTime { get; }
     private IpcProviders IpcProviders { get; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; }
@@ -46,7 +50,9 @@ public sealed class Plugin : IDalamudPlugin
                   IClientState clientState,
                   IDataManager dataManager,
                   IChatGui chatGui,
-                  IPluginLog pluginLog)
+                  IPluginLog pluginLog,
+                  IGameInteropProvider gameInteropProvider,
+                  ISigScanner sigScanner)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
@@ -54,11 +60,14 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ClientState = clientState;
         ChatGui = chatGui;
+        GameInteropProvider = gameInteropProvider;
+        SigScanner = sigScanner;
         Log = pluginLog;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();
+        GameServerTime = new GameServerTime(GameInteropProvider, SigScanner);
         Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
 
         HttpClient = new HttpClient();
@@ -110,6 +119,7 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.EnterPvP -= EnterPvP;
         ClientState.LeavePvP -= LeavePvP;
         IpcProviders.Dispose();
+        GameServerTime.Dispose();
         
         FfxivActPluginWrapper.Dispose();
         OverlayPlugin.DeInitPlugin();

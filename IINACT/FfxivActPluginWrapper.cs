@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -36,7 +35,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly ParseMediator parseMediator;
 
     private readonly ServerTimeProcessor serverTimeProcessor;
-    private readonly IReadServerTime readServerTime;
     private readonly MobArrayProcessor mobArrayProcessor;
     private readonly IZoneMapProcessor zoneMapProcessor;
     private readonly CombatantManager combatantManager;
@@ -60,41 +58,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     public ParseSettings ParseSettings = null!;
     public readonly IDataRepository Repository;
     public readonly IDataSubscription Subscription;
-
-    private bool serverTimeInitialized;
-    private readonly ReaderWriterLockSlim serverTimeLock = new(LockRecursionPolicy.SupportsRecursion);
-    private DateTime lastServerTime;
-    private readonly Stopwatch elapsedServerTime = new();
-    
-    private DateTime ServerTime
-    {
-        get
-        {
-            serverTimeLock.EnterReadLock();
-            try
-            {
-                return lastServerTime + elapsedServerTime.Elapsed;
-            }
-            finally
-            {
-                serverTimeLock.ExitReadLock();
-            }
-        }
-        set
-        {
-            serverTimeLock.EnterWriteLock();
-            try
-            {
-                elapsedServerTime.Restart();
-                lastServerTime = value;
-            }
-            finally
-            {
-                serverTimeLock.ExitWriteLock();
-            }
-        }
-    }
-
 
     public unsafe FfxivActPluginWrapper(
         Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui)
@@ -128,7 +91,6 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         processManager = scanMemory._processManager;
         serverTimeProcessor = (ServerTimeProcessor)scanMemory._serverTimeProcessor;
-        readServerTime = serverTimeProcessor._readServerTime;
         mobArrayProcessor = (MobArrayProcessor)scanMemory._mobArrayProcessor;
         zoneMapProcessor = scanMemory._zoneProcessor;
         combatantManager = (CombatantManager)scanMemory._combatantManager;
@@ -148,22 +110,7 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
-        ServerTime = DateTime.Now;
-        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () =>
-        {
-            if (!serverTimeInitialized)
-            {
-                var timestamp = readServerTime.Read();
-                var seconds = timestamp & 0xFFFFFFFF;
-                var milliseconds = timestamp >> 32;
-                var totalMilliseconds = (long)((seconds * 1_000L) + milliseconds);
-                ServerTime = serverTimeProcessor.Date1970.AddTicks(totalMilliseconds * 10_000L).ToLocalTime();
-                serverTimeInitialized = true;
-                return totalMilliseconds;
-            }
-            var timeSpan = ServerTime.ToUniversalTime() - serverTimeProcessor.Date1970;
-            return timeSpan.Ticks / 10_000L;
-        };
+        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => (long)GameServerTime.LastSeverTimestamp;
 
         cancellationTokenSource = new CancellationTokenSource();
         scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))
@@ -263,7 +210,7 @@ public partial class FfxivActPluginWrapper : IDisposable
                                     .Replace('|', '❘');
         var line = logFormat.FormatChatMessage(evenType, player, text);
 
-        logOutput.WriteLine(LogMessageType.ChatLog, ServerTime, line);
+        logOutput.WriteLine(LogMessageType.ChatLog, GameServerTime.CurrentServerTime, line);
     }
 
     private void SetupActWrapper()
@@ -374,7 +321,7 @@ public partial class FfxivActPluginWrapper : IDisposable
                 if (token.WaitHandle.WaitOne(10))
                     return;
 
-                serverTimeProcessor.ServerTime = ServerTime;
+                serverTimeProcessor.ServerTime = GameServerTime.CurrentServerTime;
 
                 if (!MobDataRefresh())
                     continue;

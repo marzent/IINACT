@@ -14,10 +14,14 @@ internal class GameServerTime : IDisposable
     
     private static readonly DateTime Date1970 = DateTime.MinValue.AddYears(1969);
 
-    public static DateTime LastServerTime => Date1970.AddTicks((long)LastSeverTimestamp * 10_000L).ToLocalTime();
+    public static DateTime LastServerTime => LastSeverTimestamp > 0
+                                                 ? Date1970.AddTicks((long)LastSeverTimestamp * 10_000L).ToLocalTime()
+                                                 : DateTime.Now;
     
-    public static DateTime CurrentServerTime =>
-        LastServerTime.AddMilliseconds(Environment.TickCount64 - LastSeverTimestampTicks);
+    public static DateTime CurrentServerTime => LastSeverTimestamp > 0
+                                                    ? LastServerTime.AddMilliseconds(
+                                                        Environment.TickCount64 - LastSeverTimestampTicks)
+                                                    : DateTime.Now;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct FfxivPacketHeader

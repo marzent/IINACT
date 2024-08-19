@@ -110,6 +110,7 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
+        serverTimeProcessor.ServerTime = DateTime.Now;
         Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => (long)GameServerTime.LastSeverTimestamp;
 
         cancellationTokenSource = new CancellationTokenSource();

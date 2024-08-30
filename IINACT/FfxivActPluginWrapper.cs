@@ -1,8 +1,8 @@
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
@@ -28,6 +28,8 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
     private readonly IChatGui chatGui;
+    private readonly IFramework framework;
+    private readonly ICondition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly Container iocContainer;
@@ -46,6 +48,8 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly int combatantBufferSize;
     private readonly nint mobData;
     private readonly nint[] mobDataOffsets;
+    private readonly SemaphoreSlim refreshSemaphore = new(0);
+    private byte mobDataAge = byte.MaxValue;
 
     private readonly Thread scanThread;
     private readonly CancellationTokenSource cancellationTokenSource;
@@ -60,11 +64,14 @@ public partial class FfxivActPluginWrapper : IDisposable
     public readonly IDataSubscription Subscription;
 
     public unsafe FfxivActPluginWrapper(
-        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui)
+        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui, IFramework framework,
+        ICondition condition)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
         this.chatGui = chatGui;
+        this.framework = framework;
+        this.condition = condition;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
@@ -128,6 +135,8 @@ public partial class FfxivActPluginWrapper : IDisposable
         mobDataOffsets = new nint[mobArraySize];
         for (var i = 0; i < mobArraySize; i++)
             mobDataOffsets[i] = mobData + (i * combatantSize);
+
+        this.framework.Update += MobDataRefresh;
     }
 
     private Language ClientLanguage =>
@@ -144,6 +153,7 @@ public partial class FfxivActPluginWrapper : IDisposable
     {
         cancellationTokenSource.Cancel();
         cancellationTokenSource.Dispose();
+        framework.Update -= MobDataRefresh;
         chatGui.ChatMessage -= OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead -= OFormActMain_BeforeLogLineRead;
         ffxivActPlugin.DeInitPlugin();
@@ -251,81 +261,57 @@ public partial class FfxivActPluginWrapper : IDisposable
     [SuppressGCTransition]
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
-    
-    private static unsafe nint TryReadAddress(nint address)
-    {
-        Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-        var bufferPtr = (nint)Unsafe.AsPointer(ref buffer[0]);
 
-        if (ReadMemory(bufferPtr, address, sizeof(ulong)) == 0)
-            return (nint)BitConverter.ToUInt64(buffer);
-
-        throw new AccessViolationException($"Attempted to read invalid memory location {address}.");
-    }
-
-    private bool MobDataRefresh()
+    private unsafe void MobDataRefresh(IFramework _)
     {
         if (settingsMediator.DataCollectionSettings == null)
-            return false;
-        
-        var mobArrayAddress = mobArrayProcessor._readMobArray.Read64();
+            return;
+
+        if (mobDataAge < 3 || (!condition[ConditionFlag.BoundByDuty56] && mobDataAge < 10))
+        {
+            mobDataAge++;
+            if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
+                return;
+
+            refreshSemaphore.Release();
+            return;
+        }
+
+        mobDataAge = 0;
+        var mobArrayAddress = (ulong*)mobArrayProcessor._readMobArray.Read64();
         var mobArray = mobArrayProcessor._internalMmobArray;
-        
-        if (mobArrayAddress == 0)
-        {
-            Array.Clear(mobArray);
-            return false;
-        }
-        
-        var mobArrayAddressValue = TryReadAddress(mobArrayAddress);
 
-        if (mobArrayAddressValue == 0)
+        if (*mobArrayAddress == 0)
         {
             Array.Clear(mobArray);
-            return false;
+            return;
         }
 
-        if (ReadMemory(mobDataOffsets[0], mobArrayAddressValue, combatantSize) != 0)
-        {
-            Array.Clear(mobArray);
-            return false;
-        }
-        
+        ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize);
         mobArray[0] = mobDataOffsets[0];
 
         for (var i = 1; i < mobArraySize; i++)
         {
-            mobArrayAddressValue = TryReadAddress(mobArrayAddress + (i * IntPtr.Size));
-
-            if (mobArrayAddressValue == 0)
+            if (*(mobArrayAddress + i) == 0)
             {
                 mobArray[i] = nint.Zero;
                 continue;
             }
-            if (ReadMemory(mobDataOffsets[i], mobArrayAddressValue, combatantSize) != 0)
-            {
-                Array.Clear(mobArray);
-                return false;
-            }
+            ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize);
             mobArray[i] = mobDataOffsets[i];
         }
 
-        return true;
+        refreshSemaphore.Release();
     }
 
     private void ScanMemory(CancellationToken token)
     {
-        while (true)
+        while (!token.IsCancellationRequested)
         {
             try
             {
-                if (token.WaitHandle.WaitOne(10))
-                    return;
-
+                refreshSemaphore.Wait(token);
                 serverTimeProcessor.ServerTime = GameServerTime.CurrentServerTime;
-
-                if (!MobDataRefresh())
-                    continue;
 
                 var zoneId = zoneMapProcessor.ZoneID;
                 zoneMapProcessor.Refresh();

@@ -26,6 +26,8 @@ public sealed class Plugin : IDalamudPlugin
     internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
+    internal IFramework Framework { get; }
+    internal ICondition Condition { get; }
     internal IGameInteropProvider GameInteropProvider { get; }
     internal ISigScanner SigScanner { get; }
     public static IPluginLog Log { get; private set; } = null!;
@@ -50,6 +52,8 @@ public sealed class Plugin : IDalamudPlugin
                   IClientState clientState,
                   IDataManager dataManager,
                   IChatGui chatGui,
+                  IFramework framework,
+                  ICondition condition,
                   IPluginLog pluginLog,
                   IGameInteropProvider gameInteropProvider,
                   ISigScanner sigScanner)
@@ -60,6 +64,8 @@ public sealed class Plugin : IDalamudPlugin
         DataManager = dataManager;
         ClientState = clientState;
         ChatGui = chatGui;
+        Framework = framework;
+        Condition = condition;
         GameInteropProvider = gameInteropProvider;
         SigScanner = sigScanner;
         Log = pluginLog;
@@ -89,7 +95,7 @@ public sealed class Plugin : IDalamudPlugin
         this.TextToSpeechProvider = new TextToSpeechProvider();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(PluginInterface);

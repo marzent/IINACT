@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
+    "net8.0-windows7.0": {
       "Microsoft.CSharp": {
         "type": "Direct",
         "requested": "[4.7.0, )",
@@ -10,9 +10,9 @@
       },
       "NetCoreServer": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "5RFgorlI297p25MTM5j0omCqoyddLWTwuJnpK7F0ytMJ4cL80vYaJ3C+C1Kticrc0LnY0j/w9mirLju6KJW20w=="
+        "requested": "[8.0.7, )",
+        "resolved": "8.0.7",
+        "contentHash": "BhNiJ6EVxKS1eKqlHINy7BruLDc+xCH59oZxu7d2Hve8CzFki69PumVlf6vyAQvIVfxbZiHw/FI3UHNnMajuVg=="
       },
       "System.Data.DataSetExtensions": {
         "type": "Direct",
@@ -41,6 +41,6 @@
         }
       }
     },
-    "net7.0-windows7.0/win-x64": {}
+    "net8.0-windows7.0/win-x64": {}
   }
 }

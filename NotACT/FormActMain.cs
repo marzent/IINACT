@@ -38,6 +38,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public bool ReadThreadLock { get; set; }
     public bool WriteLogFile { get; set; } = true;
+    public bool DisableWritingPvpLogFile { get; set; }
     public int GlobalTimeSorter { get; set; }
     public List<ZoneData> ZoneList { get; set; } = new();
     public string LogFileFilter { get; set; } = "notact*.txt";
@@ -126,7 +127,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public void ParseRawLogLine(string logLine)
     {
-        if (WriteLogFile)
+        if (WriteLogFile && !DisableWritingPvpLogFile)
             LogQueue.Enqueue(logLine);
         if (BeforeLogLineRead == null || GetDateTimeFromLog == null)
             return;
@@ -309,7 +310,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
             using var outputWriter = new StreamWriter(stream);
             while (true)
             {
-                if (!WriteLogFile)
+                if (!WriteLogFile || DisableWritingPvpLogFile)
                 {
                     Thread.Sleep(2000);
                     continue;

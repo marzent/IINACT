@@ -137,7 +137,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                     */
 
                     if (*((ushort*)&buffer[MessageType_Offset]) != ActorControl142_Opcode) return;
-                    if (*((ushort*)&buffer[Category_Offset]) != 0x1f8) return;
+                    if (*((ushort*)&buffer[Category_Offset]) != (ushort)Server_ActorControlCategory.StatusUpdate) return;
 
                     OnOnlineStatusChanged?.Invoke(
                         null,

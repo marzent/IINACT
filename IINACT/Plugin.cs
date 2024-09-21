@@ -1,11 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
-using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.Game.Network;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
@@ -28,10 +23,9 @@ public sealed class Plugin : IDalamudPlugin
     internal DalamudPluginInterface PluginInterface { get; }
     internal ICommandManager CommandManager { get; }
     internal IGameNetwork GameNetwork { get; }
+    internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
-    internal IFramework Framework { get; }
-    internal ICondition Condition { get; }
 
     internal Configuration Configuration { get; }
     private TextToSpeechProvider TextToSpeechProvider { get; }
@@ -49,18 +43,16 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
                   [RequiredVersion("1.0")] ICommandManager commandManager,
                   [RequiredVersion("1.0")] IGameNetwork gameNetwork,
+                  [RequiredVersion("1.0")] IClientState clientState,
                   [RequiredVersion("1.0")] IDataManager dataManager,
-                  [RequiredVersion("1.0")] IChatGui chatGui,
-                  [RequiredVersion("1.0")] IFramework framework,
-                  [RequiredVersion("1.0")] ICondition condition)
+                  [RequiredVersion("1.0")] IChatGui chatGui)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
         GameNetwork = gameNetwork;
         DataManager = dataManager;
+        ClientState = clientState;
         ChatGui = chatGui;
-        Framework = framework;
-        Condition = condition;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
@@ -71,7 +63,7 @@ public sealed class Plugin : IDalamudPlugin
         
         var fetchDeps =
             new FetchDependencies.FetchDependencies(Version, PluginInterface.AssemblyLocation.Directory!.FullName,
-                                                    HttpClient);
+                                                    DataManager.Language.ToString() == "ChineseSimplified", HttpClient);
         
         fetchDeps.GetFfxivPlugin();
         
@@ -86,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         this.TextToSpeechProvider = new TextToSpeechProvider();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.LogFilePath = Configuration.LogFilePath;
 
-        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui, Framework, Condition);
+        FfxivActPluginWrapper = new FfxivActPluginWrapper(Configuration, DataManager.Language, ChatGui);
         OverlayPlugin = InitOverlayPlugin();
 
         IpcProviders = new IpcProviders(PluginInterface);
@@ -107,10 +99,14 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        ClientState.EnterPvP += EnterPvP;
+        ClientState.LeavePvP += LeavePvP;
     }
 
     public void Dispose()
     {
+        ClientState.EnterPvP -= EnterPvP;
+        ClientState.LeavePvP -= LeavePvP;
         IpcProviders.Dispose();
         
         FfxivActPluginWrapper.Dispose();
@@ -136,7 +132,6 @@ public sealed class Plugin : IDalamudPlugin
         container.Register(HttpClient);
         container.Register(FileDialogManager);
         container.Register(PluginInterface);
-        container.Register(Framework);
 
         var overlayPlugin = new RainbowMage.OverlayPlugin.PluginMain(
             PluginInterface.AssemblyLocation.Directory!.FullName, logger, container);
@@ -185,6 +180,14 @@ public sealed class Plugin : IDalamudPlugin
                 Configuration.WriteLogFile = false;
                 Configuration.Save();
                 break;
+            case "log pvp start":
+                Configuration.DisablePvp = false;
+                Configuration.Save();
+                break;
+            case "log pvp stop":
+                Configuration.DisablePvp = true;
+                Configuration.Save();
+                break;
             default:
                 MainWindow.IsOpen = true;
                 break;
@@ -200,5 +203,18 @@ public sealed class Plugin : IDalamudPlugin
     public void DrawConfigUI()
     {
         MainWindow.IsOpen = true;
+    }
+
+    private void EnterPvP()
+    {
+        if (Configuration is not { DisablePvp: true, DisableWritingPvpLogFile: false })
+            return;
+
+        Configuration.DisableWritingPvpLogFile = true;
+    }
+
+    private void LeavePvP()
+    {
+        Configuration.DisableWritingPvpLogFile = false;
     }
 }

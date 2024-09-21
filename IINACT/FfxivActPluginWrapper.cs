@@ -1,9 +1,7 @@
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Advanced_Combat_Tracker;
 using Dalamud;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Logging;
@@ -30,15 +28,14 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly Configuration configuration;
     private readonly ClientLanguage dalamudClientLanguage;
     private readonly IChatGui chatGui;
-    private readonly IFramework framework;
-    private readonly ICondition condition;
 
     private readonly FFXIV_ACT_Plugin.FFXIV_ACT_Plugin ffxivActPlugin;
     private readonly Container iocContainer;
     private ISettingsMediator settingsMediator = null!;
     private readonly ParseMediator parseMediator;
 
-    private readonly IServerTimeProcessor serverTimeProcessor;
+    private readonly ServerTimeProcessor serverTimeProcessor;
+    private readonly IReadServerTime readServerTime;
     private readonly MobArrayProcessor mobArrayProcessor;
     private readonly IZoneMapProcessor zoneMapProcessor;
     private readonly CombatantManager combatantManager;
@@ -50,8 +47,6 @@ public partial class FfxivActPluginWrapper : IDisposable
     private readonly int combatantBufferSize;
     private readonly nint mobData;
     private readonly nint[] mobDataOffsets;
-    private readonly SemaphoreSlim refreshSemaphore = new(0);
-    private byte mobDataAge = byte.MaxValue;
 
     private readonly Thread scanThread;
     private readonly CancellationTokenSource cancellationTokenSource;
@@ -66,18 +61,19 @@ public partial class FfxivActPluginWrapper : IDisposable
     public readonly IDataSubscription Subscription;
 
     public unsafe FfxivActPluginWrapper(
-        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui, IFramework framework,
-        ICondition condition)
+        Configuration configuration, ClientLanguage dalamudClientLanguage, IChatGui chatGui)
     {
         this.configuration = configuration;
         this.dalamudClientLanguage = dalamudClientLanguage;
         this.chatGui = chatGui;
-        this.framework = framework;
-        this.condition = condition;
 
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         ffxivActPlugin.ConfigureIOC();
-        OpcodeManager.Instance.SetRegion(GameRegion.Global);
+        if (dalamudClientLanguage.ToString() == "ChineseSimplified") {
+            OpcodeManager.Instance.SetRegion(GameRegion.Chinese);
+        } else {
+            OpcodeManager.Instance.SetRegion(GameRegion.Global);
+        }
 
         iocContainer = ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();
@@ -95,7 +91,8 @@ public partial class FfxivActPluginWrapper : IDisposable
         var scanMemory = (ScanMemory)ffxivActPlugin._dataCollection._scanMemory;
 
         processManager = scanMemory._processManager;
-        serverTimeProcessor = scanMemory._serverTimeProcessor;
+        serverTimeProcessor = (ServerTimeProcessor)scanMemory._serverTimeProcessor;
+        readServerTime = serverTimeProcessor._readServerTime;
         mobArrayProcessor = (MobArrayProcessor)scanMemory._mobArrayProcessor;
         zoneMapProcessor = scanMemory._zoneProcessor;
         combatantManager = (CombatantManager)scanMemory._combatantManager;
@@ -115,7 +112,17 @@ public partial class FfxivActPluginWrapper : IDisposable
 
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
-        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => serverTimeProcessor.ServerTime;
+        serverTimeProcessor.ServerTime = DateTime.Now;
+        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () =>
+        {
+            var timestamp = readServerTime.Read();
+            var seconds = timestamp & 0xFFFFFFFF;
+            var milliseconds = timestamp >> 32;
+            var totalMilliseconds = (long)((seconds * 1_000L) + milliseconds);
+            serverTimeProcessor.ServerTime =
+                serverTimeProcessor.Date1970.AddTicks(totalMilliseconds * 10_000L).ToLocalTime();
+            return totalMilliseconds;
+        };
 
         cancellationTokenSource = new CancellationTokenSource();
         scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))
@@ -132,8 +139,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         mobDataOffsets = new nint[mobArraySize];
         for (var i = 0; i < mobArraySize; i++)
             mobDataOffsets[i] = mobData + (i * combatantSize);
-
-        this.framework.Update += MobDataRefresh;
     }
 
     private Language ClientLanguage =>
@@ -143,14 +148,13 @@ public partial class FfxivActPluginWrapper : IDisposable
             Dalamud.ClientLanguage.English => Language.English,
             Dalamud.ClientLanguage.German => Language.German,
             Dalamud.ClientLanguage.French => Language.French,
-            _ => Language.English
+            _ => dalamudClientLanguage.ToString() == "ChineseSimplified" ? Language.Chinese : Language.English
         };
 
     public void Dispose()
     {
         cancellationTokenSource.Cancel();
         cancellationTokenSource.Dispose();
-        framework.Update -= MobDataRefresh;
         chatGui.ChatMessage -= OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead -= OFormActMain_BeforeLogLineRead;
         ffxivActPlugin.DeInitPlugin();
@@ -255,44 +259,30 @@ public partial class FfxivActPluginWrapper : IDisposable
         PluginLog.Debug(text);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ServerTimeRefresh()
-    {
-        serverTimeProcessor.Refresh();
-    }
-
+    [SuppressGCTransition]
     [LibraryImport("SafeMemoryReader.dll")]
     private static partial int ReadMemory(nint dest, nint src, int size);
 
-    private unsafe void MobDataRefresh(IFramework _)
+    private unsafe bool MobDataRefresh()
     {
         if (settingsMediator.DataCollectionSettings == null)
-            return;
-
-        if (mobDataAge < 3 || (!condition[ConditionFlag.BoundByDuty56] && mobDataAge < 10))
-        {
-            mobDataAge++;
-            if (mobArrayProcessor.PrimaryPlayerPointer == nint.Zero)
-            {
-                ServerTimeRefresh();
-                return;
-            }
-            refreshSemaphore.Release();
-            return;
-        }
-
-        mobDataAge = 0;
+            return false;
+        
         var mobArrayAddress = (ulong*)mobArrayProcessor._readMobArray.Read64();
         var mobArray = mobArrayProcessor._internalMmobArray;
 
         if (*mobArrayAddress == 0)
         {
             Array.Clear(mobArray);
-            ServerTimeRefresh();
-            return;
+            return false;
         }
 
-        ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize);
+        if (ReadMemory(mobDataOffsets[0], (nint)(void*)*mobArrayAddress, combatantSize) != 0)
+        {
+            Array.Clear(mobArray);
+            return false;
+        }
+        
         mobArray[0] = mobDataOffsets[0];
 
         for (var i = 1; i < mobArraySize; i++)
@@ -302,22 +292,28 @@ public partial class FfxivActPluginWrapper : IDisposable
                 mobArray[i] = nint.Zero;
                 continue;
             }
-            ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize);
+            if (ReadMemory(mobDataOffsets[i], (nint)(void*)*(mobArrayAddress + i), combatantSize) != 0)
+            {
+                Array.Clear(mobArray);
+                return false;
+            }
             mobArray[i] = mobDataOffsets[i];
         }
 
-        refreshSemaphore.Release();
+        return true;
     }
 
     private void ScanMemory(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        while (true)
         {
             try
             {
-                refreshSemaphore.Wait(token);
+                if (token.WaitHandle.WaitOne(10))
+                    return;
 
-                serverTimeProcessor.Refresh();
+                if (!MobDataRefresh())
+                    continue;
 
                 var zoneId = zoneMapProcessor.ZoneID;
                 zoneMapProcessor.Refresh();

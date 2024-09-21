@@ -1,13 +1,15 @@
 using Newtonsoft.Json;
 using RainbowMage.OverlayPlugin.EventSources;
 using RainbowMage.OverlayPlugin.Handlers.Ipc;
-using RainbowMage.OverlayPlugin.Integration;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Aggro;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Combatant;
+using RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Enmity;
 using RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud;
 using RainbowMage.OverlayPlugin.MemoryProcessors.InCombat;
+using RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge;
+using RainbowMage.OverlayPlugin.MemoryProcessors.Party;
 using RainbowMage.OverlayPlugin.MemoryProcessors.Target;
 using RainbowMage.OverlayPlugin.MemoryProcessors;
 using RainbowMage.OverlayPlugin.NetworkProcessors;
@@ -204,19 +206,19 @@ namespace RainbowMage.OverlayPlugin
                     // These are registered to be lazy-loaded. Use interface to force TinyIoC to use singleton pattern.
                     _container.Register<ICombatantMemory, CombatantMemoryManager>();
                     _container.Register<ITargetMemory, TargetMemoryManager>();
+                    _container.Register<IContentFinderSettingsMemory, ContentFinderSettingsMemoryManager>();
                     _container.Register<IAggroMemory, AggroMemoryManager>();
                     _container.Register<IEnmityMemory, EnmityMemoryManager>();
                     _container.Register<IEnmityHudMemory, EnmityHudMemoryManager>();
                     _container.Register<IInCombatMemory, InCombatMemoryManager>();
                     _container.Register<IAtkStageMemory, AtkStageMemoryManager>();
+                    _container.Register<IPartyMemory, PartyMemoryManager>();
+                    _container.Register<IJobGaugeMemory, JobGaugeMemoryManager>();
 
                     _container.Register(new OverlayPluginLogLines(_container));
                     
                     Status = @"Init Phase 2: Addons";
                     LoadAddons();
-
-                    Status = @"Init Phase 2: Unstable new stuff";
-                    _container.Register(new UnstableNewLogLines(_container));
 
                     Status = @"Init Phase 2: UI";
                     try
@@ -299,7 +301,6 @@ namespace RainbowMage.OverlayPlugin
         /// <param name="overlay"></param>
         internal void RegisterOverlay(IOverlay overlay)
         {
-            overlay.OnLog += (o, e) => _logger.Log(e.Level, e.Message);
             overlay.Start();
             this.Overlays.Add(overlay);
 

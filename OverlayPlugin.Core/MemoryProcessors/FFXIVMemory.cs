@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             repository.RegisterProcessChangedHandler(UpdateProcess);
         }
 
+        [SuppressGCTransition]
         [LibraryImport("SafeMemoryReader.dll")]
         private static partial int ReadMemory(nint dest, nint src, int size);
 
@@ -109,7 +111,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         public unsafe static string GetStringFromBytes(byte* source, int size)
         {
-            var bytes = new byte[size];
+            var bytes = ArrayPool<byte>.Shared.Rent(size);
             Marshal.Copy((IntPtr)source, bytes, 0, size);
             var realSize = 0;
             for (var i = 0; i < size; i++)
@@ -122,14 +124,15 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 realSize = i;
                 break;
             }
-
-            Array.Resize(ref bytes, realSize);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            
+            var ret = System.Text.Encoding.UTF8.GetString(bytes, 0, realSize);
+            ArrayPool<byte>.Shared.Return(bytes);
+            return ret;
         }
 
         public static string GetStringFromBytes(byte[] source, int offset = 0, int size = 256)
         {
-            var bytes = new byte[size];
+            var bytes = ArrayPool<byte>.Shared.Rent(size);
             Array.Copy(source, offset, bytes, 0, size);
             var realSize = 0;
             for (var i = 0; i < size; i++)
@@ -143,8 +146,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 break;
             }
 
-            Array.Resize(ref bytes, realSize);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            var ret = System.Text.Encoding.UTF8.GetString(bytes, 0, realSize);
+            ArrayPool<byte>.Shared.Return(bytes);
+            return ret;
         }
 
         /// <summary>
@@ -168,6 +172,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public byte[] GetByteArray(IntPtr address, int length)
         {
             var data = new byte[length];
+            Peek(address, data);
+            return data;
+        }
+        
+        /// <summary>
+        /// メモリから指定された長さだけ読み取りバイト配列として返す
+        /// </summary>
+        /// <param name="address">読み取る開始アドレス</param>
+        /// <param name="length">読み取る長さ</param>
+        /// <returns></returns>
+        public byte[] GetByteArrayPooled(IntPtr address, int length)
+        {
+            var data = ArrayPool<byte>.Shared.Rent(length);
             Peek(address, data);
             return data;
         }

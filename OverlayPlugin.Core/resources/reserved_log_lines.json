@@ -56,7 +56,91 @@
         "Comment": "RSV Key/Value data"
     },
     {
-        "StartID": 263,
+        "ID": 263,
+        "Name": "ActorCastExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorCast packets"
+    },
+    {
+        "ID": 264,
+        "Name": "AbilityExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActionEffect packets"
+    },
+    {
+        "ID": 265,
+        "Name": "ContentFinderSettings",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Current content finder settings"
+    },
+    {
+        "ID": 266,
+        "Name": "NpcYell",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "NpcYell packet data"
+    },
+    {
+        "ID": 267,
+        "Name": "BattleTalk2",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "BattleTalk2 packet data"
+    },
+    {
+        "ID": 268,
+        "Name": "Countdown",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Countdown packet data"
+    },
+    {
+        "ID": 269,
+        "Name": "CountdownCancel",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "CountdownCancel packet data"
+    },
+    {
+        "ID": 270,
+        "Name": "ActorMove",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "ActorMove packet data"
+    },
+    {
+        "ID": 271,
+        "Name": "ActorSetPos",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "ActorSetPos packet data"
+    },
+    {
+        "ID": 272,
+        "Name": "SpawnNpcExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from SpawnNpc packets"
+    },
+    {
+        "ID": 273,
+        "Name": "ActorControlExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorControl packets"
+    },
+    {
+        "ID": 274,
+        "Name": "ActorControlSelfExtra",
+        "Source": "OverlayPlugin",
+        "Version": 1,
+        "Comment": "Extra info from ActorControlSelf packets"
+    },
+    {
+        "StartID": 256,
         "EndID": 512,
         "Source": "OverlayPlugin",
         "Version": 0,

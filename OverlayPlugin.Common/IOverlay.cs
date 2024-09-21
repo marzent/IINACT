@@ -7,7 +7,6 @@ namespace RainbowMage.OverlayPlugin
     /// </summary>
     /// <remarks>
     /// アドオンを作成する場合はこのインターフェイスを実装するのではなく、
-    /// <see cref="RainbowMage.OverlayPlugin.OverlayBase"/> 抽象クラスを継承してください。
     /// </remarks>
     public interface IOverlay : IDisposable
     {
@@ -21,11 +20,6 @@ namespace RainbowMage.OverlayPlugin
         bool Visible { get; set; }
 
         IntPtr Handle { get; }
-
-        /// <summary>
-        /// オーバーレイがログを出力したときに発生します。
-        /// </summary>
-        event EventHandler<LogEventArgs> OnLog;
 
         /// <summary>
         /// オーバーレイの更新を開始します。

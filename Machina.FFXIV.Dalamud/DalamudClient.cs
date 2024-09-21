@@ -14,7 +14,7 @@ namespace Machina.FFXIV.Dalamud
     public class DalamudClient : IDisposable
     {
         public static IGameNetwork GameNetwork { get; set; }
-        public delegate DateTime GetTimeDelegate();
+        public delegate long GetTimeDelegate();
         public static GetTimeDelegate GetServerTime;
 
         public delegate void MessageReceivedHandler(long epoch, byte[] message);
@@ -22,7 +22,7 @@ namespace Machina.FFXIV.Dalamud
 
         private CancellationTokenSource _tokenSource;
         private Task _monitorTask;
-        private ConcurrentQueue<(DateTime, byte[])> _messageQueue;
+        private ConcurrentQueue<(long, byte[])> _messageQueue;
 
         private DateTime _lastLoopError;
 
@@ -71,7 +71,7 @@ namespace Machina.FFXIV.Dalamud
                 return;
             }
 
-            _messageQueue = new ConcurrentQueue<(DateTime, byte[])>();
+            _messageQueue = new ConcurrentQueue<(long, byte[])>();
 
             GameNetwork.NetworkMessage += GameNetworkOnNetworkMessage;
 
@@ -90,8 +90,7 @@ namespace Machina.FFXIV.Dalamud
                     {
                         while (_messageQueue.TryDequeue(out var messageInfo))
                         {
-                            var epoch = (messageInfo.Item1 - DateTime.UnixEpoch.ToLocalTime()).Ticks / TimeSpan.TicksPerMillisecond;
-                            OnMessageReceived(epoch, messageInfo.Item2);
+                            OnMessageReceived(messageInfo.Item1, messageInfo.Item2);
                         }
 
                         Task.Delay(10, token).Wait(token);
@@ -121,7 +120,7 @@ namespace Machina.FFXIV.Dalamud
 
         protected unsafe void GameNetworkOnNetworkMessage(IntPtr dataPtr, ushort opcode, uint sourceActorId, uint targetActorId, NetworkMessageDirection direction)
         {
-            if (direction != NetworkMessageDirection.ZoneDown)
+            if (direction != NetworkMessageDirection.ZoneDown || GetServerTime == null)
                 return;
 
             var size = 0x1000;    // best effort
@@ -129,8 +128,6 @@ namespace Machina.FFXIV.Dalamud
             // if we can't map the opcode to its true size it *should* still be fine
             if (OpcodeSizes.ContainsKey((Server_MessageType)opcode))
                 size = OpcodeSizes[(Server_MessageType)opcode];
-
-            // we don't have the original package timestamp but this seems to be close enough (+- 5ms)
             var serverTime = GetServerTime();
             dataPtr -= 0x20;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage;
@@ -68,13 +69,13 @@ namespace RainbowMage.OverlayPlugin.EventSources
 
             for (var i = 0; i < partyList.MemberCount; ++i)
             {
-                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMember, i,
+                partyList.Entries.Add(PartyMemberToEntry(addonPartyList.PartyMembers, i,
                                                          SortedPartyList.Entry.EntryType.Party));
             }
 
             for (var i = 0; i < partyList.TrustCount; ++i)
             {
-                partyList.Entries.Add(TrustMemberToEntry(addonPartyList.TrustMember, i,
+                partyList.Entries.Add(TrustMemberToEntry(addonPartyList.TrustMembers, i,
                                                          SortedPartyList.Entry.EntryType.Trust));
             }
 
@@ -82,14 +83,14 @@ namespace RainbowMage.OverlayPlugin.EventSources
         }
 
         private static unsafe SortedPartyList.Entry PartyMemberToEntry(
-            AddonPartyList.PartyMembers partyMembers, int index, SortedPartyList.Entry.EntryType type)
+            Span<AddonPartyList.PartyListMemberStruct> partyMembers, int index, SortedPartyList.Entry.EntryType type)
         {
             var member = partyMembers[index];
             return TextNodeToEntry(member.Name, index, type);
         }
         
         private static unsafe SortedPartyList.Entry TrustMemberToEntry(
-            AddonPartyList.TrustMembers trustMembers, int index, SortedPartyList.Entry.EntryType type)
+            Span<AddonPartyList.PartyListMemberStruct> trustMembers, int index, SortedPartyList.Entry.EntryType type)
         {
             var member = trustMembers[index];
             return TextNodeToEntry(member.Name, index, type);

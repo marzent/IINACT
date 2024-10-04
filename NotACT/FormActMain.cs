@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Media;
 using System.Text.RegularExpressions;
 using Advanced_Combat_Tracker.Resources;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using FFXIV_ACT_Plugin.Logfile;
 
 namespace Advanced_Combat_Tracker;
@@ -12,12 +12,15 @@ namespace Advanced_Combat_Tracker;
 public partial class FormActMain : Form, ISynchronizeInvoke
 {
     public delegate DateTime DateTimeLogParser(string logLine);
+    public IPluginLog PluginLog { get; }
 
     private readonly ConcurrentQueue<MasterSwing> afterActionsQueue = new();
     private Thread afterActionQueueThread;
     public DateTimeLogParser GetDateTimeFromLog;
     private volatile bool inCombat;
+    private readonly ReaderWriterLockSlim lastKnownLock = new(LockRecursionPolicy.SupportsRecursion);
     private DateTime lastKnownTime;
+    private long lastKnownTicks;
     private DateTime lastSetEncounter;
     private HistoryRecord lastZoneRecord;
     private Thread logReaderThread;
@@ -25,8 +28,9 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     internal volatile bool refreshTree;
 
-    public FormActMain()
+    public FormActMain(IPluginLog pluginLog)
     {
+        PluginLog = pluginLog;
         InitializeComponent();
         AppDataFolder = new DirectoryInfo(".");
         ActGlobals.ActLocalization.Init();
@@ -69,10 +73,50 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
     public DateTime LastKnownTime
     {
-        get => lastKnownTime;
+        get
+        {
+            lastKnownLock.EnterReadLock();
+            try
+            {
+                return lastKnownTime;
+            }
+            finally
+            {
+                lastKnownLock.ExitReadLock();
+            }
+        }
         set
         {
-            if (!(value == DateTime.MinValue)) lastKnownTime = value;
+            if (value == DateTime.MinValue)
+                return;
+
+            lastKnownLock.EnterWriteLock();
+            try
+            {
+                lastKnownTime = value;
+                lastKnownTicks = Environment.TickCount64;
+            }
+            finally
+            {
+                lastKnownLock.ExitWriteLock();
+            }
+        }
+    }
+    
+    public DateTime LastEstimatedTime
+    {
+        get
+        {
+            lastKnownLock.EnterReadLock();
+            try
+            {
+                var ticksPassed = Environment.TickCount64 - lastKnownTicks;
+                return lastKnownTime.AddMilliseconds(ticksPassed);
+            }
+            finally
+            {
+                lastKnownLock.ExitReadLock();
+            }
         }
     }
 
@@ -121,7 +165,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
 
 
     public void WriteExceptionLog(Exception ex, string MoreInfo) => 
-        PluginLog.Error(ex, MoreInfo);
+        PluginLog.Error(ex, $"[NotAct] {MoreInfo}");
 
     public void OpenLog(bool GetCurrentZone, bool GetCharNameFromFile) { }
 

@@ -1,131 +1,88 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Linq;
+using RainbowMage.OverlayPlugin.NetworkProcessors.PacketHelper;
 
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
-    public class LineFateControl
+    class LineFateControl : LineBaseSubMachina<LineFateControl.FateControlPacket>
     {
-        public const uint LogFileLineID = 258;
-        private ILogger logger;
-        private IOpcodeConfigEntry opcode = null;
-        private readonly int offsetMessageType;
-        private readonly int offsetPacketData;
-        private readonly FFXIVRepository ffxiv;
+        public static readonly Server_ActorControlCategory[] FateActorControlCategories = {
+            Server_ActorControlCategory.FateAdd,
+            Server_ActorControlCategory.FateRemove,
+            Server_ActorControlCategory.FateUpdate,
+        };
 
-        private const ushort FateAddCategory = 0x935;
-        private const ushort FateRemoveCategory = 0x936;
-        private const ushort FateUpdateCategory = 0x93E;
-
-        private static readonly List<ushort> FateCategories = new List<ushort>()
-            { FateAddCategory, FateRemoveCategory, FateUpdateCategory };
-
-        private Func<string, DateTime, bool> logWriter;
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct ActorControlSelf_v62
+        internal class FateControlPacket : MachinaPacketWrapper
         {
-            public ushort category;
-            public ushort padding;
-            public uint param1;
-            public uint param2;
-            public uint param3;
-            public uint param4;
-            public uint param5;
-            public uint param6;
-            public uint padding1;
-
-            public override string ToString()
+            public override string ToString(long epoch, uint ActorID)
             {
-                return
-                    $"{category:X4}|{padding:X4}|{param1:X8}|{param2:X8}|{param3:X8}|{param4:X8}|{param5:X8}|{param6:X8}|{padding1:X8}";
+                var category = Get<Server_ActorControlCategory>("category");
+
+                if (!FateActorControlCategories.Contains(category)) return null;
+
+                var padding = Get<UInt16>("padding");
+                var fateID = Get<UInt32>("param1");
+                var progress = Get<UInt32>("param2");
+                var param3 = Get<UInt32>("param3");
+                var param4 = Get<UInt32>("param4");
+                var param5 = Get<UInt32>("param5");
+                var param6 = Get<UInt32>("param6");
+                var padding1 = Get<UInt32>("padding1");
+
+                var categoryStr = category.ToString().Replace("Fate", "");
+
+                // Do some basic filtering on fate data to avoid spamming the log needlessly.
+                if (category == Server_ActorControlCategory.FateAdd)
+                {
+                    if (fates.ContainsKey(fateID))
+                    {
+                        return null;
+                    }
+                    fates.Add(fateID, 0);
+                }
+                else if (category == Server_ActorControlCategory.FateRemove)
+                {
+                    if (!fates.Remove(fateID))
+                    {
+                        return null;
+                    }
+                }
+                else if (category == Server_ActorControlCategory.FateUpdate)
+                {
+                    if (fates.TryGetValue(fateID, out var oldProgress))
+                    {
+                        if (progress == oldProgress)
+                        {
+                            return null;
+                        }
+                    }
+                    fates[fateID] = progress;
+                }
+
+                return $"{categoryStr}|" +
+                    $"{padding:X4}|" +
+                    $"{fateID:X8}|" +
+                    $"{progress:X8}|" +
+                    $"{param3:X8}|" +
+                    $"{param4:X8}|" +
+                    $"{param5:X8}|" +
+                    $"{param6:X8}|" +
+                    $"{padding1:X8}";
             }
         }
+
+        private static Dictionary<uint, uint> fates = new Dictionary<uint, uint>();
+
+        public const uint LogFileLineID = 258;
+
+        public const string LogLineName = "FateDirector";
+        public const string MachinaPacketName = "ActorControlSelf";
 
         public LineFateControl(TinyIoCContainer container)
+            : base(container, LogFileLineID, LogLineName, MachinaPacketName)
         {
-            logger = container.Resolve<ILogger>();
-            ffxiv = container.Resolve<FFXIVRepository>();
-            var netHelper = container.Resolve<NetworkParser>();
-            if (!ffxiv.IsFFXIVPluginPresent())
-                return;
-            var customLogLines = container.Resolve<FFXIVCustomLogLines>();
-            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
-            {
-                Name = "FateDirector",
-                Source = "OverlayPlugin",
-                ID = LogFileLineID,
-                Version = 1,
-            });
-            try
-            {
-                var mach = Assembly.Load("Machina.FFXIV");
-                var msgHeaderType = mach.GetType("Machina.FFXIV.Headers.Server_MessageHeader");
-                offsetMessageType = netHelper.GetOffset(msgHeaderType, "MessageType");
-                offsetPacketData = Marshal.SizeOf(msgHeaderType);
-                var packetType = mach.GetType("Machina.FFXIV.Headers.Server_ActorControlSelf");
-                opcode = new OpcodeConfigEntry()
-                {
-                    opcode = netHelper.GetOpcode("ActorControlSelf"),
-                    size = (uint)Marshal.SizeOf(typeof(ActorControlSelf_v62)),
-                };
-                ffxiv.RegisterNetworkParser(MessageReceived);
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                logger.Log(LogLevel.Error, Resources.NetworkParserNoFfxiv);
-            }
-            catch (Exception e)
-            {
-                logger.Log(LogLevel.Error, Resources.NetworkParserInitException, e);
-            }
-        }
-
-        private unsafe void MessageReceived(string id, long epoch, byte[] message)
-        {
-            if (message.Length < opcode.size + offsetPacketData)
-                return;
-
-            fixed (byte* buffer = message)
-            {
-                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode)
-                {
-                    ActorControlSelf_v62 mapEffectPacket = *(ActorControlSelf_v62*)&buffer[offsetPacketData];
-                    if (FateCategories.Contains(mapEffectPacket.category))
-                    {
-                        DateTime serverTime = ffxiv.EpochToDateTime(epoch);
-                        string category = "";
-                        switch (mapEffectPacket.category)
-                        {
-                            case FateAddCategory:
-                                category = "Add";
-                                break;
-                            case FateRemoveCategory:
-                                category = "Remove";
-                                break;
-                            case FateUpdateCategory:
-                                category = "Update";
-                                break;
-                        }
-
-                        logWriter(
-                            $"{category}|" +
-                            $"{mapEffectPacket.padding:X4}|" +
-                            $"{mapEffectPacket.param1:X8}|" +
-                            $"{mapEffectPacket.param2:X8}|" +
-                            $"{mapEffectPacket.param3:X8}|" +
-                            $"{mapEffectPacket.param4:X8}|" +
-                            $"{mapEffectPacket.param5:X8}|" +
-                            $"{mapEffectPacket.param6:X8}|" +
-                            $"{mapEffectPacket.padding1:X8}",
-                            serverTime
-                        );
-                    }
-
-                    return;
-                }
-            }
+            ffxiv.RegisterZoneChangeDelegate((zoneID, zoneName) => fates.Clear());
         }
     }
 }

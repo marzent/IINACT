@@ -3,24 +3,24 @@ using System.Runtime.InteropServices;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
 {
-    interface IEnmityHudMemory60 : IEnmityHudMemory { }
+    interface IEnmityHudMemory70 : IEnmityHudMemory { }
 
-    class EnmityHudMemory60 : EnmityHudMemory, IEnmityHudMemory60
+    class EnmityHudMemory70 : EnmityHudMemory, IEnmityHudMemory70
     {
-        private const string enmityHudSignature = "48895C246048897C2470488B3D";
-        private static readonly int[] enmityHudPointerPath = new int[] { 0x30, 0x58, 0x98, 0x20 };
+        private const string enmityHudSignature = "488B8F????????488B01FF50??4C8B1D";
+        private static readonly int[] enmityHudPointerPath = new int[] { 0x30, 0x58, 0xA8, 0x20 };
 
         // Offsets from the enmityHudAddress to find various enmity HUD data structures.
         private const int enmityHudCountOffset = 4;
         private const int enmityHudEntryOffset = 16;
 
-        public EnmityHudMemory60(TinyIoCContainer container)
-            : base(container, enmityHudSignature, enmityHudPointerPath, enmityHudCountOffset, enmityHudEntryOffset,
-                   EnmityHudEntryMemory.Size) { }
+        public EnmityHudMemory70(TinyIoCContainer container)
+            : base(container, enmityHudSignature, enmityHudPointerPath, enmityHudCountOffset, enmityHudEntryOffset, EnmityHudEntryMemory.Size)
+        { }
 
         public override Version GetVersion()
         {
-            return new Version(6, 0);
+            return new Version(6, 2);
         }
 
         [StructLayout(LayoutKind.Explicit, Size = Size)]

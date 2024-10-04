@@ -20,11 +20,11 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
             public byte levelSync { get; set; }
         }
 
-        private FFXIVMemory memory;
-        private ILogger logger;
+        protected FFXIVMemory memory;
+        protected ILogger logger;
 
-        private IntPtr settingsAddress = IntPtr.Zero;
-        private IntPtr inContentFinderAddress = IntPtr.Zero;
+        protected IntPtr settingsAddress = IntPtr.Zero;
+        protected IntPtr inContentFinderAddress = IntPtr.Zero;
 
         private string settingsSignature;
         private string inContentFinderSignature;
@@ -39,7 +39,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
             memory = container.Resolve<FFXIVMemory>();
         }
 
-        private void ResetPointers()
+        protected void ResetPointers()
         {
             settingsAddress = IntPtr.Zero;
             inContentFinderAddress = IntPtr.Zero;
@@ -65,7 +65,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
             return true;
         }
 
-        public void ScanPointers()
+        public virtual void ScanPointers()
         {
             ResetPointers();
             if (!memory.IsValid())
@@ -131,9 +131,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
             var bytes = memory.GetByteArray(settingsAddress, 5);
             settings.unrestrictedParty = bytes[0];
             settings.minimalItemLevel = bytes[1];
+            settings.levelSync = bytes[2];
             settings.silenceEcho = bytes[3];
             settings.explorerMode = bytes[4];
-            settings.levelSync = bytes[2];
 
             return settings;
         }

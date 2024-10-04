@@ -41,7 +41,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         internal IntPtr player_ptr_addr_ = IntPtr.Zero;
         internal IntPtr job_data_outer_addr_ = IntPtr.Zero;
         internal IntPtr in_combat_addr_ = IntPtr.Zero;
-        internal IntPtr bait_addr_ = IntPtr.Zero;
 
         // Values found in the EntityStruct's type field.
         public enum EntityType : byte
@@ -101,6 +100,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             DNC = 38,
             RPR = 39,
             SGE = 40,
+            VPR = 41,
+            PCT = 42,
         };
 
         static internal bool IsGatherer(EntityJob job)
@@ -150,7 +151,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public short level = 0;
             public string debug_job;
             public int shield_value = 0;
-            public int bait = 0;
 
             public override bool Equals(object obj)
             {
@@ -173,8 +173,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                        job == o.job &&
                        level == o.level &&
                        debug_job == o.debug_job &&
-                       shield_value == o.shield_value &&
-                       bait == o.bait;
+                       shield_value == o.shield_value;
             }
 
             public override int GetHashCode()
@@ -200,7 +199,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 hash = hash * 31 + level.GetHashCode();
                 hash = hash * 31 + shield_value.GetHashCode();
                 hash = hash * 31 + debug_job.GetHashCode();
-                hash = hash * 31 + bait.GetHashCode();
                 return hash;
             }
         };
@@ -262,12 +260,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             uint active_process_id;
             NativeMethods.GetWindowThreadProcessId(active_hwnd, out active_process_id);
             return active_process_id == process_.Id;
-        }
-
-        internal int GetBait()
-        {
-            var jorts = Read16(bait_addr_, 1);
-            return jorts[0];
         }
 
         public unsafe abstract EntityData GetEntityDataFromByteArray(byte[] source);

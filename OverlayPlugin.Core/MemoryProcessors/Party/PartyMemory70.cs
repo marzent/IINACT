@@ -3,124 +3,98 @@ using System.Runtime.InteropServices;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
 {
-    interface IPartyMemory64 : IPartyMemory { }
+    interface IPartyMemory70 : IPartyMemory { }
 
-    public class PartyMemory64 : PartyMemory, IPartyMemory64
+    public class PartyMemory70 : PartyMemory, IPartyMemory70
     {
         // Due to lack of multi-version support in FFXIVClientStructs, we need to duplicate these structures here per-version
         // We use FFXIVClientStructs versions of the structs because they have more required details than FFXIV_ACT_Plugin's struct definitions
         #region FFXIVClientStructs structs
-        [StructLayout(LayoutKind.Explicit, Size = 0x188)]
+        [StructLayout(LayoutKind.Explicit, Size = 0x2F0)]
         public unsafe partial struct StatusManager
         {
             [FieldOffset(0x0)]
             public void* Owner;
             [FieldOffset(0x8)]
-            public fixed byte Status[0xC * 30]; // Client::Game::Status array
-            [FieldOffset(0x170)]
-            public uint Unk_170;
-            [FieldOffset(0x174)]
-            public ushort Unk_174;
-            [FieldOffset(0x178)]
+            public fixed byte Status[0xC * 60]; // Client::Game::Status array
+            [FieldOffset(0x2D8)]
+            public uint Flags1;
+            [FieldOffset(0x2DC)]
+            public ushort Flags2;
+            [FieldOffset(0x2E0)]
             public long Unk_178;
-            [FieldOffset(0x180)]
-            public byte Unk_180;
+            [FieldOffset(0x2E8)]
+            public byte NumValidStatuses;
         }
-        [StructLayout(LayoutKind.Explicit, Size = 0x230)]
+        [StructLayout(LayoutKind.Explicit, Size = 8)]
+        public struct ExtraProperty
+        {
+            [FieldOffset(0)] public byte Key;
+            [FieldOffset(4)] public int Value;
+        }
+        [StructLayout(LayoutKind.Explicit, Size = 0x3A0)]
         public unsafe struct PartyMember
         {
-            [FieldOffset(0x0)]
-            public StatusManager StatusManager;
-            [FieldOffset(0x190)]
-            public float X;
-            [FieldOffset(0x194)]
-            public float Y;
-            [FieldOffset(0x198)]
-            public float Z;
-            [FieldOffset(0x1A0)]
-            public long ContentID;
-            [FieldOffset(0x1A8)]
-            public uint ObjectID;
-            [FieldOffset(0x1AC)]
-            public uint Unk_ObjectID_1;
-            [FieldOffset(0x1B0)]
-            public uint Unk_ObjectID_2;
-            [FieldOffset(0x1B4)]
-            public uint CurrentHP;
-            [FieldOffset(0x1B8)]
-            public uint MaxHP;
-            [FieldOffset(0x1BC)]
-            public ushort CurrentMP;
-            [FieldOffset(0x1BE)]
-            public ushort MaxMP;
-            [FieldOffset(0x1C0)]
-            public ushort TerritoryType;
-            [FieldOffset(0x1C2)]
-            public ushort HomeWorld;
-            [FieldOffset(0x1C4)]
+            [FieldOffset(0x0)] public StatusManager StatusManager;
+            [FieldOffset(0x2F0)] public float X;
+            [FieldOffset(0x2F4)] public float Y;
+            [FieldOffset(0x2F8)] public float Z;
+            [FieldOffset(0x300)] public ulong Unk300;
+            [FieldOffset(0x308)] public ulong ContentId;
+            [FieldOffset(0x310)] public uint EntityId;
+            [FieldOffset(0x31C)] public uint CurrentHP;
+            [FieldOffset(0x320)] public uint MaxHP;
+            [FieldOffset(0x324)] public ushort CurrentMP;
+            [FieldOffset(0x326)] public ushort MaxMP;
+            [FieldOffset(0x328)] public ushort TerritoryType;
+            [FieldOffset(0x32A)] public ushort HomeWorld;
+            [FieldOffset(0x32C)]
             public fixed byte Name[0x40];
-            [FieldOffset(0x204)]
-            public byte Sex;
-            [FieldOffset(0x205)]
-            public byte ClassJob;
-            [FieldOffset(0x206)]
-            public byte Level;
-            [FieldOffset(0x208)]
-            public byte Unk_Struct_208__0;
-            [FieldOffset(0x20C)]
-            public uint Unk_Struct_208__4;
-            [FieldOffset(0x210)]
-            public ushort Unk_Struct_208__8;
-            [FieldOffset(0x214)]
-            public uint Unk_Struct_208__C;
-            [FieldOffset(0x218)]
-            public ushort Unk_Struct_208__10;
-            [FieldOffset(0x21A)]
-            public ushort Unk_Struct_208__14;
-            [FieldOffset(0x220)]
-            public byte Flags; // 0x01 == set for valid alliance members
+            [FieldOffset(0x370)] public void* UnkName;
+            [FieldOffset(0x378)] public byte Sex;
+            [FieldOffset(0x379)] public byte ClassJob;
+            [FieldOffset(0x37A)] public byte Level;
+            [FieldOffset(0x37B)] public byte DamageShield;
+            [FieldOffset(0x37C)] public ExtraProperty ExtraProperty1;
+            [FieldOffset(0x384)] public ExtraProperty ExtraProperty2;
+            [FieldOffset(0x38C)] public ExtraProperty ExtraProperty3;
+            [FieldOffset(0x394)] public byte Flags;
         }
-        [StructLayout(LayoutKind.Explicit, Size = 0x3D70)]
+        [StructLayout(LayoutKind.Explicit, Size = 0x65B0)]
         public unsafe partial struct GroupManager
         {
             [FieldOffset(0x0)]
-            public fixed byte PartyMembers[0x230 * 8]; // PartyMember type
-            [FieldOffset(0x1180)]
-            public fixed byte AllianceMembers[0x230 * 20]; // PartyMember type
-            [FieldOffset(0x3D40)]
-            public uint Unk_3D40;
-            [FieldOffset(0x3D44)]
-            public ushort Unk_3D44;
-            [FieldOffset(0x3D48)]
+            public fixed byte PartyMembers[0x3A0 * 8]; // PartyMember type
+            [FieldOffset(0x1D00)]
+            public fixed byte AllianceMembers[0x3A0 * 20]; // PartyMember type
+            // Immediately after `AllianceMembers`, e.g. ((0x390 * 20)+0x1D00) = 0x6400
+            [FieldOffset(0x6400)]
+            public uint CurrentPartyFlags; // FFXIVClientStructs doesn't map this, but it contains flags that indicate the alliance the player is in, as well as other flags.
+            [FieldOffset(0x6588)]
             public long PartyId; // both seem to be unique per party and replicated to every member
-            [FieldOffset(0x3D50)]
+            [FieldOffset(0x6590)]
             public long PartyId_2;
-            [FieldOffset(0x3D58)]
+            [FieldOffset(0x6598)]
             public uint PartyLeaderIndex; // index of party leader in array
-            [FieldOffset(0x3D5C)]
+            [FieldOffset(0x659C)]
             public byte MemberCount;
-            [FieldOffset(0x3D5D)]
-            public byte Unk_3D5D;
-            [FieldOffset(0x3D5F)]
-            public byte Unk_3D5F; // some sort of count
-            [FieldOffset(0x3D60)]
-            public byte Unk_3D60;
-            [FieldOffset(0x3D61)]
+            [FieldOffset(0x65A1)]
             public byte AllianceFlags; // 0x01 == is alliance; 0x02 == alliance with 5 4-man groups rather than 2 8-man
         }
         #endregion
         [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleGroupManager
+        private unsafe struct DoubleGroupManager
         {
+            public fixed byte vtbls[0x20];
             public GroupManager groupManager1;
             public GroupManager groupManager2;
         }
 
-        public PartyMemory64(TinyIoCContainer container) : base(container) { }
+        public PartyMemory70(TinyIoCContainer container) : base(container) { }
 
         public override Version GetVersion()
         {
-            return new Version(6, 4);
+            return new Version(7, 0);
         }
 
 
@@ -160,7 +134,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
                 memberCount = groupManager.groupManager1.MemberCount,
                 allianceFlags = groupManager.groupManager1.AllianceFlags,
 
-                currentPartyFlags = groupManager.groupManager1.Unk_3D40,
+                currentPartyFlags = groupManager.groupManager1.CurrentPartyFlags,
 
                 partyMembers = partyMembers,
                 alliance1Members = alliance1Members,
@@ -199,8 +173,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
                     x = member.X,
                     y = member.Y,
                     z = member.Z,
-                    contentId = member.ContentID,
-                    objectId = member.ObjectID,
+                    contentId = (long)member.ContentId,
+                    objectId = member.EntityId,
                     currentHP = member.CurrentHP,
                     maxHP = member.MaxHP,
                     currentMP = member.CurrentMP,

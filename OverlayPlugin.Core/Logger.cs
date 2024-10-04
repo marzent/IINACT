@@ -1,5 +1,5 @@
 ﻿using System;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace RainbowMage.OverlayPlugin
 {
@@ -8,6 +8,13 @@ namespace RainbowMage.OverlayPlugin
     /// </summary>
     public class Logger : ILogger
     {
+        public Logger(IPluginLog pluginLog)
+        {
+            PluginLog = pluginLog;
+        }
+        
+        private IPluginLog PluginLog { get; }
+
         /// <summary>
         /// メッセージを指定してログを記録します。
         /// </summary>
@@ -18,19 +25,19 @@ namespace RainbowMage.OverlayPlugin
             switch (level)
             {
                 case LogLevel.Trace:
-                    PluginLog.Verbose(message);
+                    PluginLog.Verbose($"[OverlayPlugin] {message}");
                     break;
                 case LogLevel.Debug:
-                    PluginLog.Debug(message);
+                    PluginLog.Debug($"[OverlayPlugin] {message}");
                     break;
                 case LogLevel.Info:
-                    PluginLog.Information(message);
+                    PluginLog.Information($"[OverlayPlugin] {message}");
                     break;
                 case LogLevel.Warning:
-                    PluginLog.Warning(message);
+                    PluginLog.Warning($"[OverlayPlugin] {message}");
                     break;
                 case LogLevel.Error:
-                    PluginLog.Error(message);
+                    PluginLog.Error($"[OverlayPlugin] {message}");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(level), level, null);

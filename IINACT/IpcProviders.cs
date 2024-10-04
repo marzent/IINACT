@@ -22,7 +22,7 @@ internal class IpcProviders : IDisposable
     internal readonly ICallGateProvider<bool> GetServerSslEnabled;
     internal readonly ICallGateProvider<Uri?> GetServerUri;
     
-    internal IpcProviders(DalamudPluginInterface pluginInterface)
+    internal IpcProviders(IDalamudPluginInterface pluginInterface)
     {
         GetVersion = pluginInterface.GetIpcProvider<Version>("IINACT.Version");
         GetIpcVersion = pluginInterface.GetIpcProvider<Version>("IINACT.IpcVersion");

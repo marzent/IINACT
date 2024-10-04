@@ -24,7 +24,11 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
         public static readonly Server_ActorControlCategory[] AllowedActorControlCategories =
         {
             Server_ActorControlCategory.SetAnimationState,
-            Server_ActorControlCategory.DisplayPublicContentTextMessage
+            Server_ActorControlCategory.DisplayPublicContentTextMessage,
+            Server_ActorControlCategory.VfxUnknown49,
+            Server_ActorControlCategory.SetModelState,
+            Server_ActorControlCategory.PlayActionTimeline,
+            Server_ActorControlCategory.EObjAnimation,
         };
 
         private class RegionalizedInfo

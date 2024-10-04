@@ -18,8 +18,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
         public PartyMemoryManager(TinyIoCContainer container)
         {
             this.container = container;
-            container.Register<IPartyMemory64, PartyMemory64>();
             container.Register<IPartyMemory65, PartyMemory65>();
+            container.Register<IPartyMemory70, PartyMemory70>();
             repository = container.Resolve<FFXIVRepository>();
 
             var memory = container.Resolve<FFXIVMemory>();
@@ -39,8 +39,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
         public void ScanPointers()
         {
             List<IPartyMemory> candidates = new List<IPartyMemory>();
-            candidates.Add(container.Resolve<IPartyMemory64>());
             candidates.Add(container.Resolve<IPartyMemory65>());
+            candidates.Add(container.Resolve<IPartyMemory70>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
         }
 

@@ -105,25 +105,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         // In combat boolean.
         // This address is written to by "mov [rax+rcx],bl" and has three readers.
         // This reader is "cmp byte ptr [ffxiv_dx11.exe+????????],00 { (0),0 }"
-        private static String kInCombatSignature = "803D????????000F95C04883C428";
-        private static int kInCombatSignatureOffset = -12;
+        private static String kInCombatSignature = "803D??????????74??488B03488BCBFF50";
+        private static int kInCombatSignatureOffset = -15;
 
         private static bool kInCombatSignatureRIP = true;
 
         // Because this line is a cmp byte line, the signature is not at the end of the line.
         private static int kInCombatRipOffset = 1;
 
-        // Bait integer.
-        // Variable is accessed via a cmp eax,[...] line at offset=0.
-        private static String kBaitSignature = "4883C4305BC3498BC8E8????????3B05";
-        private static int kBaitBaseOffset = 0;
-        private static bool kBaitBaseRIP = true;
-
         // A piece of code that reads the job data.
         // The pointer of interest is the first ???????? in the signature.
-        private static String kJobDataSignature = "488B0D????????4885C90F84????????488B05????????3C03";
-
-        private static int kJobDataSignatureOffset = -22;
+        private static String kJobDataSignature = "488B3D????????33ED";
+        private static int kJobDataSignatureOffset = -6;
 
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kJobDataSignatureRIP = true;
@@ -177,16 +170,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             else
             {
                 in_combat_addr_ = p[0];
-            }
-
-            p = SigScan(kBaitSignature, kBaitBaseOffset, kBaitBaseRIP);
-            if (p.Count != 1)
-            {
-                logger_.Log(LogLevel.Error, "Bait signature found " + p.Count + " matches");
-            }
-            else
-            {
-                bait_addr_ = p[0];
             }
         }
 
@@ -269,10 +252,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var entity_ptr = ReadIntPtr(player_ptr_addr_);
             if (entity_ptr == IntPtr.Zero)
                 return null;
-            var data = GetEntityData(entity_ptr);
-            if (data.job == EntityJob.FSH)
-                data.bait = GetBait();
-            return data;
+            return GetEntityData(entity_ptr);
         }
 
         public override unsafe JObject GetJobSpecificData(EntityJob job)
@@ -317,6 +297,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     EntityJob.SAM => JObject.FromObject(*(SamuraiJobMemory*)&p[0]),
                     EntityJob.SGE => JObject.FromObject(*(SageJobMemory*)&p[0]),
                     EntityJob.RPR => JObject.FromObject(*(ReaperJobMemory*)&p[0]),
+                    EntityJob.VPR => JObject.FromObject(*(ViperJobMemory*)&p[0]),
+                    EntityJob.PCT => JObject.FromObject(*(PictomancerJobMemory*)&p[0]),
                     _ => null
                 };
             }
@@ -602,6 +584,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public bool enochian => enochian_state.HasFlag(EnochianFlags.Enochian);
 
             public bool paradox => enochian_state.HasFlag(EnochianFlags.Paradox);
+            
+            public int astralSoulStacks {
+                get {
+                    return ((int)enochian_state >> 2) & 0x7; // = 0b111, to get the last 3 bits.
+                }
+            }
         };
 
         [StructLayout(LayoutKind.Explicit)]
@@ -623,67 +611,109 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x04)]
             public byte aetherflowStacks;
         };
-
+        
         [StructLayout(LayoutKind.Explicit)]
-        public struct SummonerJobMemory
-        {
-            [FieldOffset(0x00)]
-            public ushort tranceMilliseconds;
+         public struct SummonerJobMemory {
+           public enum ActiveArcanum : byte {
+             None = 0,
+             Ifrit = 1,
+             Titan = 2,
+             Garuda = 3,
+           }
 
-            [FieldOffset(0x02)]
-            public ushort attunementMilliseconds;
+           [Flags]
+           public enum Stance : byte {
+             None = 0,
+             // 0-1 bits: AetherFlows
+             AetherFlow1 = 1 << 0,
+             AetherFlow2 = 1 << 1,
+             AetherFlow3 = AetherFlow1 | AetherFlow2,
+             // 2 bit: Phoenix Ready
+             Phoenix = 1 << 2,
+             // 3 bit: Solar Bahamut Ready
+             // FIXME: guessed, not tested
+             SolarBahamut = 1 << 3,
+             // 4 bit: Unknown
+             // 5-7 bits: Usable Arcanum
+             Ruby = 1 << 5, // Fire/Ifrit
+             Topaz = 1 << 6, // Earth/Titan
+             Emerald = 1 << 7, // Wind/Garuda
+           }
 
-            [FieldOffset(0x06)]
-            public byte attunement;
+           [FieldOffset(0x00)]
+           public ushort tranceMilliseconds;
 
-            [NonSerialized]
-            [FieldOffset(0x07)]
-            private byte stance;
+           [FieldOffset(0x02)]
+           public ushort attunementMilliseconds;
 
-            public string[] usableArcanum
-            {
-                get
-                {
-                    var arcanums = new List<string>();
-                    if ((stance & 0x20) != 0)
-                        arcanums.Add("Ruby"); // Fire/Ifrit
-                    if ((stance & 0x40) != 0)
-                        arcanums.Add("Topaz"); // Earth/Titan
-                    if ((stance & 0x80) != 0)
-                        arcanums.Add("Emerald"); // Wind/Garuda
+           /// <summary>
+           /// 0x04: 0x17 = Summoned other than Carbuncle, 0x00 = Other Condition
+           /// </summary>
+           [NonSerialized]
+           [FieldOffset(0x04)]
+           private byte _summonStatus;
 
-                    return arcanums.ToArray();
-                }
-            }
+           /// <summary>
+           /// (From right to left)
+           /// 1-2 bits: Active Primal
+           /// 3-5 bits: Counts of Attunement Stacks
+           [NonSerialized]
+           [FieldOffset(0x06)]
+           private byte _attunement;
 
-            public string activePrimal
-            {
-                get
-                {
-                    if ((stance & 0xC) == 0x4)
-                        return "Ifrit";
-                    else if ((stance & 0xC) == 0x8)
-                        return "Titan";
-                    else if ((stance & 0xC) == 0xC)
-                        return "Garuda";
-                    else
-                        return null;
-                }
-            }
+           [NonSerialized]
+           [FieldOffset(0x07)]
+           private Stance stance;
 
-            public String nextSummoned
-            {
-                get
-                {
-                    if ((stance & 0x10) == 0)
-                        return "Bahamut";
-                    else
-                        return "Phoenix";
-                }
-            }
+           public bool summonStatus {
+             get {
+               return _summonStatus != 0;
+             }
+           }
 
-            public int aetherflowStacks => stance & 0x3;
-        };
+           public int attunement {
+             get {
+               return (_attunement >> 2) & 0x7; // = 0b111, to get the last 3 bits.
+             }
+           }
+
+           public string activePrimal {
+             get {
+               return ((ActiveArcanum)(_attunement & 0x3)).ToString();
+             }
+           }
+
+           public string[] usableArcanum {
+             get {
+               var arcanums = new List<string>();
+               foreach (var flag in new List<Stance> { Stance.Ruby, Stance.Topaz, Stance.Emerald }) {
+                 if (stance.HasFlag(flag))
+                   arcanums.Add(flag.ToString());
+               }
+
+               return arcanums.ToArray();
+             }
+           }
+
+           public string nextSummoned {
+             get {
+               foreach (var flag in new List<Stance> { Stance.SolarBahamut, Stance.Phoenix }) {
+                 if (stance.HasFlag(flag))
+                   return flag.ToString();
+               }
+               return "Bahamut";
+             }
+           }
+
+           public int aetherflowStacks {
+             get {
+               return stance.HasFlag(Stance.AetherFlow3) ? 3 :
+                      stance.HasFlag(Stance.AetherFlow2) ? 2 :
+                      stance.HasFlag(Stance.AetherFlow1) ? 1 :
+                      0;
+             }
+           }
+         };
 
         [StructLayout(LayoutKind.Explicit)]
         public struct ScholarJobMemory
@@ -709,9 +739,9 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public enum Beast : byte
             {
                 None = 0,
-                Coeurl = 1,
-                Opo = 2,
-                Raptor = 3,
+                Opo = 1,
+                Raptor = 2,
+                Coeurl = 3,
             }
 
             [FieldOffset(0x00)]
@@ -731,7 +761,14 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [NonSerialized]
             [FieldOffset(0x04)]
+            private byte Fury;
+
+            [NonSerialized]
+            [FieldOffset(0x05)]
             private byte Nadi;
+            
+            [FieldOffset(0x06)]
+            public ushort MasterfulReadyMilisecond;
 
             public string[] beastChakra
             {
@@ -757,10 +794,28 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             {
                 get
                 {
-                    if ((Nadi & 0x2) == 0x2)
+                    if ((Nadi & 0x1) == 0x1)
                         return true;
                     else
                         return false;
+                }
+            }
+            
+            public int opoopoFury {
+                get {
+                    return Fury & 0x3;
+                }
+            }
+
+            public int raptorFury {
+                get {
+                    return (Fury >> 2) & 0x3;
+                }
+            }
+
+            public int coeurlFury {
+                get {
+                    return (Fury >> 4) & 0x3;
                 }
             }
         };
@@ -804,42 +859,52 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 Spear = 4,
                 Ewer = 5,
                 Spire = 6,
-                Lord = 0x70,
-                Lady = 0x80,
-            }
-
-            public enum Arcanum : byte
-            {
-                None = 0,
-                Solar = 1,
-                Lunar = 2,
-                Celestial = 3,
+                Lord = 7,
+                Lady = 8,
             }
 
             [NonSerialized]
-            [FieldOffset(0x05)]
-            private byte _heldCard;
+            [FieldOffset(0x00)]
+            private ushort _card;
 
             [NonSerialized]
-            [FieldOffset(0x06)]
-            private byte _arcanumsmix;
+            [FieldOffset(0x02)]
+            private byte _nextdraw;
 
-            public string heldCard => ((Card)(_heldCard & 0xF)).ToString();
+            public string card1 {
+                get {
+                    return ((Card)(_card & 0xF)).ToString();
+                }
+            }
 
-            public string crownCard => ((Card)(_heldCard & 0xF0)).ToString();
+            public string card2 {
+                get {
+                    return ((Card)((_card >> 4) & 0xF)).ToString();
+                }
+            }
 
-            public string[] arcanums
-            {
-                get
-                {
-                    var _arcanums = new List<Arcanum>();
-                    for (var i = 0; i < 3; i++)
+            public string card3 {
+                get {
+                    return ((Card)((_card >> 8) & 0xF)).ToString();
+                }
+            }
+
+            public string card4 {
+                get {
+                    return ((Card)((_card >> 12) & 0xF)).ToString();
+                }
+            }
+
+            public string nextdraw {
+                get {
+                    if (_nextdraw == 0)
                     {
-                        var arcanum = (_arcanumsmix >> 2 * i) & 0x3;
-                        _arcanums.Add((Arcanum)arcanum);
+                        return "Astral";
+                    } else
+                    {
+                        return "Umbral";
                     }
 
-                    return _arcanums.Select(a => a.ToString()).Where(a => a != "None").ToArray();
                 }
             }
         };
@@ -897,6 +962,123 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
             [FieldOffset(0x05)]
             public byte voidShroud;
+        }
+        
+        [StructLayout(LayoutKind.Explicit)]
+        public struct ViperJobMemory {
+            public enum AdvancedCombo : byte {
+                Vicewinder = 1,
+                HuntersCoil = 2,
+                SwiftskinsCoil = 3,
+                Vicepit = 4,
+                HuntersDen = 5,
+                SwiftskinsDen = 6,
+                Reawaken = 7,
+                FirstGeneration = 8,
+                SecondGeneration = 9,
+                ThirdGeneration = 10,
+                FourthGeneration = 11,
+            }
+
+            [FieldOffset(0x00)]
+            public byte rattlingCoilStacks;
+
+            [FieldOffset(0x01)]
+            public byte anguineTribute;
+
+            [FieldOffset(0x02)]
+            public byte serpentOffering;
+
+            [NonSerialized]
+            [FieldOffset(0x03)]
+            private AdvancedCombo _advancedCombo;
+
+            public string advancedCombo {
+                get {
+                    return _advancedCombo.ToString();
+                }
+            }
+
+            [FieldOffset(0x06)]
+            public ushort reawakenedTimer;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct PictomancerJobMemory
+        {
+            [Flags]
+            private enum CanvasFlags : byte
+            {
+                Pom = 1,
+                Wing = 1 << 1,
+                Claw = 1 << 2,
+                Maw = 1 << 3,
+                Weapon = 1 << 4,
+                Landscape = 1 << 5,
+            }
+
+            [Flags]
+            private enum CreatureFlags : byte
+            {
+                Pom = 1,
+                Wing = 1 << 1,
+                Claw = 1 << 2,
+
+                // Maw = 1 << 3, // Once you paint the Maw motif, it becomes a Madeen portrait.
+                MooglePortrait = 1 << 4,
+                MadeenPortrait = 1 << 5,
+            }
+
+            [FieldOffset(0x00)]
+            public byte palleteGauge;
+
+            [FieldOffset(0x02)]
+            public byte paint;
+
+            [NonSerialized]
+            [FieldOffset(0x03)]
+            private CanvasFlags canvasFlags;
+
+            public string creatureMotif
+            {
+                get
+                {
+                    if (canvasFlags.HasFlag(CanvasFlags.Pom))
+                        return "Pom";
+                    if (canvasFlags.HasFlag(CanvasFlags.Wing))
+                        return "Wing";
+                    if (canvasFlags.HasFlag(CanvasFlags.Claw))
+                        return "Claw";
+                    if (canvasFlags.HasFlag(CanvasFlags.Maw))
+                        return "Maw";
+                    return "None";
+                }
+            }
+
+            public bool weaponMotif => canvasFlags.HasFlag(CanvasFlags.Weapon);
+            public bool landscapeMotif => canvasFlags.HasFlag(CanvasFlags.Landscape);
+
+            [NonSerialized]
+            [FieldOffset(0x04)]
+            private CreatureFlags creatureFlags;
+
+            public string[] depictions
+            {
+                get
+                {
+                    var motifs = new List<string>();
+                    if (creatureFlags.HasFlag(CreatureFlags.Pom))
+                        motifs.Add("Pom");
+                    if (creatureFlags.HasFlag(CreatureFlags.Wing))
+                        motifs.Add("Wing");
+                    if (creatureFlags.HasFlag(CreatureFlags.Claw))
+                        motifs.Add("Claw");
+                    return motifs.ToArray();
+                }
+            }
+
+            public bool mooglePortrait => creatureFlags.HasFlag(CreatureFlags.MooglePortrait);
+            public bool madeenPortrait => creatureFlags.HasFlag(CreatureFlags.MadeenPortrait);
         }
     }
 }

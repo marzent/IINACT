@@ -8,7 +8,7 @@ internal interface IHandlerFactory
 {
     IHandler Create(string name, TinyIoCContainer container)
     {
-        var pluginInterface = container.Resolve<DalamudPluginInterface>();
+        var pluginInterface = container.Resolve<IDalamudPluginInterface>();
         var receiver = pluginInterface.GetIpcProvider<JObject, bool>($"IINACT.IpcProvider.{name}");
         var sender = pluginInterface.GetIpcSubscriber<JObject, bool>(name);
         var logger = container.Resolve<ILogger>();

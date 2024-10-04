@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Dalamud.Logging;
 using static Advanced_Combat_Tracker.ActGlobals;
 
 namespace Advanced_Combat_Tracker.Resources;
@@ -2175,8 +2174,29 @@ public static class NotActMainFormatter
                 case "MAXHIT-*":
                     return data.GetMaxHit(ShowType: false);
                 case "duration":
+                    if (data.Active)
+                    {
+                        if (oFormActMain.LastEstimatedTime > data.StartTime)
+                        {
+                            var timeSpan = oFormActMain.LastEstimatedTime - data.StartTime;
+                            return timeSpan.Hours == 0
+                                       ? $"{timeSpan.Minutes:00}:{timeSpan.Seconds:00}"
+                                       : $"{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+                        }
+                        return "00:00";
+                    }
                     return data.DurationS;
                 case "DURATION":
+                    if (data.Active)
+                    {
+                        if (oFormActMain.LastEstimatedTime > data.StartTime)
+                        {
+                            return ((int)(oFormActMain.LastEstimatedTime - data.StartTime).TotalSeconds)
+                                .ToString("0");
+                        }
+
+                        return "0";
+                    }
                     return data.Duration.TotalSeconds.ToString("0");
                 case "damage":
                     foreach (var SelectiveAlly in selectiveAllies)
@@ -2555,7 +2575,7 @@ public static class NotActMainFormatter
             if (ex is not InvalidOperationException)
                 oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
             else 
-                PluginLog.Verbose(ex, $"FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
+                oFormActMain.PluginLog.Verbose(ex, $"[NotAct] FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
             
             return "ERROR";
         }
@@ -2806,7 +2826,7 @@ public static class NotActMainFormatter
             if (ex is not InvalidOperationException)
                 oFormActMain.WriteExceptionLog(ex, $"{data} -> {varName}({extra})");
             else 
-                PluginLog.Verbose(ex, $"FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
+                oFormActMain.PluginLog.Verbose(ex, $"[NotAct] FFIXV_ACT_Plugin modified collection needed for {data} -> {varName}({extra})");
             
             return "ERROR";
         }

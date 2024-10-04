@@ -84,12 +84,10 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             logger.Log(LogLevel.Error, message);
         }
 
-        private IOpcodeConfigEntry GetOpcode(string name, Opcodes opcodes, string version, string opcodeType)
+        private IOpcodeConfigEntry GetOpcode(string name, Opcodes opcodes, string version, string opcodeType, MachinaRegion machinaRegion)
         {
             if (opcodes == null)
                 return null;
-
-            var machinaRegion = repository.GetMachinaRegion().ToString();
 
             if (opcodes.TryGetValue(machinaRegion, out var regionOpcodes))
             {
@@ -104,7 +102,8 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 }
                 else
                 {
-                    LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
+                    if (repository.GetMachinaRegion().ToString() == machinaRegion)
+                        LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
                 }
             }
             else
@@ -114,8 +113,17 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
 
             return null;
         }
-
+        
         public IOpcodeConfigEntry this[string name]
+        {
+            get
+            {
+                var machinaRegion = repository.GetMachinaRegion().ToString();
+                return this[name, machinaRegion];
+            }
+        }
+
+        public IOpcodeConfigEntry this[string name, MachinaRegion machinaRegion]
         {
             get
             {
@@ -126,7 +134,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                     return null;
                 }
                 
-                return GetOpcode(name, config, version, "resource");
+                return GetOpcode(name, config, version, "resource", machinaRegion);
             }
         }
     }

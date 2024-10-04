@@ -1,109 +1,34 @@
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using RainbowMage.OverlayPlugin.NetworkProcessors.PacketHelper;
 
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
-    [Serializable]
-    [StructLayout(LayoutKind.Explicit)]
-    internal struct MapEffect_v62
+    class LineMapEffect : LineBaseCustom<
+            Server_MessageHeader_Global, LineMapEffect.MapEffect_v62,
+            Server_MessageHeader_CN, LineMapEffect.MapEffect_v62,
+            Server_MessageHeader_KR, LineMapEffect.MapEffect_v62>
     {
-        [FieldOffset(0x0)]
-        public uint instanceContentID;
-
-        [FieldOffset(0x4)]
-        public uint flags;
-
-        [FieldOffset(0x8)]
-        public byte index;
-
-        [FieldOffset(0x9)]
-        public byte unknown1;
-
-        [FieldOffset(0x10)]
-        public ushort unknown2;
-
-        public override string ToString()
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        internal struct MapEffect_v62 : IPacketStruct
         {
-            return $"{instanceContentID:X8}|{flags:X8}|{index:X2}|{unknown1:X2}|{unknown2:X4}";
+            public uint instanceContentID;
+            public uint flags;
+            public byte index;
+            public byte unknown1;
+            public ushort unknown2;
+            public uint padding;
+
+            public string ToString(long epoch, uint ActorID)
+            {
+                return $"{instanceContentID:X8}|{flags:X8}|{index:X2}|{unknown1:X2}|{unknown2:X4}";
+            }
         }
-    }
 
-    public class LineMapEffect
-    {
         public const uint LogFileLineID = 257;
-        private ILogger logger;
-        private OverlayPluginLogLineConfig opcodeConfig;
-        private IOpcodeConfigEntry opcode = null;
-        private readonly int offsetMessageType;
-        private readonly int offsetPacketData;
-        private readonly FFXIVRepository ffxiv;
-
-        private Func<string, DateTime, bool> logWriter;
+        public const string logLineName = "MapEffect";
+        public const string MachinaPacketName = "MapEffect";
 
         public LineMapEffect(TinyIoCContainer container)
-        {
-            logger = container.Resolve<ILogger>();
-            ffxiv = container.Resolve<FFXIVRepository>();
-            var netHelper = container.Resolve<NetworkParser>();
-            if (!ffxiv.IsFFXIVPluginPresent())
-                return;
-            opcodeConfig = container.Resolve<OverlayPluginLogLineConfig>();
-            try
-            {
-                var mach = Assembly.Load("Machina.FFXIV");
-                var msgHeaderType = mach.GetType("Machina.FFXIV.Headers.Server_MessageHeader");
-                offsetMessageType = netHelper.GetOffset(msgHeaderType, "MessageType");
-                offsetPacketData = Marshal.SizeOf(msgHeaderType);
-                ffxiv.RegisterNetworkParser(MessageReceived);
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                logger.Log(LogLevel.Error, Resources.NetworkParserNoFfxiv);
-            }
-            catch (Exception e)
-            {
-                logger.Log(LogLevel.Error, Resources.NetworkParserInitException, e);
-            }
-
-            var customLogLines = container.Resolve<FFXIVCustomLogLines>();
-            this.logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
-            {
-                Name = "MapEffect",
-                Source = "OverlayPlugin",
-                ID = LogFileLineID,
-                Version = 1,
-            });
-        }
-
-        private unsafe void MessageReceived(string id, long epoch, byte[] message)
-        {
-            // Wait for network data to actually fetch opcode info from file and register log line
-            // This is because the FFXIV_ACT_Plugin's `GetGameVersion` method only returns valid data
-            // if the player is currently logged in/a network connection is active
-            if (opcode == null)
-            {
-                opcode = opcodeConfig["MapEffect"];
-                if (opcode == null)
-                {
-                    return;
-                }
-            }
-
-            if (message.Length < opcode.size + offsetPacketData)
-                return;
-
-            fixed (byte* buffer = message)
-            {
-                if (*(ushort*)&buffer[offsetMessageType] == opcode.opcode)
-                {
-                    DateTime serverTime = ffxiv.EpochToDateTime(epoch);
-                    MapEffect_v62 mapEffectPacket = *(MapEffect_v62*)&buffer[offsetPacketData];
-                    logWriter(mapEffectPacket.ToString(), serverTime);
-
-                    return;
-                }
-            }
-        }
+            : base(container, LogFileLineID, logLineName, MachinaPacketName) { }
     }
 }

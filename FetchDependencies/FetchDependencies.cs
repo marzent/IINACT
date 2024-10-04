@@ -26,7 +26,8 @@ public class FetchDependencies
     {
         var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
         var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
-
+        var deucalionPath = Path.Combine(DependenciesDir, "deucalion-1.1.0.distrib.dll");
+        
         if (!NeedsUpdate(pluginPath))
             return;
 
@@ -47,6 +48,9 @@ public class FetchDependencies
                 ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
             }
             File.Delete(pluginZipPath);
+
+            foreach (var deucalionDll in Directory.GetFiles(DependenciesDir, "deucalion*.dll"))
+                File.Delete(deucalionDll);
         }
 
         var patcher = new Patcher(PluginVersion, DependenciesDir);

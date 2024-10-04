@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 {
@@ -19,7 +18,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.AtkStage
 
         public unsafe IntPtr GetAddonAddress(string name)
         {
-            var atkStage = AtkStage.GetSingleton();
+            var atkStage = AtkStage.Instance();
             if (atkStage == null)
                 return nint.Zero;
 

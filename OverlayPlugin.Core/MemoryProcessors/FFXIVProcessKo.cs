@@ -114,12 +114,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         private static int kInCombatOffsetOffset = 5;
         private static bool kInCombatOffsetRIP = false;
 
-        // Bait integer.
-        // Variable is accessed via a cmp eax,[...] line at offset=0.
-        private static String kBaitSignature = "4883C4305BC3498BC8E8????????3B05";
-        private static int kBaitBaseOffset = 0;
-        private static bool kBaitBaseRIP = true;
-
         // A piece of code that reads the job data.
         // The pointer of interest is the first ???????? in the signature.
         private static String kJobDataSignature = "488B0D????????4885C90F84????????488B05????????3C03";
@@ -171,16 +165,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     var offset = (int)(((UInt64)p[0]) & 0xFFFFFFFF);
                     in_combat_addr_ = IntPtr.Add(baseAddress, offset);
                 }
-            }
-
-            p = SigScan(kBaitSignature, kBaitBaseOffset, kBaitBaseRIP);
-            if (p.Count != 1)
-            {
-                logger_.Log(LogLevel.Error, "Bait signature found " + p.Count + " matches");
-            }
-            else
-            {
-                bait_addr_ = p[0];
             }
         }
 
@@ -264,10 +248,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             var entity_ptr = ReadIntPtr(player_ptr_addr_);
             if (entity_ptr == IntPtr.Zero)
                 return null;
-            var data = GetEntityData(entity_ptr);
-            if (data.job == EntityJob.FSH)
-                data.bait = GetBait();
-            return data;
+            return GetEntityData(entity_ptr);;
         }
 
         public override unsafe JObject GetJobSpecificData(EntityJob job)

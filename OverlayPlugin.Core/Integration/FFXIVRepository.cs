@@ -335,7 +335,7 @@ namespace RainbowMage.OverlayPlugin
         
         public static Dictionary<GameRegion, Dictionary<string, ushort>> GetMachinaOpcodes() =>
             (Dictionary<GameRegion, Dictionary<string, ushort>>)typeof(OpcodeManager).GetField(
-                "_opcodes", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(OpcodeManager.Instance);
+                "_opcodes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(OpcodeManager.Instance);
 
         public GameRegion GetMachinaRegion() =>
             Machina.FFXIV.Headers.Opcodes.OpcodeManager.Instance.GameRegion;

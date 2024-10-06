@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using Dalamud.Plugin.Services;
 
 namespace FetchDependencies;
 
@@ -13,13 +14,15 @@ public class FetchDependencies
     private string DependenciesDir { get; }
     private bool IsChinese { get; }
     private HttpClient HttpClient { get; }
+    private IPluginLog PluginLog { get; }
 
-    public FetchDependencies(Version version, string assemblyDir, bool isChinese, HttpClient httpClient)
+    public FetchDependencies(Version version, string assemblyDir, bool isChinese, HttpClient httpClient, IPluginLog pluginLog)
     {
         PluginVersion = version;
         DependenciesDir = assemblyDir;
         IsChinese = isChinese;
         HttpClient = httpClient;
+        PluginLog = pluginLog;
     }
 
     public void GetFfxivPlugin()
@@ -53,7 +56,7 @@ public class FetchDependencies
                 File.Delete(deucalionDll);
         }
 
-        var patcher = new Patcher(PluginVersion, DependenciesDir);
+        var patcher = new Patcher(PluginVersion, DependenciesDir, PluginLog);
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();

@@ -1,3 +1,4 @@
+using Dalamud.Plugin.Services;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -7,11 +8,13 @@ internal class Patcher
 {
     private Version PluginVersion { get; }
     private string WorkPath { get; }
+    private IPluginLog PluginLog { get; }
 
-    public Patcher(Version version, string workPath)
+    public Patcher(Version version, string workPath, IPluginLog pluginLog)
     {
         PluginVersion = version;
         WorkPath = workPath;
+        PluginLog = pluginLog;
     }
 
     public void MainPlugin()
@@ -275,7 +278,7 @@ internal class Patcher
                                     instruction.Operand = machina.Assembly.MainModule.ImportReference(newMethodDefinition);
                                 else
                                 {
-                                    Dalamud.Logging.PluginLog.LogError($"[Patcher] Could not find method {methodReference.Name} in {newType.FullName}");
+                                    PluginLog.Error($"[Patcher] Could not find method {methodReference.Name} in {newType.FullName}");
                                 }
                             }
                         }

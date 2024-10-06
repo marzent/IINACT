@@ -5,10 +5,10 @@ namespace Machina.FFXIV.Dalamud
     public class NotDeucalionClient : IDisposable
     {
         public delegate void MessageReceivedHandler(byte[] message);
-        public MessageReceivedHandler MessageReceived;
+        public MessageReceivedHandler? MessageReceived;
 
         public delegate void MessageSentHandler(byte[] message);
-        public MessageSentHandler MessageSent;
+        public MessageSentHandler? MessageSent;
 
         private DalamudClient _dalamudClient;
         private static ConditionalWeakTable<byte[], object /* long */> EpochWeakTable = new ConditionalWeakTable<byte[], object>();

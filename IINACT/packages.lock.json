@@ -4,9 +4,9 @@
     "net8.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.13, )",
-        "resolved": "2.1.13",
-        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
       },
       "System.Speech": {
         "type": "Direct",
@@ -56,7 +56,7 @@
         "type": "Project",
         "dependencies": {
           "Machina": "[2.3.1.3, )",
-          "Machina.FFXIV": "[2.3.8.5, )",
+          "Machina.FFXIV": "[2.4.0.1, )",
           "Microsoft.CSharp": "[4.7.0, )",
           "NetCoreServer": "[8.0.7, )",
           "OverlayPlugin.Common": "[1.0.0, )",

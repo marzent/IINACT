@@ -109,10 +109,19 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return false;
         }
 
-        public unsafe static string GetStringFromBytes(byte* source, int size)
+        public static unsafe string GetStringFromBytes(byte* source, int size)
         {
             var bytes = ArrayPool<byte>.Shared.Rent(size);
-            Marshal.Copy((IntPtr)source, bytes, 0, size);
+
+            fixed (byte* bytesPtr = bytes)
+            {
+                if (ReadMemory((nint)bytesPtr, (nint)source, size) != 0)
+                {
+                    ArrayPool<byte>.Shared.Return(bytes);
+                    throw new InvalidOperationException("Failed to read memory.");
+                }
+            }
+            
             var realSize = 0;
             for (var i = 0; i < size; i++)
             {

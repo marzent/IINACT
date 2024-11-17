@@ -8,7 +8,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
     public class FFXIVProcessIntl : FFXIVProcess
     {
-        // Last updated for FFXIV 6.4
+        // Last updated for FFXIV 7.1
 
         [StructLayout(LayoutKind.Explicit)]
         public unsafe struct EntityMemory
@@ -42,10 +42,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0xC0)]
             public Single rotation;
 
-            [FieldOffset(0x1BC)]
+            [FieldOffset(0x1AC)]
             public CharacterDetails charDetails;
 
-            [FieldOffset(0x1E6)]
+            [FieldOffset(0x1D6)]
             public byte shieldPercentage;
         }
 

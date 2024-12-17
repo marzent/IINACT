@@ -32,7 +32,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
         public ContentFinderSettingsMemoryManager(TinyIoCContainer container)
         {
             this.container = container;
-            container.Register<IContentFinderSettingsMemory651, ContentFinderSettingsMemory651>();
             container.Register<IContentFinderSettingsMemory70, ContentFinderSettingsMemory70>();
             container.Register<IContentFinderSettingsMemory71, ContentFinderSettingsMemory71>();
             repository = container.Resolve<FFXIVRepository>();
@@ -54,7 +53,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.ContentFinderSettings
         public void ScanPointers()
         {
             List<IContentFinderSettingsMemory> candidates = new List<IContentFinderSettingsMemory>();
-            candidates.Add(container.Resolve<IContentFinderSettingsMemory651>());
             candidates.Add(container.Resolve<IContentFinderSettingsMemory70>());
             candidates.Add(container.Resolve<IContentFinderSettingsMemory71>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());

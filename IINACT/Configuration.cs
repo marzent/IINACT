@@ -7,6 +7,7 @@ namespace IINACT;
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
+    [JsonIgnore]
     public string DefaultLogFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "IINACT");
     private string? logFilePath;
 

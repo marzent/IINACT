@@ -109,7 +109,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             return false;
         }
 
-        public static unsafe string GetStringFromBytes(byte* source, int size)
+        public static unsafe string GetStringFromBytes(byte* source, int size, int realSize = 0)
         {
             var bytes = ArrayPool<byte>.Shared.Rent(size);
 
@@ -122,7 +122,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                 }
             }
             
-            var realSize = 0;
             for (var i = 0; i < size; i++)
             {
                 if (bytes[i] != 0)

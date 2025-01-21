@@ -27,11 +27,12 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             {
                 fixed (byte* key = this.key) fixed (byte* value = this.value)
                 {
+                    int valSize = Math.Min(valueByteCount, valueSize);
                     return
                         $"{ffxiv.GetLocaleString()}|" +
                         $"{valueByteCount:X8}|" +
                         $"{FFXIVMemory.GetStringFromBytes(key, keySize).Replace("\r", "\\r").Replace("\n", "\\n")}|" +
-                        $"{FFXIVMemory.GetStringFromBytes(value, Math.Min(valueByteCount, valueSize)).Replace("\r", "\\r").Replace("\n", "\\n")}";
+                        $"{FFXIVMemory.GetStringFromBytes(value, valSize, valSize).Replace("\r", "\\r").Replace("\n", "\\n")}";
                 }
             }
         }

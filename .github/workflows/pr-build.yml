@@ -30,7 +30,7 @@ jobs:
         Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT.zip"
         Expand-Archive -Force IINACT.zip Artifact
     - name: Upload IINACT
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: IINACT
         path: Artifact/*

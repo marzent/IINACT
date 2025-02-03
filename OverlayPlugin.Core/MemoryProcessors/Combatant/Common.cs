@@ -63,6 +63,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
     // And when Titan's Heart spawns, Titan's ModelStatus remains at 0 (while his ObjectStatus remains at 189).
     // In TEA, all bosses load from the start with ModelStatus 16384 (except for Living Liquid of course), manually changing the values to 0 makes the bosses
     // appear on the map in an immune state, although it's finicky to make that happen consistently.
+    // 
+    // FFXIVClientStructs calls this `RenderFlags`
     public enum ModelStatus : int
     {
         Visible = 0,

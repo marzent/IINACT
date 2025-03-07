@@ -7,7 +7,7 @@
   "TestingAssemblyVersion": "2.7.3.12",
   "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
   "ApplicableVersion": "any",
-  "RepoUrl": "https://github.com/marzent/IINACT",
+  "RepoUrl": "https://github.com/whitedustmoon1175/IINACTgit add ",
   "Tags": [
     "parsing",
     "plugin",

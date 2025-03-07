@@ -122,7 +122,7 @@ namespace Cactbot {
       // They both point to the same spot, so verify these have the same value.
       p = SigScan(kCharmapSignature, kCharmapSignatureOffset, kCharmapSignatureRIP);
       if (p.Count == 0) {
-        logger_.Log(LogLevel.Error, Strings.CharmapSignatureFoundMultipleMatchesErrorMessage, p.Count);
+        logger_.Log(LogLevel.Error, Strings."CharmapSignatureFoundMultipleMatchesErrorMessage" + p.Count + " matches");
       } else {
         IntPtr player_ptr_value = IntPtr.Zero;
         foreach (IntPtr ptr in p) {
@@ -139,14 +139,14 @@ namespace Cactbot {
 
       p = SigScan(kJobDataSignature, kJobDataSignatureOffset, kJobDataSignatureRIP);
       if (p.Count != 1) {
-        logger_.Log(LogLevel.Error, Strings.JobSignatureFoundMultipleMatchesErrorMessage, p.Count);
+        logger_.Log(LogLevel.Error, "Strings.JobSignatureFoundMultipleMatchesErrorMessage" + p.Count + " matches");
       } else {
         job_data_outer_addr_ = IntPtr.Add(p[0], kJobDataOuterStructOffset);
       }
 
       p = SigScan(kInCombatSignature, kInCombatSignatureOffset, kInCombatSignatureRIP, kInCombatRipOffset);
       if (p.Count != 1) {
-        logger_.Log(LogLevel.Error, Strings.InCombatSignatureFoundMultipleMatchesErrorMessage, p.Count);
+        logger_.Log(LogLevel.Error, "Strings.InCombatSignatureFoundMultipleMatchesErrorMessage" + p.Count + " matches");
       } else {
         in_combat_addr_ = p[0];
       }

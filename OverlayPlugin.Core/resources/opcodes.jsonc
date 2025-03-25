@@ -3,124 +3,124 @@
 // For more information, see comments on https://github.com/OverlayPlugin/OverlayPlugin/issues/235
 {
     "Chinese": {
-        "2025.02.13.0000.0000": {
-            // Version: 7.1
+        "2025.03.03.0000.0000": {
+            // Version: 7.11
             "MapEffect": {
-                "opcode": 373,
+                "opcode": 337,
                 "size": 11
             },
             "CEDirector": {
-                "opcode": 874,
+                "opcode": 193,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 982,
+                "opcode": 466,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 973,
+                "opcode": 834,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 452,
+                "opcode": 842,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 563,
+                "opcode": 528,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 828,
+                "opcode": 737,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 291,
+                "opcode": 634,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 700,
+                "opcode": 966,
                 "size": 24
             }
         }
     },
     "Global": {
-        "2025.02.27.0000.0000": {
-            // Version: 7.18h
+        "2025.03.18.0000.0000": {
+            // Version: 7.2
             "MapEffect": {
-                "opcode": 960,
+                "opcode": 242,
                 "size": 11
             },
             "CEDirector": {
-                "opcode": 351,
+                "opcode": 279,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 561,
+                "opcode": 570,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 149,
+                "opcode": 443,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 918,
+                "opcode": 541,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 902,
+                "opcode": 894,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 270,
+                "opcode": 128,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 796,
+                "opcode": 345,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 547,
+                "opcode": 136,
                 "size": 24
             }
         }
     },
     "Korean": {
-        "2025.01.08.0000.0000": {
-            // Version: 7.05
+        "2025.03.07.0000.0000": {
+            // Version: 7.1
             "MapEffect": {
-                "opcode": 519,
+                "opcode": 199,
                 "size": 11
             },
             "CEDirector": {
-                "opcode": 802,
+                "opcode": 823,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 740,
+                "opcode": 844,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 937,
+                "opcode": 274,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 971,
+                "opcode": 976,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 689,
+                "opcode": 753,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 641,
+                "opcode": 366,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 984,
+                "opcode": 138,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 303,
+                "opcode": 703,
                 "size": 24
             }
         }

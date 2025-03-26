@@ -8,15 +8,20 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
     public class FFXIVProcessIntl : FFXIVProcess
     {
-        // Last updated for FFXIV 7.1
+        // Last updated for FFXIV 7.2
+        // Per aers/FFXIVClientStructs, what we call EntityMemory is actually:
+        // Client::Game::Character::Character (0x22E0)
+        //   Client::Game::Object::GameObject (0x190)
+        //   Client::Game::Character::CharacterData (0x50)
+        //   ...
 
         [StructLayout(LayoutKind.Explicit)]
         public unsafe struct EntityMemory
         {
             public static int Size => Marshal.SizeOf(typeof(EntityMemory));
 
-            // Unknown size, but this is the bytes up to the next field.
-            public const int nameBytes = 68;
+            // 64 bytes per both OverlayPlugin & aers/FFXIVClientStructs
+            public const int nameBytes = 64;
 
             [FieldOffset(0x30)]
             public fixed byte Name[nameBytes];
@@ -30,54 +35,54 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             [FieldOffset(0x92)]
             public ushort distance;
 
-            [FieldOffset(0xB0)]
+            [FieldOffset(0xA0)]
             public Single pos_x;
 
-            [FieldOffset(0xB4)]
+            [FieldOffset(0xA4)]
             public Single pos_z;
 
-            [FieldOffset(0xB8)]
+            [FieldOffset(0xA8)]
             public Single pos_y;
 
-            [FieldOffset(0xC0)]
+            [FieldOffset(0xB0)]
             public Single rotation;
 
-            [FieldOffset(0x1AC)]
+            [FieldOffset(0x190)]
             public CharacterDetails charDetails;
-
-            [FieldOffset(0x1D6)]
-            public byte shieldPercentage;
         }
 
         [StructLayout(LayoutKind.Explicit)]
         public struct CharacterDetails
         {
-            [FieldOffset(0x00)]
+            [FieldOffset(0x0C)]
             public int hp;
 
-            [FieldOffset(0x04)]
+            [FieldOffset(0x10)]
             public int max_hp;
 
-            [FieldOffset(0x08)]
+            [FieldOffset(0x14)]
             public short mp;
 
-            [FieldOffset(0x10)]
+            [FieldOffset(0x1C)]
             public short gp;
 
-            [FieldOffset(0x12)]
+            [FieldOffset(0x1E)]
             public short max_gp;
 
-            [FieldOffset(0x14)]
+            [FieldOffset(0x20)]
             public short cp;
 
-            [FieldOffset(0x16)]
+            [FieldOffset(0x22)]
             public short max_cp;
 
-            [FieldOffset(0x1E)]
+            [FieldOffset(0x2A)]
             public EntityJob job;
 
-            [FieldOffset(0x1F)]
+            [FieldOffset(0x2B)]
             public byte level;
+            
+            [FieldOffset(0x2E)]
+            public byte shieldPercentage;
         }
 
         public FFXIVProcessIntl(TinyIoCContainer container) : base(container) { }
@@ -204,7 +209,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
                     // This doesn't exist in memory, so just send the right value.
                     // As there are other versions that still have it, don't change the event.
                     entity.max_mp = 10000;
-                    entity.shield_value = mem.shieldPercentage * entity.max_hp / 100;
+                    entity.shield_value = mem.charDetails.shieldPercentage * entity.max_hp / 100;
 
                     if (IsGatherer(entity.job))
                     {

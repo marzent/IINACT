@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net9.0-windows7.0": {
       "Microsoft.CSharp": {
         "type": "Direct",
         "requested": "[4.7.0, )",
@@ -18,6 +18,6 @@
         "type": "Project"
       }
     },
-    "net8.0-windows7.0/win-x64": {}
+    "net9.0-windows7.0/win-x64": {}
   }
 }

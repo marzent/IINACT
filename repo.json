@@ -13,7 +13,7 @@
     "plugin",
     "ACT"
   ],
-  "DalamudApiLevel": 11,
+  "DalamudApiLevel": 12,
   "LoadPriority": 0,
   "IconUrl": "https://raw.githubusercontent.com/marzent/IINACT/master/images/icon.png",
   "Punchline": "A parsing plugin.",

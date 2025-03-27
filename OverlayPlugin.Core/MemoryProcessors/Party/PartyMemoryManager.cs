@@ -19,6 +19,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
         {
             this.container = container;
             container.Register<IPartyMemory70, PartyMemory70>();
+            container.Register<IPartyMemory72, PartyMemory72>();
             repository = container.Resolve<FFXIVRepository>();
 
             var memory = container.Resolve<FFXIVMemory>();
@@ -39,6 +40,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Party
         {
             List<IPartyMemory> candidates = new List<IPartyMemory>();
             candidates.Add(container.Resolve<IPartyMemory70>());
+            candidates.Add(container.Resolve<IPartyMemory72>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
         }
 

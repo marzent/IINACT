@@ -50,8 +50,20 @@
                 "opcode": 242,
                 "size": 11
             },
+            "MapEffect4": {
+                "opcode": 790,
+                "size": 0
+            },
+            "MapEffect8": {
+                "opcode": 605,
+                "size": 0
+            },
+            "MapEffect12": {
+                "opcode": 247,
+                "size": 0
+            },
             "CEDirector": {
-                "opcode": 279,
+                "opcode": 182,
                 "size": 16
             },
             "RSVData": {

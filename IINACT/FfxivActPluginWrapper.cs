@@ -199,10 +199,7 @@ public partial class FfxivActPluginWrapper : IDisposable
         var line2 = logFormat.FormatMemorySettings(DataCollectionSettings.ProcessID,
                                                    DataCollectionSettings.LogFileFolder,
                                                    DataCollectionSettings.LogAllNetworkData,
-                                                   DataCollectionSettings.DisableCombatLog,
-                                                   DataCollectionSettings.NetworkIP, DataCollectionSettings.UseWinPCap,
-                                                   DataCollectionSettings.UseSocketFilter,
-                                                   DataCollectionSettings.UseDeucalion);
+                                                   DataCollectionSettings.DisableCombatLog);
         logOutput.WriteLine(LogMessageType.Settings, DateTime.MinValue, line2);
 
         logOutput.CallMethod("ConfigureLogFile", null);

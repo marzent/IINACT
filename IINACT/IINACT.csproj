@@ -18,7 +18,7 @@
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <LangVersion>11</LangVersion>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -37,6 +37,10 @@
 
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="System.Speech" Version="8.0.0" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
@@ -48,6 +52,14 @@
         </Reference>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Reloaded.Hooks">
+            <HintPath>$(DalamudLibPath)Reloaded.Hooks.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Reloaded.Hooks.Definitions">
+            <HintPath>$(DalamudLibPath)Reloaded.Hooks.Definitions.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGui.NET">

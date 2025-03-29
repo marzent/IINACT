@@ -16,6 +16,7 @@ using FFXIV_ACT_Plugin.Memory.MemoryReader;
 using FFXIV_ACT_Plugin.Memory.Models;
 using FFXIV_ACT_Plugin.Parse;
 using FFXIV_ACT_Plugin.Resource;
+using IINACT.Network;
 using Machina.FFXIV;
 using Machina.FFXIV.Headers.Opcodes;
 using Microsoft.MinIoC;
@@ -118,7 +119,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         this.chatGui.ChatMessage += OnChatMessage;
         ActGlobals.oFormActMain.BeforeLogLineRead += OFormActMain_BeforeLogLineRead;
         serverTimeProcessor.ServerTime = DateTime.Now;
-        Machina.FFXIV.Dalamud.DalamudClient.GetServerTime = () => (long)GameServerTime.LastSeverTimestamp;
 
         cancellationTokenSource = new CancellationTokenSource();
         scanThread = new Thread(() => ScanMemory(cancellationTokenSource.Token))

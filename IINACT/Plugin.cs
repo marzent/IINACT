@@ -6,6 +6,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using IINACT.Network;
 using IINACT.Windows;
 
 namespace IINACT;
@@ -36,7 +37,7 @@ public sealed class Plugin : IDalamudPlugin
     private TextToSpeechProvider TextToSpeechProvider { get; }
     private MainWindow MainWindow { get; }
     internal FileDialogManager FileDialogManager { get; }
-    private GameServerTime GameServerTime { get; }
+    private ZoneDownHookManager ZoneDownHookManager { get; }
     private IpcProviders IpcProviders { get; }
 
     private FfxivActPluginWrapper FfxivActPluginWrapper { get; }
@@ -73,8 +74,7 @@ public sealed class Plugin : IDalamudPlugin
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();
-        GameServerTime = new GameServerTime(GameInteropProvider, SigScanner);
-        Machina.FFXIV.Dalamud.DalamudClient.GameNetwork = GameNetwork;
+        ZoneDownHookManager = new ZoneDownHookManager(SigScanner, GameInteropProvider);
 
         HttpClient = new HttpClient();
         
@@ -125,7 +125,7 @@ public sealed class Plugin : IDalamudPlugin
         ClientState.EnterPvP -= EnterPvP;
         ClientState.LeavePvP -= LeavePvP;
         IpcProviders.Dispose();
-        GameServerTime.Dispose();
+        ZoneDownHookManager.Dispose();
         
         FfxivActPluginWrapper.Dispose();
         OverlayPlugin.DeInitPlugin();

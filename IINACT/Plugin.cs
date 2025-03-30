@@ -71,10 +71,15 @@ public sealed class Plugin : IDalamudPlugin
         SigScanner = sigScanner;
         Log = pluginLog;
 
+        using var createZoneDownHookManager = Task.Run(() =>
+        {
+            using var deucalion = new DeucalionController(Process.GetCurrentProcess());
+            deucalion.SendExitAndLockPipe();
+            return new ZoneDownHookManager(SigScanner, GameInteropProvider);
+        });
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();
-        ZoneDownHookManager = new ZoneDownHookManager(SigScanner, GameInteropProvider);
 
         HttpClient = new HttpClient();
         
@@ -118,6 +123,8 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         ClientState.EnterPvP += EnterPvP;
         ClientState.LeavePvP += LeavePvP;
+
+        ZoneDownHookManager = createZoneDownHookManager.Result;
     }
 
     public void Dispose()

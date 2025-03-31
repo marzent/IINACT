@@ -117,6 +117,12 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        
+        if (clientState.IsPvP)
+            EnterPvP();
+        else
+            LeavePvP();
+        
         ClientState.EnterPvP += EnterPvP;
         ClientState.LeavePvP += LeavePvP;
 

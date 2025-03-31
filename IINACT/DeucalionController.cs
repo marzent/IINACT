@@ -1,19 +1,45 @@
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
+using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 
 namespace IINACT;
 
-internal class DeucalionController(Process process, IGameInteropProvider hooks): IDisposable
+internal class DeucalionController : IDisposable
 {
-    private IGameInteropProvider hooks = hooks; 
-    private readonly int pid = process.Id;
+    private readonly int pid;
     private NamedPipeServerStream? pipeServer;
+    private Hook<LoadLibraryWDelegate>? loadLibraryWHook;
+    
+    private delegate nint LoadLibraryWDelegate([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName);
+
+    public DeucalionController(Process process, IGameInteropProvider hooks)
+    {
+        pid = process.Id;
+        loadLibraryWHook = hooks.HookFromSymbol<LoadLibraryWDelegate>("Kernel32", "LoadLibraryW", LoadLibraryWDetour);
+        loadLibraryWHook.Enable();
+        SendExitAndLockPipe();
+    }
+    
+    private nint LoadLibraryWDetour(string lpLibFileName)
+    {
+        Plugin.Log.Debug($"LoadLibraryW called with {lpLibFileName}.");
+
+        var fileName = Path.GetFileName(lpLibFileName);
+        if (fileName.Contains("Deucalion", StringComparison.OrdinalIgnoreCase))
+        {
+            Plugin.Log.Warning($"Blocked loading of DLL: {lpLibFileName} (filename: {fileName})");
+            return nint.Zero;
+        }
+
+        return loadLibraryWHook!.Original(lpLibFileName);
+    }
 
     /// <summary>
     /// Sends an Exit operation to Deucalion via its named pipe and locks the pipe name afterward.
     /// </summary>
-    public void SendExitAndLockPipe()
+    private void SendExitAndLockPipe()
     {
         var pipeName = $@"deucalion-{pid}";
         if (SendExitOp(pipeName))
@@ -82,5 +108,8 @@ internal class DeucalionController(Process process, IGameInteropProvider hooks):
     {
         pipeServer?.Dispose();
         pipeServer = null;
+        loadLibraryWHook?.Disable();
+        loadLibraryWHook?.Dispose();
+        loadLibraryWHook = null;
     }
 }

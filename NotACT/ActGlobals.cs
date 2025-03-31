@@ -8,7 +8,7 @@ public static partial class ActGlobals
 
     public static bool calcRealAvgDelay = true;
 
-    internal static SortedDictionary<string, bool> selectiveList = new();
+    internal static SortedDictionary<string, bool> selectiveList;
 
     public static bool longDuration = false;
 
@@ -32,8 +32,25 @@ public static partial class ActGlobals
 
     public static FormActMain oFormActMain = null!;
 
-    internal static object ActionDataLock = new();
+    internal static object ActionDataLock;
 
-    internal static ActLocalization.LocalizationStringsHelper Trans =>
-        _trans ??= new ActLocalization.LocalizationStringsHelper();
+    internal static ActLocalization.LocalizationStringsHelper Trans => _trans!;
+    
+    public static void Init()
+    {
+        _trans = new ActLocalization.LocalizationStringsHelper();
+        selectiveList = new SortedDictionary<string, bool>();
+        ActionDataLock = new object();
+    }
+    
+    public static void Dispose()
+    {
+        oFormActMain.Exit();
+        oFormActMain.Dispose();
+        oFormActMain = null!;
+        _trans = null!;
+        selectiveList.Clear();
+        selectiveList = null!;
+        ActionDataLock = null!;
+    }
 }

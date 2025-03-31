@@ -25,6 +25,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     private HistoryRecord lastZoneRecord;
     private Thread logReaderThread;
     private Thread logWriterThread;
+    private bool pluginActive = true;
 
     internal volatile bool refreshTree;
 
@@ -371,7 +372,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         {
             using var stream = new FileStream(LogFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             using var outputWriter = new StreamWriter(stream);
-            while (true)
+            while (pluginActive)
             {
                 if (!WriteLogFile || DisableWritingPvpLogFile)
                 {
@@ -411,7 +412,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         try
         {
             var logOutput = (LogOutput)FfxivPlugin._dataCollection._logOutput;
-            while (true)
+            while (pluginActive)
             {
                 string? logLine = null;
                 lock (logOutput._LogQueueLock)
@@ -450,7 +451,7 @@ public partial class FormActMain : Form, ISynchronizeInvoke
     {
         try
         {
-            while (true)
+            while (pluginActive)
             {
                 while (afterActionsQueue.TryDequeue(out var masterSwing))
                 {
@@ -544,5 +545,10 @@ public partial class FormActMain : Form, ISynchronizeInvoke
         {
             WriteExceptionLog(ex, $"sound file: {file}");
         }
+    }
+
+    internal void Exit()
+    {
+        pluginActive = false;
     }
 }

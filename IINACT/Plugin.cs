@@ -88,6 +88,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);
 
+        Advanced_Combat_Tracker.ActGlobals.Init();
         Advanced_Combat_Tracker.ActGlobals.oFormActMain = new Advanced_Combat_Tracker.FormActMain(Log);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -146,6 +147,8 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.RemoveHandler(MainWindowCommandName);
         CommandManager.RemoveHandler(EndEncCommandName);
+
+        Advanced_Combat_Tracker.ActGlobals.Dispose();
     }
 
     private RainbowMage.OverlayPlugin.PluginMain InitOverlayPlugin()

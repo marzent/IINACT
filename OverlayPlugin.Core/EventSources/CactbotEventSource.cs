@@ -266,7 +266,16 @@ public class CactbotEventSource : EventSourceBase
     {
         fastUpdateTimer?.Stop();
 
-        ActGlobals.oFormActMain.OnLogLineRead -= OnLogLineRead;
+        var formActMain = ActGlobals.oFormActMain;
+        
+        if (formActMain is not null)
+            formActMain.OnLogLineRead -= OnLogLineRead;
+    }
+
+    public override void Dispose()
+    {
+        fastUpdateTimer?.Dispose();
+        base.Dispose();
     }
 
     protected override void Update()

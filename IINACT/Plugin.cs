@@ -71,12 +71,8 @@ public sealed class Plugin : IDalamudPlugin
         SigScanner = sigScanner;
         Log = pluginLog;
 
-        using var createZoneDownHookManager = Task.Run(() =>
-        {
-            using var deucalion = new DeucalionController(Process.GetCurrentProcess());
-            deucalion.SendExitAndLockPipe();
-            return new ZoneDownHookManager(SigScanner, GameInteropProvider);
-        });
+        using var createZoneDownHookManager = Task.Run(() 
+                                                           => new ZoneDownHookManager(SigScanner, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();

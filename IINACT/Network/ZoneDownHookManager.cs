@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -29,11 +30,14 @@ public unsafe class ZoneDownHookManager : IDisposable
 
 	private readonly Queue<PacketMetadata> zoneDownIpcQueue;
 	private bool ignoreCreateTarget;
+    
+    private readonly DeucalionController deucalionController;
 
 	public ZoneDownHookManager(
 		ISigScanner sigScanner,
 		IGameInteropProvider hooks)
-	{
+    {
+        deucalionController = new DeucalionController(Process.GetCurrentProcess(), hooks);
 		buffer = new SimpleBuffer(1024 * 1024);
 		zoneDownIpcQueue = new Queue<PacketMetadata>();
 
@@ -70,6 +74,7 @@ public unsafe class ZoneDownHookManager : IDisposable
 	
 	public void Dispose()
 	{
+        deucalionController.Dispose();
 		Disable();
 		zoneDownHook?.Dispose();
 		

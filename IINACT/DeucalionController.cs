@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using System.IO.Pipes;
+using Dalamud.Plugin.Services;
 
 namespace IINACT;
 
-internal class DeucalionController(Process process): IDisposable
+internal class DeucalionController(Process process, IGameInteropProvider hooks): IDisposable
 {
+    private IGameInteropProvider hooks = hooks; 
     private readonly int pid = process.Id;
     private NamedPipeServerStream? pipeServer;
 

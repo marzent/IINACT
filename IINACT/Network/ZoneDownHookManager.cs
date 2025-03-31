@@ -37,7 +37,7 @@ public unsafe class ZoneDownHookManager : IDisposable
 		buffer = new SimpleBuffer(1024 * 1024);
 		zoneDownIpcQueue = new Queue<PacketMetadata>();
 
-        var multiScanner = new MultiSigScanner(Plugin.Log);
+        var multiScanner = new MultiSigScanner();
 		var rxPtrs = multiScanner.ScanText(GenericDownSignature, 3);
 		zoneDownHook = hooks.HookFromAddress<DownPrototype>(rxPtrs[2], ZoneDownDetour);
 		

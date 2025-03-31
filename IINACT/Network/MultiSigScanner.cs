@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Storage.FileSystem;
 using Windows.Win32.System.Memory;
-using Dalamud.Plugin.Services;
 
 namespace IINACT.Network;
 
@@ -17,18 +15,16 @@ namespace IINACT.Network;
 /// </summary>
 public class MultiSigScanner : IDisposable
 {
-    private const uint GENERIC_READ = 0x80000000;
-
-    private IPluginLog _log;
-    private nint _moduleCopyPtr;
-    private long _moduleCopyOffset;
+    private const uint GenericRead = 0x80000000;
+    
+    private nint moduleCopyPtr;
+    private long moduleCopyOffset;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MultiSigScanner"/> class.
     /// </summary>
-    public MultiSigScanner(IPluginLog log)
+    public MultiSigScanner()
     {
-        _log = log;
         Module = Process.GetCurrentProcess().MainModule!;
         Is32BitProcess = !Environment.Is64BitProcess;
         IsCopy = true;
@@ -50,7 +46,7 @@ public class MultiSigScanner : IDisposable
     /// <summary>
     /// Gets the base address of the search area. When copied, this will be the address of the copy.
     /// </summary>
-    public nint SearchBase => this.IsCopy ? this._moduleCopyPtr : this.Module.BaseAddress;
+    public nint SearchBase => this.IsCopy ? this.moduleCopyPtr : this.Module.BaseAddress;
 
     /// <summary>
     /// Gets the base address of the .text section search area.
@@ -122,6 +118,7 @@ public class MultiSigScanner : IDisposable
     /// <param name="baseAddress">The base address to scan from.</param>
     /// <param name="size">The amount of bytes to scan.</param>
     /// <param name="signature">The signature to search for.</param>
+    /// <param name="maxAddresses">The maximum number of addresses being searched for.</param>
     /// <returns>The found offset.</returns>
     public static nint[] Scan(nint baseAddress, int size, string signature, int maxAddresses)
     {
@@ -132,7 +129,7 @@ public class MultiSigScanner : IDisposable
         for (int i = 0; i < maxAddresses; i++)
         {
             var index = IndexOf(runningBase, size, needle, mask);
-            // DalamudApi.PluginLog.Debug($"[MultiSigScanner] IndexOf returned {index:X}");
+            Plugin.Log.Debug($"[MultiSigScanner] IndexOf returned {index:X}");
             if (index < 0)
                 throw new KeyNotFoundException($"Can't find a signature of {signature}");
             var offset = index + needle.Length;
@@ -225,7 +222,7 @@ public class MultiSigScanner : IDisposable
         var scanRet = Scan(this.DataSectionBase, this.DataSectionSize, signature);
 
         if (this.IsCopy)
-            scanRet = new nint(scanRet.ToInt64() - this._moduleCopyOffset);
+            scanRet = new nint(scanRet.ToInt64() - this.moduleCopyOffset);
 
         return scanRet;
     }
@@ -260,7 +257,7 @@ public class MultiSigScanner : IDisposable
         var scanRet = Scan(this.SearchBase, this.Module.ModuleMemorySize, signature);
 
         if (this.IsCopy)
-            scanRet = new nint(scanRet.ToInt64() - this._moduleCopyOffset);
+            scanRet = new nint(scanRet.ToInt64() - this.moduleCopyOffset);
 
         return scanRet;
     }
@@ -311,16 +308,17 @@ public class MultiSigScanner : IDisposable
     /// Scan for a byte signature in the .text section.
     /// </summary>
     /// <param name="signature">The signature.</param>
+    /// <param name="maxAddresses">The maximum number of addresses being searched for.</param>
     /// <returns>The real offset of the found signature.</returns>
     public nint[] ScanText(string signature, int maxAddresses)
     {
-        var mBase = IsCopy ? _moduleCopyPtr : TextSectionBase;
+        var mBase = IsCopy ? moduleCopyPtr : TextSectionBase;
         var scanRet = Scan(mBase, TextSectionSize, signature, maxAddresses);
 
         for (int i = 0; i < scanRet.Length; i++)
         {
             if (IsCopy)
-                scanRet[i] = new nint(scanRet[i].ToInt64() - _moduleCopyOffset);
+                scanRet[i] = new nint(scanRet[i].ToInt64() - moduleCopyOffset);
 
             var insnByte = Marshal.ReadByte(scanRet[i]);
 
@@ -356,7 +354,7 @@ public class MultiSigScanner : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Marshal.FreeHGlobal(_moduleCopyPtr);
+        Marshal.FreeHGlobal(moduleCopyPtr);
     }
 
     /// <summary>
@@ -374,7 +372,7 @@ public class MultiSigScanner : IDisposable
     {
         signature = signature.Replace(" ", string.Empty);
         if (signature.Length % 2 != 0)
-            throw new ArgumentException("Signature without whitespaces must be divisible by two.", nameof(signature));
+            throw new ArgumentException(@"Signature without whitespaces must be divisible by two.", nameof(signature));
 
         var needleLength = signature.Length / 2;
         var needle = new byte[needleLength];
@@ -488,18 +486,28 @@ public class MultiSigScanner : IDisposable
             sectionCursor += 40;
         }
         
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] TextSectionOffset: 0x{this.TextSectionOffset:X}");
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] TextSectionSize: 0x{this.TextSectionSize:X}");
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] DataSectionOffset: 0x{this.DataSectionOffset:X}");
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] DataSectionSize: 0x{this.DataSectionSize:X}");
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] RDataSectionOffset: 0x{this.RDataSectionOffset:X}");
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] RDataSectionSize: 0x{this.RDataSectionSize:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] TextSectionOffset: 0x{this.TextSectionOffset:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] TextSectionSize: 0x{this.TextSectionSize:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] DataSectionOffset: 0x{this.DataSectionOffset:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] DataSectionSize: 0x{this.DataSectionSize:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] RDataSectionOffset: 0x{this.RDataSectionOffset:X}");
+        Plugin.Log.Debug($"[MultiSigScanner] RDataSectionSize: 0x{this.RDataSectionSize:X}");
+    }
+    
+    private static unsafe string ByteString(byte* data, int offset, int length)
+    {
+        var sb = new StringBuilder();
+        for (var i = offset; i < length; i++)
+        {
+            sb.Append($"{data[i]:X2}");
+        }
+        return sb.ToString();
     }
 
     private void SetupCopy()
     {
         var handle = PInvoke.CreateFile(Module.FileName,
-                GENERIC_READ,
+                GenericRead,
                 FILE_SHARE_MODE.FILE_SHARE_READ, 
                 null,
                 FILE_CREATION_DISPOSITION.OPEN_EXISTING,
@@ -508,7 +516,7 @@ public class MultiSigScanner : IDisposable
 
         if (handle.IsInvalid)
         {
-            // DalamudApi.PluginLog.Error($"[MultiSigScanner] Failed to open file handle for {Module.FileName}");
+            Plugin.Log.Error($"[MultiSigScanner] Failed to open file handle for {Module.FileName}");
             return;
         }
         
@@ -521,7 +529,7 @@ public class MultiSigScanner : IDisposable
         
         if (map.IsInvalid)
         {
-            // DalamudApi.PluginLog.Error($"[MultiSigScanner] Failed to create file mapping for {Module.FileName}");
+            Plugin.Log.Error($"[MultiSigScanner] Failed to create file mapping for {Module.FileName}");
             return;
         }
 
@@ -532,37 +540,37 @@ public class MultiSigScanner : IDisposable
             0);
         
         // .text
-        this._moduleCopyPtr = Marshal.AllocHGlobal(this.Module.ModuleMemorySize);
+        this.moduleCopyPtr = Marshal.AllocHGlobal(this.Module.ModuleMemorySize);
         
         unsafe
         {
             if (view.Value == null)
             {
-                // DalamudApi.PluginLog.Error($"[MultiSigScanner] Failed to map view of file for {Module.FileName}");
-                // DalamudApi.PluginLog.Error($"[MultiSigScanner] Marshal.GetLastWin32Error(): {Marshal.GetLastWin32Error()}");
-                // DalamudApi.PluginLog.Error($"[MultiSigScanner] Marshal.GetLastPInvokeError(): {Marshal.GetLastPInvokeError()}");
-                // DalamudApi.PluginLog.Error($"[MultiSigScanner] Marshal.GetLastPInvokeErrorMessage(): {Marshal.GetLastPInvokeErrorMessage()}");
+                Plugin.Log.Error($"[MultiSigScanner] Failed to map view of file for {Module.FileName}");
+                Plugin.Log.Error($"[MultiSigScanner] Marshal.GetLastWin32Error(): {Marshal.GetLastWin32Error()}");
+                Plugin.Log.Error($"[MultiSigScanner] Marshal.GetLastPInvokeError(): {Marshal.GetLastPInvokeError()}");
+                Plugin.Log.Error($"[MultiSigScanner] Marshal.GetLastPInvokeErrorMessage(): {Marshal.GetLastPInvokeErrorMessage()}");
                 return;
             }
             
             Buffer.MemoryCopy(
                 (byte*)view.Value,
-                this._moduleCopyPtr.ToPointer(),
+                this.moduleCopyPtr.ToPointer(),
                 this.Module.ModuleMemorySize,
                 this.Module.ModuleMemorySize);
-            // DalamudApi.PluginLog.Debug($"[MultiSigScanner] First 16 bytes of data: {Util.ByteString((byte*)_moduleCopyPtr, 0, 16)}");
+            Plugin.Log.Debug($"[MultiSigScanner] First 16 bytes of data: {ByteString((byte*)moduleCopyPtr, 0, 16)}");
         }
 
-        this._moduleCopyOffset = this._moduleCopyPtr.ToInt64() - this.Module.BaseAddress.ToInt64();
-        // DalamudApi.PluginLog.Debug($"[MultiSigScanner] Offset is 0x{this._moduleCopyOffset:X} ({_moduleCopyPtr.ToInt64()} - {Module.BaseAddress.ToInt64()})");
-        _log.Debug("[MultiSigScanner] Unmapping.");
+        this.moduleCopyOffset = this.moduleCopyPtr.ToInt64() - this.Module.BaseAddress.ToInt64();
+        Plugin.Log.Debug($"[MultiSigScanner] Offset is 0x{this.moduleCopyOffset:X} ({moduleCopyPtr.ToInt64()} - {Module.BaseAddress.ToInt64()})");
+        Plugin.Log.Debug("[MultiSigScanner] Unmapping.");
         unsafe
         {
             PInvoke.UnmapViewOfFile((MEMORY_MAPPED_VIEW_ADDRESS)view.Value);   
         }
-        _log.Debug("[MultiSigScanner] Unmapped. Closing handles.");
+        Plugin.Log.Debug("[MultiSigScanner] Unmapped. Closing handles.");
         PInvoke.CloseHandle((HANDLE)handle.DangerousGetHandle());
         PInvoke.CloseHandle((HANDLE)map.DangerousGetHandle());
-        _log.Debug("[MultiSigScanner] Handles closed.");
+        Plugin.Log.Debug("[MultiSigScanner] Handles closed.");
     }
 }

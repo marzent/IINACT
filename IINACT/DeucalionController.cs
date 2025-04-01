@@ -24,7 +24,7 @@ internal class DeucalionController : IDisposable
     
     private nint LoadLibraryWDetour(string lpLibFileName)
     {
-        Plugin.Log.Debug($"LoadLibraryW called with {lpLibFileName}.");
+        Plugin.Log.Verbose($"LoadLibraryW called with {lpLibFileName}.");
 
         var fileName = Path.GetFileName(lpLibFileName);
         if (fileName.Contains("Deucalion", StringComparison.OrdinalIgnoreCase))

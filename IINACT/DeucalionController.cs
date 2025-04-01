@@ -95,7 +95,7 @@ internal class DeucalionController : IDisposable
                 Plugin.Log.Debug($"Acquired pipe at {pipeName}.");
                 return;
             }
-            catch (IOException)
+            catch
             {
                 // keep spinning to get the handle first
             }

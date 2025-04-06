@@ -31,6 +31,7 @@ public sealed class Plugin : IDalamudPlugin
     internal ICondition Condition { get; }
     internal IGameInteropProvider GameInteropProvider { get; }
     internal ISigScanner SigScanner { get; }
+    internal INotificationManager NotificationManager { get; }
     public static IPluginLog Log { get; private set; } = null!;
 
     internal Configuration Configuration { get; }
@@ -57,7 +58,8 @@ public sealed class Plugin : IDalamudPlugin
                   ICondition condition,
                   IPluginLog pluginLog,
                   IGameInteropProvider gameInteropProvider,
-                  ISigScanner sigScanner)
+                  ISigScanner sigScanner,
+                  INotificationManager notificationManager)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
@@ -69,10 +71,11 @@ public sealed class Plugin : IDalamudPlugin
         Condition = condition;
         GameInteropProvider = gameInteropProvider;
         SigScanner = sigScanner;
+        NotificationManager = notificationManager;
         Log = pluginLog;
 
         using var createZoneDownHookManager = Task.Run(() 
-                                                           => new ZoneDownHookManager(SigScanner, GameInteropProvider));
+            => new ZoneDownHookManager(NotificationManager, SigScanner, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();

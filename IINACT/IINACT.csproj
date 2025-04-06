@@ -37,6 +37,7 @@
 
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.3" />
         <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -2,7 +2,9 @@
 using System.Runtime.CompilerServices;
 using Dalamud.Game;
 using Dalamud.Hooking;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
+using Microsoft.Extensions.ObjectPool;
 using Reloaded.Hooks.Definitions.X64;
 
 namespace IINACT.Network;
@@ -14,7 +16,8 @@ public unsafe class ZoneDownHookManager : IDisposable
 	private const string OtherCreateTargetCaller =
 		"48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 50 48 8B FA 48 8B F1 0F B7 12";
 	private const string CreateTargetSignature = "3B 0D ?? ?? ?? ?? 74 0E";
-	
+    
+    private readonly INotificationManager notificationManager;
 	private delegate nuint DownPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
 	
 	private readonly Hook<DownPrototype> zoneDownHook;
@@ -27,19 +30,44 @@ public unsafe class ZoneDownHookManager : IDisposable
 	private readonly Hook<CreateTargetPrototype> createTargetHook;
     
 	private readonly SimpleBuffer buffer;
-
-	private readonly Queue<PacketMetadata> zoneDownIpcQueue;
+    
 	private bool ignoreCreateTarget;
+    
+    /// <summary>
+    /// Queue for frames observed prior to receiving all data from a previous Zone Rx frame with IPC packets.
+    /// </summary>
+    private readonly Queue<QueuedFrame> frameQueue;
+    
+    /// <summary>
+    /// Queue for Zone Rx IPC packets that have yet to have their data filled in via CreateTarget.
+    /// </summary>
+    private readonly Queue<QueuedPacket> zoneDownIpcQueue;
+    
+    /// <summary>
+    /// A pool of QueuedFrames to reduce GC pressure.
+    /// </summary>
+    private readonly ObjectPool<QueuedFrame> framePool;
+    
+    /// <summary>
+    /// A pool of QueuedPackets to reduce GC pressure.
+    /// </summary>
+    private readonly ObjectPool<QueuedPacket> packetPool;
     
     private readonly DeucalionController deucalionController;
 
 	public ZoneDownHookManager(
+        INotificationManager notificationManager,
 		ISigScanner sigScanner,
 		IGameInteropProvider hooks)
     {
+        this.notificationManager = notificationManager;
         deucalionController = new DeucalionController(Process.GetCurrentProcess(), hooks);
 		buffer = new SimpleBuffer(1024 * 1024);
-		zoneDownIpcQueue = new Queue<PacketMetadata>();
+        frameQueue = new Queue<QueuedFrame>();
+		zoneDownIpcQueue = new Queue<QueuedPacket>();
+        
+        framePool = new DefaultObjectPool<QueuedFrame>(new DefaultPooledObjectPolicy<QueuedFrame>(), 200);
+        packetPool = new DefaultObjectPool<QueuedPacket>(new DefaultPooledObjectPolicy<QueuedPacket>(), 1000);
 
         var multiScanner = new MultiSigScanner();
 		var rxPtrs = multiScanner.ScanText(GenericDownSignature, 3);
@@ -87,6 +115,7 @@ public unsafe class ZoneDownHookManager : IDisposable
 	private byte OtherCreateTargetCallerDetour(void* a1, void* a2, void* a3)
 	{
 		ignoreCreateTarget = true;
+        Plugin.Log.Verbose($"[OtherCreateTargetCaller]: ignoring next CreateTarget");
 		return otherCreateTargetCallerHook.Original(a1, a2, a3);
 	}
 	
@@ -104,21 +133,48 @@ public unsafe class ZoneDownHookManager : IDisposable
 			return createTargetHook.Original(entityId, packetPtr);
 		}
 		
-		var meta = zoneDownIpcQueue.Dequeue();
+        var queuedPacket = zoneDownIpcQueue.Dequeue();
+        Plugin.Log.Verbose($"[CreateTarget]: entity {entityId} meta source {queuedPacket.Source} size {queuedPacket.DataSize}");
 
-		if (meta.Source != entityId)
+		if (queuedPacket.Source != entityId)
 		{
-            Plugin.Log.Error($"[CreateTarget]: Please report this problem: srcId {entityId} | queuedSrcId {meta.Source}");
+            Plugin.Log.Error($"[CreateTarget]: Please report this problem: srcId {entityId} | queuedSrcId {queuedPacket.Source}");
 		}
+        
+        // Set the packet's data
+        var data = new Span<byte>((byte*)packetPtr, queuedPacket.DataSize);
+        queuedPacket.Data = data.ToArray();
 
-		var data = new Span<byte>((byte*)packetPtr, meta.DataSize);
-        buffer.Clear();
-		buffer.Write(meta.Header);
-		buffer.Write(data);
-        EnqueueToMachina(buffer.GetBuffer());
-		
+        // We dequeued the final packet in the zone rx ipc queue, we can commit all data now
+        if (zoneDownIpcQueue.Count == 0)
+        {
+            while (frameQueue.TryDequeue(out var frame))
+            {
+                if (frame.Packets.All(p => p.Data != null))
+                {
+                    WriteFrameAndReturn(frame);
+                }
+                else
+                {
+                    // Show an error if there are any frames in which a packet does not have data
+                    // This is significant because the zone rx IPC queue is empty - everything should have data
+                    SendNotification("ZoneDown IPC Queue is empty, but not all packets have data.");
+                }
+            }
+        }
+        
 		return createTargetHook.Original(entityId, packetPtr);
 	}
+    
+    private void SendNotification(string content)
+    {
+        notificationManager.AddNotification(new Notification
+        {
+            Content = content,
+            Title = "IINACT", 
+        });
+        Plugin.Log.Debug($"[SendNotification] {content}");
+    }
     
     private nuint ZoneDownDetour(byte* data, byte* a2, nuint a3, nuint a4, nuint a5)
     {
@@ -152,13 +208,17 @@ public unsafe class ZoneDownHookManager : IDisposable
         
         var header = headerSpan.Cast<byte, FrameHeader>();
         var span = new Span<byte>(framePtr, (int)header.TotalSize);
-        
         var data = span.Slice(headerSize, (int)header.TotalSize - headerSize);
+
+        var queuedFrame = GetFrameFromPool();
+        queuedFrame.Header = headerSpan.ToArray();
+
+        Plugin.Log.Verbose($"[{(nuint)framePtr:X}] [ZoneDown] proto {header.Protocol} unk {header.Unknown}, {header.Count} pkts size {header.TotalSize} usize {header.DecompressedLength}");
         
         // Compression
         if (header.Compression != CompressionType.None)
         {
-            Plugin.Log.Error($"frame compressed: {header.Compression} payload is {header.TotalSize - 40} bytes, decomp'd is {header.DecompressedLength}");
+            SendNotification($"A frame was compressed.");
             return;
         }
         
@@ -171,35 +231,68 @@ public unsafe class ZoneDownHookManager : IDisposable
 	        var pktHdrSize = Unsafe.SizeOf<PacketElementHeader>();
             var pktHdrSlice = data.Slice(offset, pktHdrSize);
             var pktHdr = pktHdrSlice.Cast<byte, PacketElementHeader>();
-            
-            var needsDeobfuscation = pktHdr.Type is PacketType.Ipc;
-
-            if (!needsDeobfuscation)
-            {
-                buffer.Clear();
-                buffer.Write(pktHdrSlice);
-            }
-            
             var pktData = data.Slice(offset + pktHdrSize, (int)pktHdr.Size - pktHdrSize);
+            
+            var queuedPacket = GetPacketFromPool();
+            queuedFrame.Packets.Add(queuedPacket);
+            queuedPacket.Source = pktHdr.SrcEntity;
+            queuedPacket.DataSize = pktData.Length;
+            queuedPacket.Header = pktHdrSlice.ToArray();
 
-            if (needsDeobfuscation)
+            if (pktHdr.Type == PacketType.Ipc)
             {
-	            var meta = new PacketMetadata(pktHdr.SrcEntity, pktData.Length, pktHdrSlice);
-	            zoneDownIpcQueue.Enqueue(meta);
+	            zoneDownIpcQueue.Enqueue(queuedPacket);
             }
             else
             {
-                buffer.Write(pktData);
-                EnqueueToMachina(buffer.GetBuffer());
+                queuedPacket.Data = pktData.ToArray();
             }
             
             offset += (int)pktHdr.Size;
         }
+        
+        if (zoneDownIpcQueue.Count == 0)
+        {
+            WriteFrameAndReturn(queuedFrame);
+        }
+        else
+        {
+            Plugin.Log.Verbose($"[PacketsFromFrame] queueing ZoneDown frame with {queuedFrame.Packets.Count(p => p.Data != null)}/{queuedFrame.Packets.Count}");
+            frameQueue.Enqueue(queuedFrame);
+        }
+    }
+    
+    private void WriteFrameAndReturn(QueuedFrame frame)
+    {
+        Plugin.Log.Verbose($"[WriteFrameAndReturn] Writing ZoneDown frame with {frame.Packets.Count(p => p.Data != null)}/{frame.Packets.Count}");
+	    
+        foreach (var queuedPacket in frame.Packets)
+        {
+            buffer.Clear();
+            buffer.Write(queuedPacket.Header);
+            buffer.Write(queuedPacket.Data);
+            EnqueueToMachina(buffer.GetBuffer());
+        }
+        framePool.Return(frame);
     }
 
     private static void EnqueueToMachina(ReadOnlySpan<byte> data)
     {
         var queue = Machina.FFXIV.Dalamud.DalamudClient.MessageQueue;
         queue?.Enqueue((GameServerTime.LastSeverTimestamp, data.ToArray()));
+    }
+    
+    private QueuedFrame GetFrameFromPool()
+    {
+        var frame = framePool.Get();
+        frame.Clear(packetPool);
+        return frame;
+    }
+
+    private QueuedPacket GetPacketFromPool()
+    {
+        var packet = packetPool.Get();
+        packet.Clear();
+        return packet;
     }
 }

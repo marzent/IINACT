@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using Dalamud.Hooking;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 
 namespace IINACT;
@@ -10,12 +11,14 @@ internal class DeucalionController : IDisposable
 {
     private readonly int pid;
     private NamedPipeServerStream? pipeServer;
+    private readonly INotificationManager notificationManager;
     private Hook<LoadLibraryWDelegate>? loadLibraryWHook;
     
     private delegate nint LoadLibraryWDelegate([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName);
 
-    public DeucalionController(Process process, IGameInteropProvider hooks)
+    public DeucalionController(Process process, IGameInteropProvider hooks, INotificationManager notificationManager)
     {
+        this.notificationManager = notificationManager;
         pid = process.Id;
         loadLibraryWHook = hooks.HookFromSymbol<LoadLibraryWDelegate>("Kernel32", "LoadLibraryW", LoadLibraryWDetour);
         loadLibraryWHook.Enable();
@@ -29,6 +32,11 @@ internal class DeucalionController : IDisposable
         var fileName = Path.GetFileName(lpLibFileName);
         if (fileName.Contains("Deucalion", StringComparison.OrdinalIgnoreCase))
         {
+            notificationManager.AddNotification(new Notification
+            {
+                Content = "Blocked loading of Deucalion to prevent crashing.",
+                Title = "IINACT", 
+            });
             Plugin.Log.Warning($"Blocked loading of DLL: {lpLibFileName} (filename: {fileName})");
             return nint.Zero;
         }

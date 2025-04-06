@@ -61,7 +61,7 @@ public unsafe class ZoneDownHookManager : IDisposable
 		IGameInteropProvider hooks)
     {
         this.notificationManager = notificationManager;
-        deucalionController = new DeucalionController(Process.GetCurrentProcess(), hooks);
+        deucalionController = new DeucalionController(Process.GetCurrentProcess(), hooks, notificationManager);
 		buffer = new SimpleBuffer(1024 * 1024);
         frameQueue = new Queue<QueuedFrame>();
 		zoneDownIpcQueue = new Queue<QueuedPacket>();

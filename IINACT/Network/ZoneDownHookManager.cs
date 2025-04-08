@@ -134,13 +134,31 @@ public unsafe class ZoneDownHookManager : IDisposable
 			return createTargetHook.Original(entityId, packetPtr);
 		}
 		
-        var queuedPacket = zoneDownIpcQueue.Dequeue();
+        var queuedPacket = zoneDownIpcQueue.Peek();
         Plugin.Log.Verbose($"[CreateTarget]: entity {entityId} meta source {queuedPacket.Source} size {queuedPacket.DataSize}");
 
 		if (queuedPacket.Source != entityId)
 		{
             Plugin.Log.Error($"[CreateTarget]: Please report this problem: srcId {entityId} | queuedSrcId {queuedPacket.Source}");
-		}
+            // Try to see if the problem can be rectified...
+            if (zoneDownIpcQueue.ToArray().Any(packet => packet.Source == entityId))
+            {
+                while (zoneDownIpcQueue.Count > 0)
+                {
+                    queuedPacket = zoneDownIpcQueue.Dequeue();
+                    if (queuedPacket.Source == entityId)
+                        break;
+                }
+            }
+            else
+            {
+                return createTargetHook.Original(entityId, packetPtr);
+            }
+        }
+        else
+        {
+            zoneDownIpcQueue.Dequeue();
+        }
         
         // Set the packet's data
         var data = new Span<byte>((byte*)packetPtr, queuedPacket.DataSize);

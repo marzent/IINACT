@@ -10,9 +10,9 @@ namespace IINACT;
 internal class DeucalionController : IDisposable
 {
     private readonly int pid;
-    private NamedPipeServerStream? pipeServer;
     private readonly INotificationManager notificationManager;
     private Hook<LoadLibraryWDelegate>? loadLibraryWHook;
+    private bool allowLoads = false;
     
     private delegate nint LoadLibraryWDelegate([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName);
 
@@ -22,36 +22,63 @@ internal class DeucalionController : IDisposable
         pid = process.Id;
         loadLibraryWHook = hooks.HookFromSymbol<LoadLibraryWDelegate>("Kernel32", "LoadLibraryW", LoadLibraryWDetour);
         loadLibraryWHook.Enable();
-        SendExitAndLockPipe();
+        SendExit();
     }
     
     private nint LoadLibraryWDetour(string lpLibFileName)
     {
         Plugin.Log.Verbose($"LoadLibraryW called with {lpLibFileName}.");
 
-        var fileName = Path.GetFileName(lpLibFileName);
-        if (fileName.Contains("Deucalion", StringComparison.OrdinalIgnoreCase))
-        {
-            notificationManager.AddNotification(new Notification
-            {
-                Content = "Blocked loading of Deucalion to prevent crashing.",
-                Title = "IINACT", 
-            });
-            Plugin.Log.Warning($"Blocked loading of DLL: {lpLibFileName} (filename: {fileName})");
+        if (!ShouldLoadLibrary(lpLibFileName))
             return nint.Zero;
-        }
 
         return loadLibraryWHook!.Original(lpLibFileName);
     }
 
+    private bool ShouldLoadLibrary(string lpLibFileName)
+    {
+        try
+        {
+            var fileName = Path.GetFileName(lpLibFileName);
+
+            if (fileName.Contains("Deucalion", StringComparison.OrdinalIgnoreCase))
+            {
+                var versionInfo = FileVersionInfo.GetVersionInfo(lpLibFileName);
+                var minimumVersion = new Version(1, 2, 1);
+                var deucalionVersion = new Version(versionInfo.FileVersion ?? "0.0.0");
+
+                if (deucalionVersion >= minimumVersion && allowLoads)
+                {
+                    Plugin.Log.Debug($"Allowed Deucalion version [{deucalionVersion}] to load.");
+                    return true;
+                }
+
+                notificationManager.AddNotification(new Notification
+                {
+                    Content = "Blocked loading of Deucalion to prevent crashing.",
+                    Title = "Warning",
+                });
+                Plugin.Log.Warning($"Blocked loading of DLL: {lpLibFileName} (filename: {fileName})");
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Error(ex, "Exception in LoadLibraryW hook");
+            return true;
+        }
+    }
+
     /// <summary>
-    /// Sends an Exit operation to Deucalion via its named pipe and locks the pipe name afterward.
+    /// Sends an Exit operation to Deucalion via its named pipe and waits for its unload afterward.
     /// </summary>
-    private void SendExitAndLockPipe()
+    private void SendExit()
     {
         var pipeName = $@"deucalion-{pid}";
         if (SendExitOp(pipeName))
-            LockPipeName(pipeName);
+            WaitForDeucalionExit(pipeName);
     }
 
     /// <summary>
@@ -59,7 +86,7 @@ internal class DeucalionController : IDisposable
     /// </summary>
     /// <param name="pipeName">The name of the named pipe.</param>
     /// <returns>Returns true if Deucalion was running, otherwise false.</returns>
-    private static bool SendExitOp(string pipeName)
+    private bool SendExitOp(string pipeName)
     {
         using var pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.Out);
         try
@@ -71,6 +98,12 @@ internal class DeucalionController : IDisposable
             Plugin.Log.Debug("Deucalion is not running.");
             return false;
         }
+
+        notificationManager.AddNotification(new Notification
+        {
+            Content = "Unloadind Deucalion to safely start plugin for now. You will have to restart your Deucalion client (FFXIV_ACT_Plugin, Teamcraft, etc.) after this in order to receive network data.",
+            Title = "Warning",
+        });
 
         // Construct the 9-byte Exit OP payload:
         // - Bytes 0-3: Length (9)
@@ -87,10 +120,10 @@ internal class DeucalionController : IDisposable
     }
 
     /// <summary>
-    /// Locks the pipe name by creating a new named pipe server and holding it.
+    /// Detects Deucalion shutdown by trying to acquire the named pipe it uses.
     /// </summary>
-    /// <param name="pipeName">The name of the named pipe to lock.</param>
-    private void LockPipeName(string pipeName)
+    /// <param name="pipeName">The name of the named pipe to acquire.</param>
+    private void WaitForDeucalionExit(string pipeName)
     {
         const int timeoutSeconds = 5;
         var stopwatch = Stopwatch.StartNew();
@@ -99,23 +132,23 @@ internal class DeucalionController : IDisposable
         {
             try
             {
-                pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1);
+                using var pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1);
                 Plugin.Log.Debug($"Acquired pipe at {pipeName}.");
                 return;
             }
             catch
             {
-                // keep spinning to get the handle first
+                Thread.Sleep(10);
             }
         }
         
-        Plugin.Log.Error($"Failed to lock pipe {pipeName} after {timeoutSeconds} seconds.");
+        Plugin.Log.Error($"Pipe {pipeName} is still used after after {timeoutSeconds} seconds.");
     }
+
+    internal void AllowLoads() => allowLoads = true;
 
     public void Dispose()
     {
-        pipeServer?.Dispose();
-        pipeServer = null;
         loadLibraryWHook?.Disable();
         loadLibraryWHook?.Dispose();
         loadLibraryWHook = null;

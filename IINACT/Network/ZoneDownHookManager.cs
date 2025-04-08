@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Dalamud.Game;
 using Dalamud.Hooking;
@@ -81,7 +81,8 @@ public unsafe class ZoneDownHookManager : IDisposable
 			HookFromAddress<OtherCreateTargetCallerPrototype>(otherCreateTargetCallerPtr, OtherCreateTargetCallerDetour);
 
 		Enable();
-	}
+        deucalionController.AllowLoads();
+    }
 
 	public void Enable()
 	{

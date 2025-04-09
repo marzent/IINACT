@@ -74,7 +74,7 @@ public sealed class Plugin : IDalamudPlugin
         NotificationManager = notificationManager;
         Log = pluginLog;
 
-        using var createZoneDownHookManager = Task.Run(() 
+        var createZoneDownHookManager = Task.Run(() 
             => new ZoneDownHookManager(NotificationManager, SigScanner, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 

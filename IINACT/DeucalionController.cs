@@ -12,7 +12,7 @@ internal class DeucalionController : IDisposable
     private readonly int pid;
     private readonly INotificationManager notificationManager;
     private Hook<LoadLibraryWDelegate>? loadLibraryWHook;
-    private bool allowLoads = false;
+    private bool allowLoads;
     
     private delegate nint LoadLibraryWDelegate([MarshalAs(UnmanagedType.LPWStr)] string lpLibFileName);
 
@@ -28,11 +28,7 @@ internal class DeucalionController : IDisposable
     private nint LoadLibraryWDetour(string lpLibFileName)
     {
         Plugin.Log.Verbose($"LoadLibraryW called with {lpLibFileName}.");
-
-        if (!ShouldLoadLibrary(lpLibFileName))
-            return nint.Zero;
-
-        return loadLibraryWHook!.Original(lpLibFileName);
+        return ShouldLoadLibrary(lpLibFileName) ? loadLibraryWHook!.Original(lpLibFileName) : nint.Zero;
     }
 
     private bool ShouldLoadLibrary(string lpLibFileName)
@@ -101,7 +97,9 @@ internal class DeucalionController : IDisposable
 
         notificationManager.AddNotification(new Notification
         {
-            Content = "Unloading Deucalion to safely start plugin for now. You will have to restart your Deucalion client (FFXIV_ACT_Plugin, Teamcraft, etc.) after this in order to receive network data.",
+            Content = "Unloading Deucalion to safely start plugin for now. " + 
+                      "You will have to restart your Deucalion client (FFXIV_ACT_Plugin, Teamcraft, etc.) " +
+                      "after this in order to receive network data.",
             Title = "Warning",
         });
 
@@ -123,7 +121,7 @@ internal class DeucalionController : IDisposable
     /// Detects Deucalion shutdown by trying to acquire the named pipe it uses.
     /// </summary>
     /// <param name="pipeName">The name of the named pipe to acquire.</param>
-    private void WaitForDeucalionExit(string pipeName)
+    private static void WaitForDeucalionExit(string pipeName)
     {
         const int timeoutSeconds = 5;
         var stopwatch = Stopwatch.StartNew();

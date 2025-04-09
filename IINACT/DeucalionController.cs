@@ -101,7 +101,7 @@ internal class DeucalionController : IDisposable
 
         notificationManager.AddNotification(new Notification
         {
-            Content = "Unloadind Deucalion to safely start plugin for now. You will have to restart your Deucalion client (FFXIV_ACT_Plugin, Teamcraft, etc.) after this in order to receive network data.",
+            Content = "Unloading Deucalion to safely start plugin for now. You will have to restart your Deucalion client (FFXIV_ACT_Plugin, Teamcraft, etc.) after this in order to receive network data.",
             Title = "Warning",
         });
 

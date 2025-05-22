@@ -9,23 +9,12 @@ internal class TextToSpeechProvider
     private string binary = "/usr/bin/say";
     private string args = "";
     private readonly object speechLock = new();
-    private readonly SpeechSynthesizer? speechSynthesizer;  
-    
+
     public TextToSpeechProvider()
     {
-        try
-        {
-            speechSynthesizer = new SpeechSynthesizer();
-            speechSynthesizer?.SetOutputToDefaultAudioDevice();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.Warning(ex, "Failed to initialize SAPI TTS engine");
-        }
-        
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
-    
+
     public void Speak(string message)
     {
         Task.Run(() =>
@@ -52,7 +41,7 @@ internal class TextToSpeechProvider
                         // heuristic pause
                         Thread.Sleep(500 * message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length);
                     }
-                
+
                     return;
                 }
                 catch (Exception ex)
@@ -61,11 +50,12 @@ internal class TextToSpeechProvider
                     return;
                 }
             }
-        
+            Plugin.Log.Error("tts");
             try
             {
-                lock (speechLock)
-                    speechSynthesizer?.Speak(message);
+                SpeechSynthesizer speechSynthesizer = new SpeechSynthesizer();
+                speechSynthesizer.SetOutputToDefaultAudioDevice();
+                speechSynthesizer.SpeakAsync(message);
             }
             catch (Exception ex)
             {

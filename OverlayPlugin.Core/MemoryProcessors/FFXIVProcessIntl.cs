@@ -550,9 +550,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public struct ThaumaturgeJobMemory
         {
             [FieldOffset(0x02)]
-            public ushort umbralMilliseconds; // Number of ms left in umbral fire/ice.
-
-            [FieldOffset(0x04)]
             public sbyte umbralStacks; // Positive = Umbral Fire Stacks, Negative = Umbral Ice Stacks.
         };
 
@@ -571,19 +568,16 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
             public ushort nextPolyglotMilliseconds; // Number of ms left before polyglot proc.
 
             [FieldOffset(0x02)]
-            public ushort umbralMilliseconds; // Number of ms left in umbral fire/ice.
-
-            [FieldOffset(0x04)]
             public sbyte umbralStacks; // Positive = Umbral Fire Stacks, Negative = Umbral Ice Stacks.
 
-            [FieldOffset(0x05)]
+            [FieldOffset(0x03)]
             public byte umbralHearts;
 
-            [FieldOffset(0x06)]
+            [FieldOffset(0x04)]
             public byte polyglot;
 
             [NonSerialized]
-            [FieldOffset(0x07)]
+            [FieldOffset(0x05)]
             private EnochianFlags enochian_state;
 
             public bool enochian => enochian_state.HasFlag(EnochianFlags.Enochian);

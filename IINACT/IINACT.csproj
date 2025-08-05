@@ -41,7 +41,8 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Speech" Version="8.0.0" />
+        <PackageReference Include="NAudio" Version="2.2.1" />
+        <PackageReference Include="System.Speech" Version="9.0.8" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
@@ -63,7 +64,7 @@
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGuiScene">

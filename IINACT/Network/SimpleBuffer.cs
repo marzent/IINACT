@@ -4,6 +4,13 @@ internal class SimpleBuffer(int size)
 {
 	private readonly byte[] buffer = new byte[size];
 	private int offset = 0;
+    
+    public int Size => offset;
+
+    public Span<byte> Get(int start, int length)
+    {
+        return buffer.AsSpan()[start..(start + length)];
+    }
 
     public void Write(ReadOnlySpan<byte> src)
 	{

@@ -36,8 +36,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="12.0.0" />
-        <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.3" />
+        <PackageReference Include="DalamudPackager" Version="13.0.0" />
         <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -83,6 +82,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
+        <ProjectReference Include="..\Unscrambler\Unscrambler\Unscrambler.csproj" />
         <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
         <ProjectReference Include="..\machina\Machina\Machina.csproj" />
         <ProjectReference Include="..\NotACT\NotACT.csproj" />

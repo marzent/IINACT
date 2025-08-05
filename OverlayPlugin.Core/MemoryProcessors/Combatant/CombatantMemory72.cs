@@ -10,8 +10,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
     {
         private const string charmapSignature = "488B5720B8000000E0483BD00F84????????488D0D";
 
+        // TODO: Once all regions are on 7.2, remove the new methods for `GetEffectEntries` and `GetEffectEntryFromByteArray`
+        // Remove the struct for `EffectMemory72`, and adjust the parent struct to have the correct size of 16 bytes.
         public CombatantMemory72(TinyIoCContainer container)
-            : base(container, charmapSignature, CombatantMemory.Size, EffectMemory.Size, 629)
+            : base(container, charmapSignature, CombatantMemory.Size, EffectMemory72.Size, 629)
         {
 
         }
@@ -124,7 +126,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             public const int NameBytes = 64;
 
             public const int EffectCount = 60;
-            public const int EffectBytes = EffectMemory.Size * EffectCount;
+            public const int EffectBytes = EffectMemory72.Size * EffectCount;
 
             [FieldOffset(0x30)]
             public fixed byte Name[NameBytes];
@@ -249,6 +251,70 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             public float CastDurationMax;
 
             // Missing PartyType
+        }
+        
+        protected new unsafe List<EffectEntry> GetEffectEntries(byte* source, ObjectType type, uint mycharID)
+        {
+            var result = new List<EffectEntry>();
+            int maxEffects = (type == ObjectType.PC) ? 30 : 60;
+            var size = EffectMemory72.Size * maxEffects;
+
+            var bytes = new byte[size];
+            Marshal.Copy((IntPtr)source, bytes, 0, size);
+
+            for (int i = 0; i < maxEffects; i++)
+            {
+                var effect = GetEffectEntryFromByteArray(bytes, i);
+
+                if (effect.BuffID > 0 &&
+                    effect.Stack >= 0 &&
+                    effect.Timer >= 0.0f &&
+                    effect.ActorID > 0)
+                {
+                    effect.isOwner = effect.ActorID == mycharID;
+
+                    result.Add(effect);
+                }
+            }
+
+            return result;
+        }
+
+        protected new unsafe EffectEntry GetEffectEntryFromByteArray(byte[] source, int num = 0)
+        {
+            fixed (byte* p = source)
+            {
+                EffectMemory72 mem = *(EffectMemory72*)&p[num * EffectMemory72.Size];
+
+                EffectEntry effectEntry = new EffectEntry()
+                {
+                    BuffID = mem.BuffID,
+                    Stack = mem.Stack,
+                    Timer = mem.Timer,
+                    ActorID = mem.ActorID,
+                    isOwner = false,
+                };
+
+                return effectEntry;
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit, Size = Size)]
+        public struct EffectMemory72
+        {
+            public const int Size = 16;
+
+            [FieldOffset(0)]
+            public ushort BuffID;
+
+            [FieldOffset(2)]
+            public ushort Stack;
+
+            [FieldOffset(4)]
+            public float Timer;
+
+            [FieldOffset(8)]
+            public uint ActorID;
         }
     }
 }

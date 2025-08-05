@@ -23,7 +23,6 @@ public sealed class Plugin : IDalamudPlugin
     
     internal IDalamudPluginInterface PluginInterface { get; }
     internal ICommandManager CommandManager { get; }
-    internal IGameNetwork GameNetwork { get; }
     internal IClientState ClientState { get; }
     internal IDataManager DataManager { get; }
     internal IChatGui ChatGui { get; }
@@ -50,7 +49,6 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin(IDalamudPluginInterface pluginInterface,
                   ICommandManager commandManager,
-                  IGameNetwork gameNetwork,
                   IClientState clientState,
                   IDataManager dataManager,
                   IChatGui chatGui,
@@ -63,7 +61,6 @@ public sealed class Plugin : IDalamudPlugin
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
-        GameNetwork = gameNetwork;
         DataManager = dataManager;
         ClientState = clientState;
         ChatGui = chatGui;

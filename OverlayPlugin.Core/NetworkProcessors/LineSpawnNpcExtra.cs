@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Reflection;
+﻿using System.Globalization;
 using System.Runtime.InteropServices;
+using RainbowMage.OverlayPlugin.NetworkProcessors.PacketHelper;
 
 /*
 At initial zone-in of Barbariccia normal, there are 9 actors that spawn with `animationState` of `01`:
@@ -34,113 +32,51 @@ This is later cleared to a state of `00` via `ActorControl` `SetAnimationState`:
 273|2024-03-02T18:36:55.8380000-05:00|40013FCB|003E|00000000|00000000|00000000|00000000|1be7b98bf67c8479
  */
 
+/*
+After the first Superchain cast in P12N, 3 orbs and 1 donut are spawned with tethers:
+- 3 orbs with tether ID `00E4` (chn_kusari_tama_0v)
+- 1 donut with tether ID `00E5` (chn_kusari_wa_0v)
+272|time|40019FE8|40019FE9|00E4|00
+272|time|40019FE9|E0000000|0000|00
+272|time|40019FEA|40019FEB|00E5|00
+272|time|40019FEB|E0000000|0000|00
+272|time|40019FEC|40019FED|00E4|00
+272|time|40019FED|E0000000|0000|00
+272|time|40019FEE|40019FEF|00E4|00
+272|time|40019FEF|E0000000|0000|00
+ */
+
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
-    public class LineSpawnNpcExtra
+    class LineSpawnNpcExtra : LineBaseCustomMachina<Server_MessageHeader_Global, LineSpawnNpcExtra.Server_NpcSpawn_Global_6_51,
+            Server_MessageHeader_CN, LineSpawnNpcExtra.Server_NpcSpawn_Global_6_51,
+            Server_MessageHeader_KR, LineSpawnNpcExtra.Server_NpcSpawn_Global_6_51>
     {
         public const uint LogFileLineID = 272;
-        private ILogger logger;
-        private readonly FFXIVRepository ffxiv;
-
-        private readonly Func<string, DateTime, bool> logWriter;
-        private readonly NetworkParser netHelper;
+        public const string LogLineName = "NpcSpawnExtra";
+        public const string MachinaPacketName = "NpcSpawn";
 
         [StructLayout(LayoutKind.Explicit)]
-        public unsafe struct Server_NpcSpawn
+        public unsafe struct Server_NpcSpawn_Global_6_51 : IPacketStruct
         {
-            [FieldOffset(0x78)]
+            [FieldOffset(0x58)]
             public uint parentActorId;
 
-            [FieldOffset(0x9A)]
+            [FieldOffset(0x7C)]
             public ushort tetherId;
 
-            [FieldOffset(0xB3)]
+            [FieldOffset(0x95)]
             public byte animationState;
-        }
 
-        private class RegionalizedInfo
-        {
-            public readonly int packetSize;
-            public readonly int packetOpcode;
-            public readonly int offsetMessageType;
-            public readonly Type headerType;
-            public readonly FieldInfo fieldCastSourceId;
-
-            public RegionalizedInfo(Type headerType, NetworkParser netHelper)
+            public string ToString(long epoch, uint ActorID)
             {
-                this.headerType = headerType;
-                fieldCastSourceId = headerType.GetField("ActorID");
-                packetOpcode = netHelper.GetOpcode("NpcSpawn");
-                packetSize = Marshal.SizeOf(typeof(Server_NpcSpawn));
-                offsetMessageType = netHelper.GetOffset(headerType, "MessageType");
+                return string.Format(CultureInfo.InvariantCulture,
+                    "{0:X8}|{1:X8}|{2:X4}|{3:X2}",
+                    ActorID, parentActorId, tetherId, animationState);
             }
         }
-
-        private RegionalizedInfo regionalized;
 
         public LineSpawnNpcExtra(TinyIoCContainer container)
-        {
-            logger = container.Resolve<ILogger>();
-            ffxiv = container.Resolve<FFXIVRepository>();
-            netHelper = container.Resolve<NetworkParser>();
-            ffxiv.RegisterNetworkParser(MessageReceived);
-            ffxiv.RegisterProcessChangedHandler(ProcessChanged);
-
-            var customLogLines = container.Resolve<FFXIVCustomLogLines>();
-            logWriter = customLogLines.RegisterCustomLogLine(new LogLineRegistryEntry()
-            {
-                Name = "NpcSpawnExtra",
-                Source = "OverlayPlugin",
-                ID = LogFileLineID,
-                Version = 1,
-            });
-        }
-
-        private void ProcessChanged(Process process)
-        {
-            if (!ffxiv.IsFFXIVPluginPresent())
-                return;
-
-            try
-            {
-                Assembly mach = Assembly.Load("Machina.FFXIV");
-                Type headerType = mach.GetType("Machina.FFXIV.Headers.Server_MessageHeader");
-                regionalized = new RegionalizedInfo(headerType, netHelper);
-            }
-            catch
-            {
-            }
-        }
-
-        private unsafe void MessageReceived(string id, long epoch, byte[] message)
-        {
-            var info = regionalized;
-            if (info == null)
-                return;
-
-            if (message.Length < info.packetSize)
-                return;
-
-            fixed (byte* buffer = message)
-            {
-                if (*(ushort*)&buffer[info.offsetMessageType] == info.packetOpcode)
-                {
-                    object header = Marshal.PtrToStructure(new IntPtr(buffer), info.headerType);
-                    UInt32 sourceId = (UInt32)info.fieldCastSourceId.GetValue(header);
-
-                    var packet = Marshal.PtrToStructure<Server_NpcSpawn>(new IntPtr(buffer));
-                    var parentActorId = packet.parentActorId;
-                    var tetherId = packet.tetherId;
-                    var animationState = packet.animationState;
-
-                    string line = string.Format(CultureInfo.InvariantCulture,
-                        "{0:X8}|{1:X8}|{2:X4}|{3:X2}",
-                        sourceId, parentActorId, tetherId, animationState);
-
-                    DateTime serverTime = ffxiv.EpochToDateTime(epoch);
-                    logWriter(line, serverTime);
-                }
-            }
-        }
+            : base(container, LogFileLineID, LogLineName, MachinaPacketName) { }
     }
 }

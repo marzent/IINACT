@@ -23,6 +23,9 @@ internal class TextToSpeechProvider
             speechSynthesizer = null;
         }
         
+        if (Dalamud.Utility.Util.IsWine())
+            speechSynthesizer = null;
+        
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
     

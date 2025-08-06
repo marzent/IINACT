@@ -163,7 +163,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             [FieldOffset(0xD0)]
             public Single Radius;
 
-            [FieldOffset(0x128)]
+            [FieldOffset(0x118)]
             public int ModelStatus;
 
             [FieldOffset(0x1AC)]
@@ -199,16 +199,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             [FieldOffset(0x1CB)]
             public byte Level;
 
-//FIXME FOR 7.3
             [FieldOffset(0xCE0)]
             public byte WeaponId;
 
-//FIXME FOR 7.3
-            // TODO: Verify for 7.3. Could potentially be 0xD50, 0xF30, 0x1110
             [FieldOffset(0xDC0)]
             public uint PCTargetID;
 
-            // TODO: Verify for 7.3. Could potentially be 0x19EC or 0x2288
             [FieldOffset(0x22F8)]
             public uint NPCTargetID;
 

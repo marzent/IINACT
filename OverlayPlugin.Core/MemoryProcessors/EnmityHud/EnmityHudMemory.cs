@@ -71,13 +71,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
 
                 if (enmityHudAddress == IntPtr.Zero)
                 {
-                    fail.Add(nameof(enmityHudAddress));
+                    fail.Add($"{nameof(enmityHudAddress)}, initial ptr null");
                 }
             }
             else
             {
                 enmityHudAddress = IntPtr.Zero;
-                fail.Add(nameof(enmityHudAddress));
+                fail.Add($"{nameof(enmityHudAddress)}, sigscan failed, count: {list.Count}");
             }
 
             logger.Log(LogLevel.Debug, "enmityHudAddress: 0x{0:X}", enmityHudAddress.ToInt64());

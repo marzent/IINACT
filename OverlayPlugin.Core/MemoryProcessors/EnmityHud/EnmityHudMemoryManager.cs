@@ -19,6 +19,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
         {
             this.container = container;
             container.Register<IEnmityHudMemory70, EnmityHudMemory70>();
+            container.Register<IEnmityHudMemory73, EnmityHudMemory73>();
             repository = container.Resolve<FFXIVRepository>();
 
             var memory = container.Resolve<FFXIVMemory>();
@@ -40,6 +41,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.EnmityHud
         {
             List<IEnmityHudMemory> candidates = new List<IEnmityHudMemory>();
             candidates.Add(container.Resolve<IEnmityHudMemory70>());
+            candidates.Add(container.Resolve<IEnmityHudMemory73>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
         }
 

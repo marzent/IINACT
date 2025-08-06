@@ -152,7 +152,7 @@ public unsafe class ZoneDownHookManager : IDisposable
             var pktHdrSlice = data.Slice(offset, pktHdrSize);
             var pktHdr = pktHdrSlice.Cast<byte, PacketElementHeader>();
             var pktData = data.Slice(offset + pktHdrSize, (int)pktHdr.Size - pktHdrSize);
-            var pktOpcode = BitConverter.ToUInt16(pktData[2..5]);
+            var pktOpcode = OpcodeUtility.GetOpcodeFromPacketAtIpcStart(pktData);
             var canInitDeobfuscation = pktOpcode == versionConstants.InitZoneOpcode ||
                                        pktOpcode == versionConstants.UnknownObfuscationInitOpcode;
             var needsDeobfuscation = versionConstants.ObfuscatedOpcodes.ContainsValue(pktOpcode);
@@ -175,7 +175,8 @@ public unsafe class ZoneDownHookManager : IDisposable
                 var pos = buffer.Size;
                 buffer.Write(pktData);
                 var slice = buffer.Get(pos, pktData.Length);
-                unscrambler.Unscramble(slice, keyGenerator.Keys[0], keyGenerator.Keys[1], keyGenerator.Keys[2]);
+                var opcodeBasedKey = keyGenerator.GetOpcodeBasedKey(pktOpcode);
+                unscrambler.Unscramble(slice, keyGenerator.Keys[0], keyGenerator.Keys[1], keyGenerator.Keys[2], opcodeBasedKey);
             }
             else
             {

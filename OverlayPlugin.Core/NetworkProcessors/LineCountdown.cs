@@ -5,7 +5,7 @@ using RainbowMage.OverlayPlugin.NetworkProcessors.PacketHelper;
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
     class LineCountdown : LineBaseCustom<
-            Server_MessageHeader_Global, LineCountdown.Countdown_v655,
+            Server_MessageHeader_Global, LineCountdown.Countdown_v730,
             Server_MessageHeader_CN, LineCountdown.Countdown_v655,
             Server_MessageHeader_KR, LineCountdown.Countdown_v655>
     {
@@ -31,6 +31,41 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
 
             [FieldOffset(0xB)]
             public fixed byte countdownStarterName[32];
+
+            public string ToString(long epoch, uint ActorID)
+            {
+                fixed (byte* name = countdownStarterName)
+                {
+                    return
+                        $"{countdownStarterActorID:X8}|" +
+                        $"{countdownStarterWorldId:X4}|" +
+                        $"{countdownTimeSeconds}|" +
+                        $"{countdownResultCode:X2}|" +
+                        $"{FFXIVMemory.GetStringFromBytes(name, 32)}";
+                }
+            }
+        }
+        
+        [StructLayout(LayoutKind.Explicit, Size = structSize, Pack = 1)]
+        internal unsafe struct Countdown_v730 : IPacketStruct
+        {
+            // As of 7.3, there are an extra 0x10 bytes at the start of the packet
+
+            public const int structSize = 64;
+            [FieldOffset(0x10)]
+            public uint countdownStarterActorID;
+            [FieldOffset(0x14)]
+            public ushort countdownStarterWorldId;
+
+            [FieldOffset(0x16)]
+            public ushort countdownTimeSeconds;
+            [FieldOffset(0x18)]
+            public byte countdownResultCode;
+
+            [FieldOffset(0x1B)]
+            public fixed byte countdownStarterName[32];
+
+
 
             public string ToString(long epoch, uint ActorID)
             {

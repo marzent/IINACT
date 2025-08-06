@@ -5,7 +5,7 @@ using RainbowMage.OverlayPlugin.NetworkProcessors.PacketHelper;
 namespace RainbowMage.OverlayPlugin.NetworkProcessors
 {
     class LineCountdownCancel : LineBaseCustom<
-            Server_MessageHeader_Global, LineCountdownCancel.CountdownCancel_v655,
+            Server_MessageHeader_Global, LineCountdownCancel.CountdownCancel_v730,
             Server_MessageHeader_CN, LineCountdownCancel.CountdownCancel_v655,
             Server_MessageHeader_KR, LineCountdownCancel.CountdownCancel_v655>
     {
@@ -25,6 +25,31 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             public ushort countdownCancellerWorldId;
 
             [FieldOffset(0x8)]
+            public fixed byte countdownCancellerName[32];
+
+            public string ToString(long epoch, uint ActorID)
+            {
+                fixed (byte* name = countdownCancellerName)
+                {
+                    return
+                        $"{countdownCancellerActorID:X8}|" +
+                        $"{countdownCancellerWorldId:X4}|" +
+                        $"{FFXIVMemory.GetStringFromBytes(name, 32)}";
+                }
+            }
+        }
+        [StructLayout(LayoutKind.Explicit, Size = structSize, Pack = 1)]
+        internal unsafe struct CountdownCancel_v730 : IPacketStruct
+        {
+            // As of 7.3, there are an extra 0x10 bytes at the start of the packet
+
+            public const int structSize = 56;
+            [FieldOffset(0x10)]
+            public uint countdownCancellerActorID;
+            [FieldOffset(0x14)]
+            public ushort countdownCancellerWorldId;
+
+            [FieldOffset(0x18)]
             public fixed byte countdownCancellerName[32];
 
             public string ToString(long epoch, uint ActorID)

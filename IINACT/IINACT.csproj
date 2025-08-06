@@ -63,7 +63,7 @@
             <HintPath>$(DalamudLibPath)Reloaded.Hooks.Definitions.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="ImGui.NET">
+        <Reference Include="Dalamud.Bindings.ImGui">
             <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
             <Private>false</Private>
         </Reference>

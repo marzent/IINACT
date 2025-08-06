@@ -11,6 +11,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             Server_MessageHeader_CN, LineMapEffect.MapEffect_v62,
             Server_MessageHeader_KR, LineMapEffect.MapEffect_v62>
     {
+        // `MapEffect` and some of the `MapEffect#` packets can be verified in Zelenia Normal, when blooms appear and despawn
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         internal struct MapEffect_v62 : IPacketStruct, IMapEffectPacket
         {

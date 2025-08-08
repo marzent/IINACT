@@ -8,6 +8,8 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using IINACT.Network;
 using IINACT.Windows;
+using Machina.FFXIV;
+using Machina.FFXIV.Headers.Opcodes;
 
 namespace IINACT;
 
@@ -70,6 +72,10 @@ public sealed class Plugin : IDalamudPlugin
         SigScanner = sigScanner;
         NotificationManager = notificationManager;
         Log = pluginLog;
+
+        OpcodeManager.Instance.SetRegion(DataManager.Language.ToString() == "ChineseSimplified"
+                                             ? GameRegion.Chinese
+                                             : GameRegion.Global);
 
         var createZoneDownHookManager = Task.Run(() 
             => new ZoneDownHookManager(NotificationManager, SigScanner, GameInteropProvider));

@@ -77,11 +77,6 @@ public partial class FfxivActPluginWrapper : IDisposable
         ffxivActPlugin = new FFXIV_ACT_Plugin.FFXIV_ACT_Plugin();
         Plugin.Log.Information($"Initializing FFXIV_ACT_Plugin version {typeof(FFXIV_ACT_Plugin.FFXIV_ACT_Plugin).Assembly.GetName().Version}");
         ffxivActPlugin.ConfigureIOC();
-        if (dalamudClientLanguage.ToString() == "ChineseSimplified") {
-            OpcodeManager.Instance.SetRegion(GameRegion.Chinese);
-        } else {
-            OpcodeManager.Instance.SetRegion(GameRegion.Global);
-        }
 
         iocContainer = ffxivActPlugin._iocContainer;
         iocContainer.Resolve<ResourceManager>().LoadResources();

@@ -89,7 +89,8 @@ public class MainWindow : Window, IDisposable
         }
 
         var selectedOverlay = OverlayPresets?[selectedOverlayIndex];
-        var overlayUri = selectedOverlay?.ToOverlayUri(new Uri($"ws://{Server?.Address}:{Server?.Port}/ws"));
+        Uri.TryCreate($"ws://{Server?.Address}:{Server?.Port}/ws", UriKind.Absolute, out var webSocketServer);
+        var overlayUri = selectedOverlay?.ToOverlayUri(webSocketServer);
         var overlayUriString = overlayUri?.ToString() ?? "<Error generating URI>";
 
         ImGui.SetNextItemWidth(comboWidth);

@@ -31,6 +31,11 @@ namespace RainbowMage.OverlayPlugin
         public Uri ToOverlayUri(Uri webSocketServer)
         {
             Uri overlayUri;
+            
+            if (webSocketServer == null)
+            {
+                return null;
+            }
 
             if (webSocketServer.Scheme == "wss")
             {

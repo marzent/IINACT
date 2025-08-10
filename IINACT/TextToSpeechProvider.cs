@@ -12,19 +12,19 @@ internal class TextToSpeechProvider
     
     public TextToSpeechProvider()
     {
-        try
+        if (!Dalamud.Utility.Util.IsWine())
         {
-            speechSynthesizer = new SpeechSynthesizer();
-            speechSynthesizer?.SetOutputToDefaultAudioDevice();
+            try
+            {
+                speechSynthesizer = new SpeechSynthesizer();
+                speechSynthesizer?.SetOutputToDefaultAudioDevice();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.Warning(ex, "Failed to initialize SAPI TTS engine");
+                speechSynthesizer = null;
+            }
         }
-        catch (Exception ex)
-        {
-            Plugin.Log.Warning(ex, "Failed to initialize SAPI TTS engine");
-            speechSynthesizer = null;
-        }
-        
-        if (Dalamud.Utility.Util.IsWine())
-            speechSynthesizer = null;
         
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }

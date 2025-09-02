@@ -24,4 +24,10 @@ public unsafe struct PacketDispatcher
         if (rcb == null) return null;
         return (PacketDispatcher*)&rcb->PacketDispatcher;
     }
+    
+    public static nint GetOnReceivePacketAddress()
+    {
+        var vtable = FFXIVClientStructs.FFXIV.Client.Network.PacketDispatcher.StaticVirtualTablePointer;
+        return (nint)vtable->OnReceivePacket;
+    }
 }

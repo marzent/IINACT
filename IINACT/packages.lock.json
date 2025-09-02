@@ -181,7 +181,7 @@
           "System.Data.DataSetExtensions": "[4.5.0, )"
         }
       },
-      "unscrambler": {
+      "Unscrambler.XIV": {
         "type": "Project"
       }
     },

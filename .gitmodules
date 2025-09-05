@@ -1,9 +1,6 @@
-[submodule "machina"]
+#[submodule "machina"]
 	path = machina
 	url = https://github.com/marzent/machina
 [submodule "OverlayPlugin.Core/resources/act-overlays"]
 	path = OverlayPlugin.Core/resources/act-overlays
 	url = https://github.com/cking/act-overlays
-[submodule "Unscrambler"]
-	path = Unscrambler
-	url = https://github.com/perchbirdd/Unscrambler

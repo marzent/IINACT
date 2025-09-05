@@ -1,4 +1,4 @@
-#[submodule "machina"]
+[submodule "machina"]
 	path = machina
 	url = https://github.com/marzent/machina
 [submodule "OverlayPlugin.Core/resources/act-overlays"]

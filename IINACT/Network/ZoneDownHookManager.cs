@@ -18,7 +18,6 @@ public unsafe class ZoneDownHookManager : IDisposable
 {
 	private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
     private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
-    private const string OpcodeKeyTableLengthSignature =  "?? ?? ?? 41 01 00 00 00 ?? ?? c7 41 01 00 00 00";
     
     private readonly INotificationManager notificationManager;
 	private delegate nuint DownPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
@@ -59,15 +58,21 @@ public unsafe class ZoneDownHookManager : IDisposable
             var opcodeKeyTableOffset = BitConverter.ToUInt32(bytes, 9);
             var moduleBase = Process.GetCurrentProcess().MainModule!.BaseAddress;
             var opcodeKeyTableAddress = moduleBase + (nint)opcodeKeyTableOffset;
-            var opcodeKeyTableEnd = MultiSigScanner.Scan(opcodeKeyTableAddress, 0x1000, OpcodeKeyTableLengthSignature);
-            var memory = new byte[4];
-            Marshal.Copy(opcodeKeyTableEnd - 4, memory, 0, 4);
-            if (memory.SequenceEqual(new byte[] { 0, 0, 0, 0 }))
+            var searchRange = 0x1000;
+            var memory = new byte[searchRange];
+            Marshal.Copy(opcodeKeyTableAddress, memory, 0, searchRange);
+            var opcodeKeyTableSize = 0;
+            while (!IsVtablePattern(memory, opcodeKeyTableSize))
+            {
+                opcodeKeyTableSize += 4;
+                if (opcodeKeyTableSize > searchRange)
+                    throw new Exception("Opcode key table size is too large");
+            }
+            if (memory[opcodeKeyTableSize - 1] == 0 && memory[opcodeKeyTableSize - 2] == 0 && memory[opcodeKeyTableSize - 3] == 0 && memory[opcodeKeyTableSize - 4] == 0)
             {
                 Plugin.Log.Debug("Uneven padded length for opcode key table");
-                opcodeKeyTableEnd -= 4;
+                opcodeKeyTableSize -= 4;
             }
-            var opcodeKeyTableSize = (int)(opcodeKeyTableEnd - opcodeKeyTableAddress);
             Plugin.Log.Debug(
                 $"[ZoneDownHookManager] opcodeKeyTableOffset {opcodeKeyTableOffset:X}, opcodeKeyTableSize {opcodeKeyTableSize:X}");
             var opcodeKeyTableBytes = new byte[opcodeKeyTableSize];
@@ -91,6 +96,25 @@ public unsafe class ZoneDownHookManager : IDisposable
 		zoneDownHook = hooks.HookFromAddress<DownPrototype>(rxPtrs[2], ZoneDownDetour);
 
 		Enable();
+    }
+    
+    private bool IsVtablePattern(ReadOnlySpan<byte> memory, int offset)
+    {
+        for (var i = 0; i < 5; i++)
+            if (memory[offset + i] == 0)
+                return false;
+        
+        if (memory[offset + 6] != 0 || memory[offset + 7] != 0)
+            return false;
+        
+        for (var i = 8; i < 13; i++)
+            if (memory[offset + i] == 0)
+                return false;
+        
+        if (memory[offset + 14] != 0 || memory[offset + 15] != 0)
+            return false;
+
+        return true;
     }
 
 	public void Enable()

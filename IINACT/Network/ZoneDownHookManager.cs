@@ -3,12 +3,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Unscrambler;
 using Unscrambler.Constants;
-using Unscrambler.Derivation;
-using Unscrambler.Derivation.Versions;
 using Unscrambler.Unscramble;
 using Unscrambler.Unscramble.Versions;
 
@@ -18,6 +15,8 @@ public unsafe class ZoneDownHookManager : IDisposable
 {
 	private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
     private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
+    private readonly int[] opcodeKeyTable;
+    private readonly byte[] keys = new byte[3];
     
     private readonly INotificationManager notificationManager;
 	private delegate nuint DownPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
@@ -26,25 +25,23 @@ public unsafe class ZoneDownHookManager : IDisposable
     
 	private readonly SimpleBuffer buffer;
     
-    private bool obfuscationOverride;
+    private bool obfuscationKeysLoaded;
     private readonly VersionConstants versionConstants;
-    private readonly IKeyGenerator keyGenerator;
     private readonly IUnscrambler unscrambler;
 
 	public ZoneDownHookManager(
         INotificationManager notificationManager,
-		IGameInteropProvider hooks,
-        IDalamudPluginInterface pluginInterface)
+		IGameInteropProvider hooks)
     {
         this.notificationManager = notificationManager;
 		buffer = new SimpleBuffer(1024 * 1024);
         var multiScanner = new MultiSigScanner();
+        var moduleBase = Process.GetCurrentProcess().MainModule!.BaseAddress;
         
         var version = GetRunningGameVersion();
         if (VersionConstants.Constants.ContainsKey(version))
         {
             versionConstants = VersionConstants.ForGameVersion(version);
-            keyGenerator = KeyGeneratorFactory.ForGameVersion(version);
             unscrambler = UnscramblerFactory.ForGameVersion(version);
         }
         else
@@ -56,7 +53,6 @@ public unsafe class ZoneDownHookManager : IDisposable
             var bytes = new byte[13];
             Marshal.Copy(opcodeKeyTableIns, bytes, 0, 13);
             var opcodeKeyTableOffset = BitConverter.ToUInt32(bytes, 9);
-            var moduleBase = Process.GetCurrentProcess().MainModule!.BaseAddress;
             var opcodeKeyTableAddress = moduleBase + (nint)opcodeKeyTableOffset;
             var searchRange = 0x1000;
             var memory = new byte[searchRange];
@@ -75,22 +71,16 @@ public unsafe class ZoneDownHookManager : IDisposable
             }
             Plugin.Log.Debug(
                 $"[ZoneDownHookManager] opcodeKeyTableOffset {opcodeKeyTableOffset:X}, opcodeKeyTableSize {opcodeKeyTableSize:X}");
-            var opcodeKeyTableBytes = new byte[opcodeKeyTableSize];
-            Marshal.Copy(opcodeKeyTableAddress, opcodeKeyTableBytes, 0, opcodeKeyTableSize);
-            var emptyTableBytes = Array.Empty<byte>();
-            var tableBinaryBasePath = pluginInterface.AssemblyLocation.Directory!.CreateSubdirectory($"unscrambler_tables_{version}").FullName;
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "table0.bin"), emptyTableBytes);
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "table1.bin"), emptyTableBytes);
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "table2.bin"), emptyTableBytes);
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "midtable.bin"), emptyTableBytes);
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "daytable.bin"), emptyTableBytes);
-            File.WriteAllBytes(Path.Combine(tableBinaryBasePath, "opcodekeytable.bin"), opcodeKeyTableBytes);
             versionConstants = GetFallbackVersionConstant(opcodeKeyTableOffset, opcodeKeyTableSize);
-            keyGenerator = new KeyGenerator73();
-            keyGenerator.Initialize(versionConstants, tableBinaryBasePath);
             unscrambler = new Unscrambler73();
             unscrambler.Initialize(versionConstants);
         }
+        
+        var rawOpcodeKeyTable = new byte[versionConstants.OpcodeKeyTableSize];
+        opcodeKeyTable = new int[rawOpcodeKeyTable.Length / 4];
+        Marshal.Copy(moduleBase + (nint)versionConstants.OpcodeKeyTableOffset, rawOpcodeKeyTable, 0, rawOpcodeKeyTable.Length);
+        for (var i = 0; i < rawOpcodeKeyTable.Length; i += 4)
+            opcodeKeyTable[i / 4] = BitConverter.ToInt32(rawOpcodeKeyTable, i);
 
         var rxPtrs = multiScanner.ScanText(GenericDownSignature, 3);
 		zoneDownHook = hooks.HookFromAddress<DownPrototype>(rxPtrs[2], ZoneDownDetour);
@@ -132,22 +122,15 @@ public unsafe class ZoneDownHookManager : IDisposable
             var gameRandom = dispatcher->GameRandom;
             var packetRandom = dispatcher->LastPacketRandom;
             
-            obfuscationOverride = dispatcher->Key0 >= gameRandom + packetRandom;
+            obfuscationKeysLoaded = dispatcher->Key0 >= gameRandom + packetRandom;
 
-            if (obfuscationOverride)
+            if (obfuscationKeysLoaded)
             {
-                keyGenerator.Keys[0] = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
-                keyGenerator.Keys[1] = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
-                keyGenerator.Keys[2] = (byte)(dispatcher->Key2 - gameRandom - packetRandom);	
-            }
-            else
-            {
-                keyGenerator.Keys[0] = 0;
-                keyGenerator.Keys[1] = 0;
-                keyGenerator.Keys[2] = 0;
+                keys[0] = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
+                keys[1] = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
+                keys[2] = (byte)(dispatcher->Key2 - gameRandom - packetRandom);	
             }
             
-            Plugin.Log.Debug($"[UpdateKeys] obfuscation override is {obfuscationOverride}");
             Plugin.Log.Debug($"[UpdateKeys] keys {dispatcher->Key0}, {dispatcher->Key1}, {dispatcher->Key2}");
             Plugin.Log.Debug($"[UpdateKeys] game random {dispatcher->GameRandom}, packet random {dispatcher->LastPacketRandom}");
         }
@@ -229,38 +212,22 @@ public unsafe class ZoneDownHookManager : IDisposable
             var pktHdr = pktHdrSlice.Cast<byte, PacketElementHeader>();
             var pktData = data.Slice(offset + pktHdrSize, (int)pktHdr.Size - pktHdrSize);
             var pktOpcode = OpcodeUtility.GetOpcodeFromPacketAtIpcStart(pktData);
-            var canInitDeobfuscation = pktOpcode == versionConstants.InitZoneOpcode ||
-                                       pktOpcode == versionConstants.UnknownObfuscationInitOpcode;
             var needsDeobfuscation = versionConstants.ObfuscatedOpcodes.ContainsValue(pktOpcode);
             
             buffer.Clear();
             buffer.Write(pktHdrSlice);
-            
-            if (canInitDeobfuscation)
-            {
-                if (pktOpcode == versionConstants.InitZoneOpcode)
-                    keyGenerator.GenerateFromInitZone(pktData);
-                else if (pktOpcode == versionConstants.UnknownObfuscationInitOpcode)
-                    keyGenerator.GenerateFromUnknownInitializer(pktData);
-                
-                obfuscationOverride = false;
-            }
-            
-            var canDeobfuscate = keyGenerator.ObfuscationEnabled || obfuscationOverride;
 
-            if (needsDeobfuscation && !canDeobfuscate)
+            if (needsDeobfuscation && !obfuscationKeysLoaded)
             {
                 UpdateKeys();
-                canDeobfuscate = obfuscationOverride;
             }
 
-            if (needsDeobfuscation && canDeobfuscate)
+            if (needsDeobfuscation && obfuscationKeysLoaded)
             {
                 var pos = buffer.Size;
                 buffer.Write(pktData);
                 var slice = buffer.Get(pos, pktData.Length);
-                var opcodeBasedKey = keyGenerator.GetOpcodeBasedKey(pktOpcode);
-                unscrambler.Unscramble(slice, keyGenerator.Keys[0], keyGenerator.Keys[1], keyGenerator.Keys[2], opcodeBasedKey);
+                unscrambler.Unscramble(slice, keys[0], keys[1], keys[2], opcodeKeyTable);
             }
             else
             {

@@ -78,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
                                              : GameRegion.Global);
 
         var createZoneDownHookManager = Task.Run(() 
-            => new ZoneDownHookManager(NotificationManager, GameInteropProvider, PluginInterface));
+            => new ZoneDownHookManager(NotificationManager, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();

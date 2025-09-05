@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina", "machina\Machina\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Machina.FFXIV", "machina\Machina.FFXIV\Machina.FFXIV.csproj", "{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unscrambler", "Unscrambler\Unscrambler\Unscrambler.csproj", "{1BBBEF78-9899-4C03-8E51-1869F6138E52}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,10 +51,6 @@ Global
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AAD30B3-55ED-4C10-94BF-41889B6BD44A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1BBBEF78-9899-4C03-8E51-1869F6138E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BBBEF78-9899-4C03-8E51-1869F6138E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BBBEF78-9899-4C03-8E51-1869F6138E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BBBEF78-9899-4C03-8E51-1869F6138E52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

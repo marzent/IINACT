@@ -39,6 +39,12 @@
         "resolved": "9.0.8",
         "contentHash": "tBo9CM+4MWYDnTH1oKL5A0dcyTHqr8F+zljbOc/vpRHHmZA7jnZxyqh7uwuICWH9F//IAgwfulTvXlzVy+j8lQ=="
       },
+      "Unscrambler.XIV": {
+        "type": "Direct",
+        "requested": "[7.31.1, )",
+        "resolved": "7.31.1",
+        "contentHash": "TnNraAWRQug9JdRObG2rHxs2OIsP0zi+We+MTIUGCiC5qTzlmqW9MO4OfSzAyPZTa/qTAZxPBMlCnJBqnsUj/w=="
+      },
       "Microsoft.CSharp": {
         "type": "Transitive",
         "resolved": "4.7.0",
@@ -180,9 +186,6 @@
           "OverlayPlugin.Common": "[1.0.0, )",
           "System.Data.DataSetExtensions": "[4.5.0, )"
         }
-      },
-      "Unscrambler.XIV": {
-        "type": "Project"
       }
     },
     "net9.0-windows7.0/win-x64": {

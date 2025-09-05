@@ -43,6 +43,7 @@
         </PackageReference>
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="System.Speech" Version="9.0.8" />
+        <PackageReference Include="Unscrambler.XIV" Version="7.31.1" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
@@ -83,7 +84,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FetchDependencies\FetchDependencies.csproj" />
-        <ProjectReference Include="..\Unscrambler\Unscrambler\Unscrambler.csproj" />
         <ProjectReference Include="..\machina\Machina.FFXIV\Machina.FFXIV.csproj" />
         <ProjectReference Include="..\machina\Machina\Machina.csproj" />
         <ProjectReference Include="..\NotACT\NotACT.csproj" />

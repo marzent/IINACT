@@ -17,7 +17,8 @@ namespace IINACT.Network;
 public unsafe class ZoneDownHookManager : IDisposable
 {
 	private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
-    private const string OpcodeKeyTableSignature = "6B ?? ?? ?? ?? ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
+    private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
+    private const string OpcodeKeyTableLengthSignature =  "?? ?? ?? 41 01 00 00 00 ?? ?? c7 41 01 00 00 00";
     
     private readonly INotificationManager notificationManager;
 	private delegate nuint DownPrototype(byte* data, byte* a2, nuint a3, nuint a4, nuint a5);
@@ -50,16 +51,25 @@ public unsafe class ZoneDownHookManager : IDisposable
         else
         {
             Plugin.Log.Warning("[ZoneDownHookManager] Creating fallback Unscrambler constants dynamically");
-            var opcodeKeyTableIns =
-                MultiSigScanner.Scan(PacketDispatcher.GetOnReceivePacketAddress(), 0x1000, OpcodeKeyTableSignature);
+            var onReceivePacketAddress = PacketDispatcher.GetOnReceivePacketAddress();
+            Plugin.Log.Debug($"[ZoneDownHookManager] GetOnReceivePacketAddress: {onReceivePacketAddress:X}");
+            var opcodeKeyTableIns = MultiSigScanner.Scan(onReceivePacketAddress, 0x1000, OpcodeKeyTableSignature);
             var bytes = new byte[13];
             Marshal.Copy(opcodeKeyTableIns, bytes, 0, 13);
             var opcodeKeyTableOffset = BitConverter.ToUInt32(bytes, 9);
-            var opcodeKeyTableSize = bytes[2] * 4;
-            Plugin.Log.Debug(
-                $"[ZoneDownHookManager] opcodeKeyTableOffset {opcodeKeyTableOffset:X}, opcodeKeyTableSize {opcodeKeyTableSize:X}");
             var moduleBase = Process.GetCurrentProcess().MainModule!.BaseAddress;
             var opcodeKeyTableAddress = moduleBase + (nint)opcodeKeyTableOffset;
+            var opcodeKeyTableEnd = MultiSigScanner.Scan(opcodeKeyTableAddress, 0x1000, OpcodeKeyTableLengthSignature);
+            var memory = new byte[4];
+            Marshal.Copy(opcodeKeyTableEnd - 4, memory, 0, 4);
+            if (memory.SequenceEqual(new byte[] { 0, 0, 0, 0 }))
+            {
+                Plugin.Log.Debug("Uneven padded length for opcode key table");
+                opcodeKeyTableEnd -= 4;
+            }
+            var opcodeKeyTableSize = (int)(opcodeKeyTableEnd - opcodeKeyTableAddress);
+            Plugin.Log.Debug(
+                $"[ZoneDownHookManager] opcodeKeyTableOffset {opcodeKeyTableOffset:X}, opcodeKeyTableSize {opcodeKeyTableSize:X}");
             var opcodeKeyTableBytes = new byte[opcodeKeyTableSize];
             Marshal.Copy(opcodeKeyTableAddress, opcodeKeyTableBytes, 0, opcodeKeyTableSize);
             var emptyTableBytes = Array.Empty<byte>();

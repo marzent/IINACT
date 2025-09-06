@@ -25,7 +25,6 @@ public unsafe class ZoneDownHookManager : IDisposable
     
 	private readonly SimpleBuffer buffer;
     
-    private bool obfuscationKeysLoaded;
     private readonly VersionConstants versionConstants;
     private readonly IUnscrambler unscrambler;
 
@@ -121,18 +120,25 @@ public unsafe class ZoneDownHookManager : IDisposable
         {
             var gameRandom = dispatcher->GameRandom;
             var packetRandom = dispatcher->LastPacketRandom;
+            byte key0 = 0, key1 = 0, key2 = 0;
             
-            obfuscationKeysLoaded = dispatcher->Key0 >= gameRandom + packetRandom;
+            var obfuscationKeysLoaded = dispatcher->Key0 >= gameRandom + packetRandom;
 
             if (obfuscationKeysLoaded)
             {
-                keys[0] = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
-                keys[1] = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
-                keys[2] = (byte)(dispatcher->Key2 - gameRandom - packetRandom);	
+                key0 = (byte)(dispatcher->Key0 - gameRandom - packetRandom);
+                key1 = (byte)(dispatcher->Key1 - gameRandom - packetRandom);
+                key2 = (byte)(dispatcher->Key2 - gameRandom - packetRandom);	
             }
             
-            Plugin.Log.Debug($"[UpdateKeys] keys {dispatcher->Key0}, {dispatcher->Key1}, {dispatcher->Key2}");
-            Plugin.Log.Debug($"[UpdateKeys] game random {dispatcher->GameRandom}, packet random {dispatcher->LastPacketRandom}");
+            if (key0 != keys[0] || key1 != keys[1] || key2 != keys[2])
+            {
+                keys[0] = key0;
+                keys[1] = key1;
+                keys[2] = key2;    
+                Plugin.Log.Debug($"[UpdateKeys] keys {dispatcher->Key0}, {dispatcher->Key1}, {dispatcher->Key2}");
+                Plugin.Log.Debug($"[UpdateKeys] game random {dispatcher->GameRandom}, packet random {dispatcher->LastPacketRandom}");
+            }
         }
         else
         {
@@ -217,13 +223,9 @@ public unsafe class ZoneDownHookManager : IDisposable
             buffer.Clear();
             buffer.Write(pktHdrSlice);
 
-            if (needsDeobfuscation && !obfuscationKeysLoaded)
+            if (needsDeobfuscation)
             {
                 UpdateKeys();
-            }
-
-            if (needsDeobfuscation && obfuscationKeysLoaded)
-            {
                 var pos = buffer.Size;
                 buffer.Write(pktData);
                 var slice = buffer.Get(pos, pktData.Length);

@@ -35,7 +35,7 @@ public unsafe class ZoneDownHookManager : IDisposable
         this.notificationManager = notificationManager;
 		buffer = new SimpleBuffer(1024 * 1024);
         var multiScanner = new MultiSigScanner();
-        var moduleBase = Process.GetCurrentProcess().MainModule!.BaseAddress;
+        var moduleBase = multiScanner.Module.BaseAddress;
         
         var version = GetRunningGameVersion();
         if (VersionConstants.Constants.ContainsKey(version))

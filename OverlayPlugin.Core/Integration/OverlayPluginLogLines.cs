@@ -83,6 +83,14 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
             exceptionCount++;
             logger.Log(LogLevel.Error, message);
         }
+        
+        private void LogWarning(string message)
+        {
+            if (exceptionCount >= maxExceptionsLogged)
+                return;
+            exceptionCount++;
+            logger.Log(LogLevel.Warning, message);
+        }
 
         private IOpcodeConfigEntry GetOpcode(string name, Opcodes opcodes, string version, string opcodeType, MachinaRegion machinaRegion)
         {
@@ -103,7 +111,7 @@ namespace RainbowMage.OverlayPlugin.NetworkProcessors
                 else
                 {
                     if (repository.GetMachinaRegion().ToString() == machinaRegion)
-                        LogException($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
+                        LogWarning($"No {opcodeType} opcodes for game region {machinaRegion}, version {version}");
                 }
             }
             else

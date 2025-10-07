@@ -40,7 +40,7 @@ namespace RainbowMage.OverlayPlugin
         {
             if (updateRunning)
             {
-                Log(LogLevel.Error, "Update for {0} took too long, skipping overlapping tick!", this.GetType().Name);
+                Log(LogLevel.Warning, "Update for {0} took too long, skipping overlapping tick!", this.GetType().Name);
                 return;
             }
 

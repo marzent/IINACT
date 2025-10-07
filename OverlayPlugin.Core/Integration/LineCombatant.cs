@@ -259,6 +259,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         private void CheckCombatants(DateTime now, params uint[] filter)
         {
             var combatants = combatantMemoryManager.GetCombatantList();
+            
+            Span<uint> combatantIDs = stackalloc uint[combatants.Count];
+            var index = 0;
+            foreach (var c in combatants) combatantIDs[index++] = c.ID;
 
             var criteria = CombatantChangeCriteria.Criteria(inCombat);
 
@@ -362,6 +366,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                         lastUpdated = now,
                         combatant = combatant,
                     };
+                    
+                    combatantMemoryManager.ReturnCombatant(oldCombatant);
 
                     WriteLine(
                         CombatantMemoryChangeType.Change,
@@ -369,6 +375,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                         string.Join("",
                             CombatantChangeCriteria.AllFields.Where((field) => changed.Contains(field))
                             .Select((fi) => FormatFieldChange(fi, combatant))));
+                }
+                else
+                {
+                    combatantMemoryManager.ReturnCombatant(combatant);
                 }
             }
 
@@ -380,9 +390,13 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 {
                     continue;
                 }
-                if (!combatants.Any((c) => c.ID == ID))
+                if (!combatantIDs.Contains(ID))
                 {
-                    combatantStateMap.TryRemove(ID, out var _);
+                    combatantStateMap.TryRemove(ID, out var combatantStateInfo);
+                    if (combatantStateInfo != null)
+                    {
+                        combatantMemoryManager.ReturnCombatant(combatantStateInfo.combatant);
+                    }
                     WriteLine(CombatantMemoryChangeType.Remove, ID, "");
                 }
             }

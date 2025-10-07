@@ -170,6 +170,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Enmity
 
                 result.Add(entry);
             }
+            
+            combatantMemory.ReturnCombatant(mychar);
 
             return result;
         }

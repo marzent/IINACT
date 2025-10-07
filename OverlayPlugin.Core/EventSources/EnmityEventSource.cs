@@ -147,9 +147,8 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 stopwatch.Start();
 #endif
 
-                var combatants = combatantMemory.GetCombatantList();
-
-                combatants.RemoveAll((c) => c.Type != ObjectType.PC && c.Type != ObjectType.Monster);
+                var allCombatants = combatantMemory.GetCombatantList();
+                var combatants = allCombatants.FindAll(c => c.Type is ObjectType.PC or ObjectType.Monster);
 
                 if (targetData)
                 {
@@ -164,6 +163,9 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 {
                     DispatchEvent(CreateTargetableEnemyList(combatants));
                 }
+                
+                foreach (var combatant in allCombatants)
+                    combatantMemory.ReturnCombatant(combatant);
 #if TRACEPERF
                 Log(LogLevel.Trace, "UpdateEnmity: {0}ms", stopwatch.ElapsedMilliseconds);
 #endif
@@ -250,13 +252,20 @@ namespace RainbowMage.OverlayPlugin.EventSources
                         enmity.TargetOfTarget.Distance = mychar.DistanceString(enmity.TargetOfTarget);
                         enmity.TargetOfTarget.EffectiveDistance = mychar.EffectiveDistanceString(enmity.TargetOfTarget);
                     }
+                    
+                    combatantMemory.ReturnCombatant(mychar);
                 }
             }
             catch (Exception ex)
             {
                 this.logger.Log(LogLevel.Error, "CreateTargetData: {0}", ex);
             }
-            return JObject.FromObject(enmity);
+            
+            var ret = JObject.FromObject(enmity);
+            combatantMemory.ReturnCombatant(enmity.Target);
+            combatantMemory.ReturnCombatant(enmity.Focus);
+            combatantMemory.ReturnCombatant(enmity.Hover);
+            return ret;
         }
 
         internal JObject CreateAggroList(List<Combatant> combatants)

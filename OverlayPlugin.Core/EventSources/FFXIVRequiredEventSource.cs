@@ -237,6 +237,11 @@ namespace RainbowMage.OverlayPlugin.EventSources
                 }
             }
 
+            foreach (var combatant in memCombatants)
+            {
+                combatantMemory.ReturnCombatant(combatant);
+            }
+
             return filteredCombatants;
         }
         
@@ -503,6 +508,7 @@ namespace RainbowMage.OverlayPlugin.EventSources
                     },
                 };
                 newParty.partyLeaderIndex = 0;
+                combatantMemory.ReturnCombatant(currentPlayer);
             }
 
             var dispatchEvent = false;

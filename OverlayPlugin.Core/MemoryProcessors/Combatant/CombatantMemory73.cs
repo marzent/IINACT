@@ -48,61 +48,50 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                     mycharID = mem.ID;
                 }
 
-                Combatant combatant = new Combatant()
-                {
-                    Name = FFXIVMemory.GetStringFromBytes(mem.Name, CombatantMemory.NameBytes),
-                    Job = mem.Job,
-                    ID = mem.ID,
-                    OwnerID = mem.OwnerID == emptyID ? 0 : mem.OwnerID,
-                    Type = (ObjectType)mem.Type,
-                    MonsterType = 0,
-                    Status = (ObjectStatus)mem.Status,
-                    ModelStatus = (ModelStatus)mem.ModelStatus,
-                    // Normalize all possible aggression statuses into the basic 4 ones.
-                    AggressionStatus = 0,
-                    NPCTargetID = mem.NPCTargetID,
-                    RawEffectiveDistance = mem.EffectiveDistance,
-                    PosX = mem.PosX,
-                    // Y and Z are deliberately swapped to match FFXIV_ACT_Plugin's data model
-                    PosY = mem.PosZ,
-                    PosZ = mem.PosY,
-                    Heading = mem.Heading,
-                    Radius = mem.Radius,
-                    // In-memory there are separate values for PC's current target and NPC's current target
-                    TargetID = (ObjectType)mem.Type == ObjectType.PC ? mem.PCTargetID : mem.NPCTargetID,
-                    CurrentHP = mem.CurrentHP,
-                    MaxHP = mem.MaxHP,
-                    Effects = exceptEffects ? new List<EffectEntry>() : GetEffectEntries(mem.Effects, (ObjectType)mem.Type, mycharID),
-
-                    BNpcID = mem.BNpcID,
-                    CurrentMP = mem.CurrentMP,
-                    MaxMP = mem.MaxMP,
-                    CurrentGP = mem.CurrentGP,
-                    MaxGP = mem.MaxGP,
-                    CurrentCP = mem.CurrentCP,
-                    MaxCP = mem.MaxCP,
-                    Level = mem.Level,
-                    PCTargetID = mem.PCTargetID,
-
-                    BNpcNameID = mem.BNpcNameID,
-
-                    WorldID = mem.WorldID,
-                    CurrentWorldID = mem.CurrentWorldID,
-
-                    IsCasting1 = mem.IsCasting1,
-                    IsCasting2 = mem.IsCasting2,
-                    CastBuffID = mem.CastBuffID,
-                    CastTargetID = mem.CastTargetID,
-                    // Y and Z are deliberately swapped to match FFXIV_ACT_Plugin's data model
-                    CastGroundTargetX = mem.CastGroundTargetX,
-                    CastGroundTargetY = mem.CastGroundTargetZ,
-                    CastGroundTargetZ = mem.CastGroundTargetY,
-                    CastDurationCurrent = mem.CastDurationCurrent,
-                    CastDurationMax = mem.CastDurationMax,
-
-                    TransformationId = mem.TransformationId,
-                    WeaponId = mem.WeaponId
-                };
+                Combatant combatant = combatantPool.Get();
+                combatant.Job = mem.Job;
+                combatant.ID = mem.ID;
+                combatant.OwnerID = mem.OwnerID == emptyID ? 0 : mem.OwnerID;
+                combatant.Type = (ObjectType)mem.Type;
+                combatant.MonsterType = 0;
+                combatant.Status = (ObjectStatus)mem.Status;
+                combatant.ModelStatus = (ModelStatus)mem.ModelStatus; // Normalize all possible aggression statuses into the basic 4 ones.
+                combatant.AggressionStatus = 0;
+                combatant.NPCTargetID = mem.NPCTargetID;
+                combatant.RawEffectiveDistance = mem.EffectiveDistance;
+                combatant.PosX = mem.PosX; // Y and Z are deliberately swapped to match FFXIV_ACT_Plugin's data model
+                combatant.PosY = mem.PosZ;
+                combatant.PosZ = mem.PosY;
+                combatant.Heading = mem.Heading;
+                combatant.Radius = mem.Radius; // In-memory there are separate values for PC's current target and NPC's current target
+                combatant.TargetID = (ObjectType)mem.Type == ObjectType.PC ? mem.PCTargetID : mem.NPCTargetID;
+                combatant.CurrentHP = mem.CurrentHP;
+                combatant.MaxHP = mem.MaxHP;
+                combatant.Effects = exceptEffects ? new List<EffectEntry>() : GetEffectEntries(mem.Effects, (ObjectType)mem.Type, mycharID);
+                combatant.BNpcID = mem.BNpcID;
+                combatant.CurrentMP = mem.CurrentMP;
+                combatant.MaxMP = mem.MaxMP;
+                combatant.CurrentGP = mem.CurrentGP;
+                combatant.MaxGP = mem.MaxGP;
+                combatant.CurrentCP = mem.CurrentCP;
+                combatant.MaxCP = mem.MaxCP;
+                combatant.Level = mem.Level;
+                combatant.PCTargetID = mem.PCTargetID;
+                combatant.BNpcNameID = mem.BNpcNameID;
+                combatant.WorldID = mem.WorldID;
+                combatant.CurrentWorldID = mem.CurrentWorldID;
+                combatant.IsCasting1 = mem.IsCasting1;
+                combatant.IsCasting2 = mem.IsCasting2;
+                combatant.CastBuffID = mem.CastBuffID;
+                combatant.CastTargetID = mem.CastTargetID; // Y and Z are deliberately swapped to match FFXIV_ACT_Plugin's data model
+                combatant.CastGroundTargetX = mem.CastGroundTargetX;
+                combatant.CastGroundTargetY = mem.CastGroundTargetZ;
+                combatant.CastGroundTargetZ = mem.CastGroundTargetY;
+                combatant.CastDurationCurrent = mem.CastDurationCurrent;
+                combatant.CastDurationMax = mem.CastDurationMax;
+                combatant.TransformationId = mem.TransformationId;
+                combatant.WeaponId = mem.WeaponId;
+                combatant.Name = FFXIVMemory.GetStringFromBytes(mem.Name, CombatantMemory.NameBytes);
                 combatant.IsTargetable =
                     (combatant.ModelStatus == ModelStatus.Visible)
                     && ((combatant.Status == ObjectStatus.NormalActorStatus) || (combatant.Status == ObjectStatus.NormalSubActorStatus));

@@ -154,6 +154,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
             if (targetCombatant != null)
             {
                 currentTargetID = targetCombatant.ID;
+                combatantMemory.ReturnCombatant(targetCombatant);
             }
 
             var result = new List<AggroEntry>();
@@ -205,6 +206,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Aggro
 
                 result.Add(entry);
             }
+            
+            combatantMemory.ReturnCombatant(mychar);
 
             return result;
         }

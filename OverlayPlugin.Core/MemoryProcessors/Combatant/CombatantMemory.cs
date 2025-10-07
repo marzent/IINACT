@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.ObjectPool;
 
 namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
 {
@@ -18,6 +19,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
         private int numMemoryCombatants;
         private int combatantSize;
         private int effectSize;
+        
+        protected ObjectPool<Combatant> combatantPool;
 
         // Constants.
         protected const uint emptyID = 0xE0000000;
@@ -32,6 +35,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             this.numMemoryCombatants = numMemoryCombatants;
             logger = container.Resolve<ILogger>();
             memory = container.Resolve<FFXIVMemory>();
+            var policy = new DefaultPooledObjectPolicy<Combatant>();
+            combatantPool = new DefaultObjectPool<Combatant>(policy, maximumRetained: 2 * numMemoryCombatants);
         }
 
         private void ResetPointers()
@@ -102,14 +107,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             IntPtr address = memory.ReadIntPtr(charmapAddress);
             if (address == IntPtr.Zero)
                 return null;
-            byte[] source = memory.GetByteArray(address, combatantSize);
-            return GetCombatantFromByteArray(source, 0, true, true);
+            byte[] source = memory.GetByteArrayPooled(address, combatantSize);
+            var ret = GetCombatantFromByteArray(source, 0, true, true);
+            ArrayPool<byte>.Shared.Return(source);
+            return ret;
         }
 
         public Combatant GetCombatantFromAddress(IntPtr address, uint selfCharID = 0)
         {
-            byte[] c = memory.GetByteArray(address, combatantSize);
-            return GetCombatantFromByteArray(c, selfCharID, false);
+            byte[] c = memory.GetByteArrayPooled(address, combatantSize);
+            var ret = GetCombatantFromByteArray(c, selfCharID, false);
+            ArrayPool<byte>.Shared.Return(c);
+            return ret;
         }
 
         public unsafe List<Combatant> GetCombatantList()
@@ -138,7 +147,10 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
                 if (combatant == null)
                     continue;
                 if (seen.Contains(combatant.ID))
+                {
+                    ReturnCombatant(combatant);
                     continue;
+                }
 
                 // TODO: should this just be a dictionary? there are a lot of id lookups.
                 result.Add(combatant);
@@ -146,7 +158,18 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             }
             
             ArrayPool<byte>.Shared.Return(source);
+            ReturnCombatant(mychar);
             return result;
+        }
+
+        public void ReturnCombatant(Combatant combatant)
+        {
+            if (combatant == null)
+            {
+                return;
+            }
+            
+            combatantPool.Return(combatant);
         }
 
         // Returns a combatant if the combatant is a mob or a PC.

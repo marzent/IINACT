@@ -41,9 +41,9 @@
       },
       "Unscrambler.XIV": {
         "type": "Direct",
-        "requested": "[7.31.1, )",
-        "resolved": "7.31.1",
-        "contentHash": "TnNraAWRQug9JdRObG2rHxs2OIsP0zi+We+MTIUGCiC5qTzlmqW9MO4OfSzAyPZTa/qTAZxPBMlCnJBqnsUj/w=="
+        "requested": "[7.35.0, )",
+        "resolved": "7.35.0",
+        "contentHash": "k5/h4jklMJ5sP5AjZIdeC/h4kvHICnlKKnmaAshtEIoM2LSCFS8AjGEarh+dRm0T71YmRRn+xsx9IwUQBTeCHQ=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",

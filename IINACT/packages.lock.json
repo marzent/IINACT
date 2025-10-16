@@ -41,9 +41,9 @@
       },
       "Unscrambler.XIV": {
         "type": "Direct",
-        "requested": "[7.35.0, )",
-        "resolved": "7.35.0",
-        "contentHash": "k5/h4jklMJ5sP5AjZIdeC/h4kvHICnlKKnmaAshtEIoM2LSCFS8AjGEarh+dRm0T71YmRRn+xsx9IwUQBTeCHQ=="
+        "requested": "[7.35.1, )",
+        "resolved": "7.35.1",
+        "contentHash": "MMdLjiQ1ndI990W7FyOa+hIyh/SCw8aifS5ninR3za58kTx86ILih6SxtS/1+cYz1FtV+bmvgGpEvhTvPPq8bg=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -185,7 +185,7 @@
         "type": "Project",
         "dependencies": {
           "Machina": "[2.3.1.3, )",
-          "Machina.FFXIV": "[2.4.3.1, )",
+          "Machina.FFXIV": "[2.4.4, )",
           "Microsoft.CSharp": "[4.7.0, )",
           "Microsoft.Extensions.ObjectPool": "[9.0.9, )",
           "NetCoreServer": "[8.0.7, )",

@@ -43,7 +43,7 @@
         </PackageReference>
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="System.Speech" Version="10.0.0" />
-        <PackageReference Include="Unscrambler.XIV" Version="7.35.1" />
+        <PackageReference Include="Unscrambler.XIV" Version="7.38.0" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>

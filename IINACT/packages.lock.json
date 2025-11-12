@@ -35,9 +35,9 @@
       },
       "System.Speech": {
         "type": "Direct",
-        "requested": "[9.0.8, )",
-        "resolved": "9.0.8",
-        "contentHash": "tBo9CM+4MWYDnTH1oKL5A0dcyTHqr8F+zljbOc/vpRHHmZA7jnZxyqh7uwuICWH9F//IAgwfulTvXlzVy+j8lQ=="
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "nHlCdjoeReiSx4kzgPEwPRlbOAyuVFwndXTZZT+CLnHb8UIfB+YMgpQjQ7faYvs3xU8wyvpb6dt+U+HwdlbG7w=="
       },
       "Unscrambler.XIV": {
         "type": "Direct",
@@ -197,9 +197,9 @@
     "net9.0-windows7.0/win-x64": {
       "System.Speech": {
         "type": "Direct",
-        "requested": "[9.0.8, )",
-        "resolved": "9.0.8",
-        "contentHash": "tBo9CM+4MWYDnTH1oKL5A0dcyTHqr8F+zljbOc/vpRHHmZA7jnZxyqh7uwuICWH9F//IAgwfulTvXlzVy+j8lQ=="
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "nHlCdjoeReiSx4kzgPEwPRlbOAyuVFwndXTZZT+CLnHb8UIfB+YMgpQjQ7faYvs3xU8wyvpb6dt+U+HwdlbG7w=="
       },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",

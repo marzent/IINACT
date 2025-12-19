@@ -83,6 +83,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge
         {
             this.container = container;
             container.Register<IJobGaugeMemory655, JobGaugeMemory655>();
+            container.Register<IJobGaugeMemory74, JobGaugeMemory74>();
             repository = container.Resolve<FFXIVRepository>();
             logger = container.Resolve<ILogger>();
 
@@ -105,6 +106,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge
             List<IJobGaugeMemory> candidates = new List<IJobGaugeMemory>();
             candidates.Add(container.Resolve<IJobGaugeMemory655>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
+            candidates.Add(container.Resolve<IJobGaugeMemory74>());
         }
 
         public bool IsValid()

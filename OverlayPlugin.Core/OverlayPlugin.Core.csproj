@@ -12,7 +12,7 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Version>0.19.73</Version>
+        <Version>0.19.76</Version>
     </PropertyGroup>
 
     <PropertyGroup>

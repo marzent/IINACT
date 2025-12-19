@@ -105,8 +105,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.JobGauge
         {
             List<IJobGaugeMemory> candidates = new List<IJobGaugeMemory>();
             candidates.Add(container.Resolve<IJobGaugeMemory655>());
-            memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
             candidates.Add(container.Resolve<IJobGaugeMemory74>());
+            memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
         }
 
         public bool IsValid()

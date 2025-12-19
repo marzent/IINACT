@@ -5,7 +5,7 @@
     "RepoUrl": "https://github.com/marzent/IINACT",
     "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
     "InternalName": "IINACT",
-    "ApplicableVersion": "2025.10.30.0000.0000",
+    "ApplicableVersion": "2025.12.18.0000.0000",
     "Tags": [
         "parsing",
         "plugin",

@@ -8,7 +8,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 {
     public class FFXIVProcessIntl : FFXIVProcess
     {
-        // Last updated for FFXIV 7.3
+        // Last updated for FFXIV 7.4
         // Per aers/FFXIVClientStructs, what we call EntityMemory is actually:
         // Client::Game::Character::Character (0x22E0)
         //   Client::Game::Object::GameObject (0x190)
@@ -121,8 +121,8 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         // A piece of code that reads the job data.
         // The pointer of interest is the first ???????? in the signature.
-        private static String kJobDataSignature = "488B3D????????33ED";
-        private static int kJobDataSignatureOffset = -6;
+        private static String kJobDataSignature = "488D0D????????0F95C2E8????????488B8D";
+        private static int kJobDataSignatureOffset = -15;
 
         // The signature finds a pointer in the executable code which uses RIP addressing.
         private static bool kJobDataSignatureRIP = true;

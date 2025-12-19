@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Authors>Usagi</Authors>
         <Company>Dezent</Company>
-        <Version>2.9.5.0</Version>
+        <Version>2.9.5.1</Version>
         <Description>A parsing plugin.</Description>
         <Copyright></Copyright>
         <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>

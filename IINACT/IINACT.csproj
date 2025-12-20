@@ -30,7 +30,7 @@
         </PackageReference>
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="System.Speech" Version="10.0.0" />
-        <PackageReference Include="Unscrambler.XIV" Version="7.40.0" />
+        <PackageReference Include="Unscrambler.XIV" Version="7.40.1.1" />
     </ItemGroup>
 
     <ItemGroup>

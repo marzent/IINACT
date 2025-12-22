@@ -26,6 +26,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             container.Register<ICombatantMemory71, CombatantMemory71>();
             container.Register<ICombatantMemory72, CombatantMemory72>();
             container.Register<ICombatantMemory73, CombatantMemory73>();
+            container.Register<ICombatantMemory74, CombatantMemory74>();
             repository = container.Resolve<FFXIVRepository>();
 
             var memory = container.Resolve<FFXIVMemory>();
@@ -50,6 +51,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             candidates.Add(container.Resolve<ICombatantMemory71>());
             candidates.Add(container.Resolve<ICombatantMemory72>());
             candidates.Add(container.Resolve<ICombatantMemory73>());
+            candidates.Add(container.Resolve<ICombatantMemory74>());
             memory = FFXIVMemory.FindCandidate(candidates, repository.GetMachinaRegion());
         }
 

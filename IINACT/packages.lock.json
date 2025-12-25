@@ -183,7 +183,6 @@
         "type": "Project",
         "dependencies": {
           "Advanced Combat Tracker": "[6.9.0, )",
-          "Microsoft.CSharp": "[4.7.0, )",
           "System.Data.DataSetExtensions": "[4.5.0, )"
         }
       },

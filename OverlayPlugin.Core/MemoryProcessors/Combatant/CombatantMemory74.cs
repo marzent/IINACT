@@ -202,7 +202,7 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors.Combatant
             [FieldOffset(0xCF0)]
             public byte WeaponId;
 
-            [FieldOffset(0xDE0)]
+            [FieldOffset(0xDD0)]
             public uint PCTargetID;
 
             [FieldOffset(0x2308)]

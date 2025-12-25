@@ -78,6 +78,7 @@ public unsafe class ZoneDownHookManager : IDisposable
         var rawOpcodeKeyTable = new byte[versionConstants.OpcodeKeyTableSize];
         opcodeKeyTable = new int[rawOpcodeKeyTable.Length / 4];
         Marshal.Copy(moduleBase + (nint)versionConstants.OpcodeKeyTableOffset, rawOpcodeKeyTable, 0, rawOpcodeKeyTable.Length);
+        Plugin.Log.Debug("[ZoneDownHookManager] raw opcode key table {@Data} (length: {Length})", rawOpcodeKeyTable, rawOpcodeKeyTable.Length);
         for (var i = 0; i < rawOpcodeKeyTable.Length; i += 4)
             opcodeKeyTable[i / 4] = BitConverter.ToInt32(rawOpcodeKeyTable, i);
 

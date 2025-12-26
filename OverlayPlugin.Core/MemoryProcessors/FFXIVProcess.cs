@@ -16,14 +16,12 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
         public LimitedProcess(Process process)
         {
             this.process = process;
-            if (process == null || process.HasExited)
+            if (process == null)
                 return;
             Handle = -1;
         }
 
         public IntPtr Handle { get; } = IntPtr.Zero;
-
-        public bool HasExited => process.HasExited;
 
         public int Id => process.Id;
 

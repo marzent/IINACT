@@ -97,12 +97,6 @@ namespace RainbowMage.OverlayPlugin.MemoryProcessors
 
         public bool IsValid()
         {
-            if (process != null)
-            {
-                CloseProcessHandle();
-                OnProcessChange?.Invoke(this, null);
-            }
-
             if (processHandle != IntPtr.Zero)
                 return true;
 

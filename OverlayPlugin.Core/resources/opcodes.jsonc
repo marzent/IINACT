@@ -3,160 +3,160 @@
 // For more information, see comments on https://github.com/OverlayPlugin/OverlayPlugin/issues/235
 {
     "Chinese": {
-        "2026.05.25.0000.0000": {
-            // Version: 7.51
+        "2026.06.10.0000.0000": {
+            // Version: 7.51h
             "MapEffect": {
-                "opcode": 951,
+                "opcode": 980,
                 "size": 11
             },
             "MapEffect4": {
-                "opcode": 573,
+                "opcode": 772,
                 "size": 0
             },
             "MapEffect8": {
-                "opcode": 577,
+                "opcode": 961,
                 "size": 0
             },
             "MapEffect12": {
-                "opcode": 115,
+                "opcode": 292,
                 "size": 0
             },
             "CEDirector": {
-                "opcode": 986,
+                "opcode": 315,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 523,
+                "opcode": 351,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 613,
+                "opcode": 179,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 692,
+                "opcode": 664,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 584,
+                "opcode": 694,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 143,
+                "opcode": 479,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 950,
+                "opcode": 870,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 655,
+                "opcode": 305,
                 "size": 24
             }
         }
     },
     "Global": {
-        "2026.05.25.0000.0000": {
-            // Version: 7.51
+        "2026.06.10.0000.0000": {
+            // Version: 7.51h
             "MapEffect": {
-                "opcode": 951,
+                "opcode": 980,
                 "size": 11
             },
             "MapEffect4": {
-                "opcode": 573,
+                "opcode": 772,
                 "size": 0
             },
             "MapEffect8": {
-                "opcode": 577,
+                "opcode": 961,
                 "size": 0
             },
             "MapEffect12": {
-                "opcode": 115,
+                "opcode": 292,
                 "size": 0
             },
             "CEDirector": {
-                "opcode": 986,
+                "opcode": 315,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 523,
+                "opcode": 351,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 613,
+                "opcode": 179,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 692,
+                "opcode": 664,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 584,
+                "opcode": 694,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 143,
+                "opcode": 479,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 950,
+                "opcode": 870,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 655,
+                "opcode": 305,
                 "size": 24
             }
         }
     },
     "Korean": {
-        "2026.05.25.0000.0000": {
-            // Version: 7.51
+        "2026.06.10.0000.0000": {
+            // Version: 7.51h
             "MapEffect": {
-                "opcode": 951,
+                "opcode": 980,
                 "size": 11
             },
             "MapEffect4": {
-                "opcode": 573,
+                "opcode": 772,
                 "size": 0
             },
             "MapEffect8": {
-                "opcode": 577,
+                "opcode": 961,
                 "size": 0
             },
             "MapEffect12": {
-                "opcode": 115,
+                "opcode": 292,
                 "size": 0
             },
             "CEDirector": {
-                "opcode": 986,
+                "opcode": 315,
                 "size": 16
             },
             "RSVData": {
-                "opcode": 523,
+                "opcode": 351,
                 "size": 1080
             },
             "NpcYell": {
-                "opcode": 613,
+                "opcode": 179,
                 "size": 32
             },
             "BattleTalk2": {
-                "opcode": 692,
+                "opcode": 664,
                 "size": 40
             },
             "Countdown": {
-                "opcode": 584,
+                "opcode": 694,
                 "size": 48
             },
             "CountdownCancel": {
-                "opcode": 143,
+                "opcode": 479,
                 "size": 40
             },
             "ActorMove": {
-                "opcode": 950,
+                "opcode": 870,
                 "size": 16
             },
             "ActorSetPos": {
-                "opcode": 655,
+                "opcode": 305,
                 "size": 24
             }
         }

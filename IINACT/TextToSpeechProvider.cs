@@ -1,44 +1,42 @@
 using System.Speech.Synthesis;
 using System.Web;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace IINACT;
 
-internal class TextToSpeechProvider
+internal class TextToSpeechProvider : IDisposable
 {
-    private readonly object speechLock = new();
     private readonly HttpClient client = new();
-    private readonly SpeechSynthesizer? speechSynthesizer;
     private readonly Configuration configuration;
-    
+    private bool disposed = false;
+
     public TextToSpeechProvider(Configuration config)
     {
         this.configuration = config;
-        if (!Dalamud.Utility.Util.IsWine())
-        {
-            try
-            {
-                speechSynthesizer = new SpeechSynthesizer();
-                speechSynthesizer?.SetOutputToDefaultAudioDevice();
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.Warning(ex, "Failed to initialize SAPI TTS engine");
-                speechSynthesizer = null;
-            }
-        }
-        
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
-    
+    public void Dispose()
+    {
+        if (!disposed)
+        {
+            Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech -= Speak;
+            client?.Dispose();
+            disposed = true;
+        }
+    }
+
     public void Speak(string message)
     {
-        Task.Run(() =>
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        Task.Run(async () =>
         {
             try
             {
-                if (speechSynthesizer == null || configuration.ForceGoogleTts)
-                    SpeakGoogle(message);
+                if (configuration.ForceGoogleTts)
+                    await SpeakGoogle(message);
                 else
                     SpeakSapi(message);
             }
@@ -49,32 +47,61 @@ internal class TextToSpeechProvider
         });
     }
 
-    private void SpeakGoogle(string message)
+    private async Task SpeakGoogle(string message)
     {
         var query = HttpUtility.UrlEncode(message);
         var lang = configuration.GoogleTtsLanguage;
         if (string.IsNullOrWhiteSpace(lang)) lang = "en";
         var url = $"https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl={lang}&q={query}";
-        var mp3Data = client.GetByteArrayAsync(url).Result;
+        var mp3Data = await client.GetByteArrayAsync(url);
 
         using var stream = new MemoryStream(mp3Data);
         using var reader = new Mp3FileReader(stream);
-        using var waveOut = new WaveOutEvent();
-        waveOut.DeviceNumber = configuration.TtsPlaybackDevice;
-        waveOut.Init(reader);
-        var waitHandle = new ManualResetEventSlim(false);
-        
-        lock (speechLock)
-        {
-            waveOut.Play();
-            waveOut.PlaybackStopped += (s, e) => waitHandle.Set();
-            waitHandle.Wait();
-        }
+
+        PlayAudioStream(reader);
     }
-    
+
     private void SpeakSapi(string message)
     {
-        lock (speechLock)
-            speechSynthesizer?.Speak(message);
+        using var speechSynthesizer = new SpeechSynthesizer();
+
+        var voiceName = configuration.SapiVoice;
+        if (!string.IsNullOrEmpty(voiceName))
+        {
+            speechSynthesizer.SelectVoice(voiceName);
+        }
+
+        using var stream = new MemoryStream();
+        speechSynthesizer.SetOutputToWaveStream(stream);
+        speechSynthesizer.Speak(message);
+
+        stream.Position = 0;
+        using var reader = new WaveFileReader(stream);
+
+        PlayAudioStream(reader);
+    }
+
+    private void PlayAudioStream(WaveStream audioStream)
+    {
+        var volumeProvider = new VolumeSampleProvider(audioStream.ToSampleProvider())
+        {
+            Volume = float.IsNaN(configuration.TtsVolume)
+                   ? 1.0f : Math.Clamp(configuration.TtsVolume, 0.0f, 2.0f)
+        };
+
+        var outputDevice = configuration.TtsPlaybackDevice;
+
+        using var waveOut = new WaveOutEvent()
+        {
+            DeviceNumber = (outputDevice >= 0 && outputDevice < WaveOut.DeviceCount)
+                         ? outputDevice : -1
+        };
+        waveOut.Init(volumeProvider);
+
+        var waitHandle = new ManualResetEventSlim(false);
+        waveOut.PlaybackStopped += (s, e) => waitHandle.Set();
+
+        waveOut.Play();
+        waitHandle.Wait();
     }
 }

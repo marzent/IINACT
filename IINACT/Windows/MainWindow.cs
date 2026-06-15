@@ -12,6 +12,8 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using NAudio.Wave;
 using RainbowMage.OverlayPlugin.EventSources;
+using System.Collections.ObjectModel;
+using System.Speech.Synthesis;
 
 namespace IINACT.Windows;
 
@@ -20,6 +22,7 @@ public class MainWindow : Window, IDisposable
     private Plugin Plugin { get; }
 
     private int selectedOverlayIndex;
+    private readonly ReadOnlyCollection<InstalledVoice> installedVoicesSapi;
 
     public MainWindow(Plugin plugin) : base($"IINACT v{plugin.Version}")
     {
@@ -28,6 +31,16 @@ public class MainWindow : Window, IDisposable
             MinimumSize = new Vector2(307, 207),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
+
+        if (Dalamud.Utility.Util.IsWine())
+        {
+            installedVoicesSapi = new([]);
+        }
+        else
+        {
+            using var synth = new SpeechSynthesizer();
+            installedVoicesSapi = synth.GetInstalledVoices();
+        }
 
         Plugin = plugin;
     }
@@ -291,35 +304,13 @@ public class MainWindow : Window, IDisposable
     {
         using var tab = ImRaii.TabItem("Text to Speech");
         if (!tab) return;
-        
-        ImGui.Spacing();
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "Google TTS:");
-        ImGui.Spacing();
 
-        var forceGoogleTts = Plugin.Configuration.ForceGoogleTts;
-        if (ImGui.Checkbox("Force Google TTS instead of SAPI", ref forceGoogleTts))
-        {
-            Plugin.Configuration.ForceGoogleTts = forceGoogleTts;
-            Plugin.Configuration.Save();
-        }
-
-        ImGui.Spacing();
-
-        var googleTtsLanguage = Plugin.Configuration.GoogleTtsLanguage;
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputText("Language", ref googleTtsLanguage, 10))
-        {
-            Plugin.Configuration.GoogleTtsLanguage = googleTtsLanguage;
-            Plugin.Configuration.Save();
-        }
-        ImGui.SameLine();
-        ImGui.TextColored(ImGuiColors.DalamudGrey, "(e.g. ja, en, de, fr, ko)");
         ImGui.Spacing();
 
         var ttsDeviceCount = WaveOut.DeviceCount;
         var currentDevice = Plugin.Configuration.TtsPlaybackDevice;
         var currentDeviceName = currentDevice == -1 ? "Default" : WaveOut.GetCapabilities(currentDevice).ProductName;
-        
+
         ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
 
         if (ImGui.BeginCombo("Playback Device", currentDeviceName))
@@ -342,6 +333,96 @@ public class MainWindow : Window, IDisposable
 
             ImGui.EndCombo();
         }
+
+        ImGui.Spacing();
+
+        ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
+
+        var volumePercent = (int)(Plugin.Configuration.TtsVolume * 100f);
+        if (ImGui.SliderInt("TTS Volume", ref volumePercent, 0, 200, "%d%%"))
+        {
+            Plugin.Configuration.TtsVolume = volumePercent / 100f;
+            Plugin.Configuration.Save();
+        }
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
+        var forceGoogleTts = Plugin.Configuration.ForceGoogleTts;
+
+        ImGui.BeginDisabled(Dalamud.Utility.Util.IsWine());
+        {
+            if (ImGui.RadioButton("SAPI:", ref forceGoogleTts, false))
+            {
+                Plugin.Configuration.ForceGoogleTts = forceGoogleTts;
+                Plugin.Configuration.Save();
+            }
+
+            ImGui.Spacing();
+
+            ImGui.BeginDisabled(forceGoogleTts);
+            {
+                ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
+
+                var hasVoices = installedVoicesSapi?.Any() ?? false;
+
+                var currentVoice = hasVoices
+                                 ? (Plugin.Configuration.SapiVoice ?? installedVoicesSapi?.FirstOrDefault()?.VoiceInfo.Name)
+                                 : "No voices available";
+
+                if (ImGui.BeginCombo("SAPI Voice", currentVoice))
+                {
+                    if (hasVoices)
+                    {
+                        foreach (var voice in installedVoicesSapi!)
+                        {
+                            if (ImGui.Selectable(voice.VoiceInfo.Name, voice.VoiceInfo.Name.Equals(currentVoice)))
+                            {
+                                Plugin.Configuration.SapiVoice = voice.VoiceInfo.Name;
+                                Plugin.Configuration.Save();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ImGui.BeginDisabled();
+                        {
+                            ImGui.Selectable("No voices available", false);
+                        }
+                        ImGui.EndDisabled();
+                    }
+
+                    ImGui.EndCombo();
+                }
+            }
+            ImGui.EndDisabled();
+        }
+        ImGui.EndDisabled();
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
+        if (ImGui.RadioButton("GoogleTTS:", ref forceGoogleTts, true))
+        {
+            Plugin.Configuration.ForceGoogleTts = forceGoogleTts;
+            Plugin.Configuration.Save();
+        }
+
+        ImGui.Spacing();
+
+        ImGui.BeginDisabled(!forceGoogleTts);
+        {
+            var googleTtsLanguage = Plugin.Configuration.GoogleTtsLanguage;
+            ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+            if (ImGui.InputText("Language", ref googleTtsLanguage, 10))
+            {
+                Plugin.Configuration.GoogleTtsLanguage = googleTtsLanguage;
+                Plugin.Configuration.Save();
+            }
+            ImGui.SameLine();
+            ImGui.TextColored(ImGuiColors.DalamudGrey, "(e.g. ja, en, de, fr, ko)");
+        }
+        ImGui.EndDisabled();
     }
 
     private void DrawWebSocketSettings()

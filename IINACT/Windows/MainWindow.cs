@@ -346,6 +346,13 @@ public class MainWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+
+        var concurrentTtsPlayback = Plugin.Configuration.ConcurrentTtsPlayback;
+        if(ImGui.Checkbox("Concurrent Playback", ref concurrentTtsPlayback))
+        {
+            Plugin.Configuration.ConcurrentTtsPlayback = concurrentTtsPlayback;
+            Plugin.Configuration.Save();
+        }
         ImGui.Spacing();
 
         var forceGoogleTts = Plugin.Configuration.ForceGoogleTts;

@@ -68,13 +68,25 @@ public class Configuration : IPluginConfiguration
 
     public int TtsPlaybackDevice { get; set; } = -1;
 
+    public float TtsVolume { get; set; } = 1.0f;
+
+    public string SapiVoice { get; set; } = "";
+
     public void Initialize(IDalamudPluginInterface pluginInterface)
     {
         PluginInterface = pluginInterface;
+        if (Dalamud.Utility.Util.IsWine())
+        {
+            ForceGoogleTts = true;
+        }
     }
 
     public void Save()
     {
+        if (Dalamud.Utility.Util.IsWine())
+        {
+            ForceGoogleTts = true;
+        }
         PluginInterface?.SavePluginConfig(this);
     }
 }

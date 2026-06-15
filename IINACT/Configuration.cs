@@ -72,6 +72,8 @@ public class Configuration : IPluginConfiguration
 
     public string SapiVoice { get; set; } = "";
 
+    public bool ConcurrentTtsPlayback { get; set; } = false;
+
     public void Initialize(IDalamudPluginInterface pluginInterface)
     {
         PluginInterface = pluginInterface;

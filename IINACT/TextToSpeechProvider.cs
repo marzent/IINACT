@@ -7,6 +7,7 @@ namespace IINACT;
 
 internal class TextToSpeechProvider : IDisposable
 {
+    private readonly SemaphoreSlim speechLock = new(1, 1);
     private readonly HttpClient client = new();
     private readonly Configuration configuration;
     private bool disposed = false;
@@ -16,11 +17,13 @@ internal class TextToSpeechProvider : IDisposable
         this.configuration = config;
         Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech += Speak;
     }
+
     public void Dispose()
     {
         if (!disposed)
         {
             Advanced_Combat_Tracker.ActGlobals.oFormActMain.TextToSpeech -= Speak;
+            speechLock?.Dispose();
             client?.Dispose();
             disposed = true;
         }
@@ -35,16 +38,36 @@ internal class TextToSpeechProvider : IDisposable
         {
             try
             {
-                if (configuration.ForceGoogleTts)
-                    await SpeakGoogle(message);
+                if (configuration.ConcurrentTtsPlayback)
+                {
+                    await ExecuteSpeak(message);
+                }
                 else
-                    SpeakSapi(message);
+                {
+                    await speechLock.WaitAsync();
+                    try
+                    {
+                        await ExecuteSpeak(message);
+                    }
+                    finally
+                    {
+                        speechLock.Release();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Plugin.Log.Error(ex, $"TTS failed to play back {message}");
             }
         });
+    }
+
+    private async Task ExecuteSpeak(string message)
+    {
+        if (configuration.ForceGoogleTts)
+            await SpeakGoogle(message);
+        else
+            SpeakSapi(message);
     }
 
     private async Task SpeakGoogle(string message)

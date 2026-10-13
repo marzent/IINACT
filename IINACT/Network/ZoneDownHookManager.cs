@@ -13,7 +13,7 @@ namespace IINACT.Network;
 
 public unsafe class ZoneDownHookManager : IDisposable
 {
-	private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4F 10 8B 47 1C 45";
+    private const string GenericDownSignature = "E8 ?? ?? ?? ?? 4C 8B 4E 10 8B 46 1C 45";
     private const string OpcodeKeyTableSignature = "?? ?? ?? 2B C8 ?? 8B ?? 8A ?? ?? ?? ?? 41 81";
     private readonly int[] opcodeKeyTable;
     private readonly byte[] keys = new byte[3];

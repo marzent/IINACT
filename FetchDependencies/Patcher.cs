@@ -193,7 +193,44 @@ internal class Patcher
             var ilProcessor = method.Body.GetILProcessor();
             ilProcessor.Replace(0, Instruction.Create(OpCodes.Ret));
         }
-        
+        // IINACT always runs inside the game process so listing all ffxiv_dx11 processes
+        // on the system only adds failure modes. On Windows Read64 reads StartTime and
+        // MainWindowTitle of every found process outside of a per process try/catch which
+        // throws Win32Exception 5 when another game process is inaccessible for example a
+        // second client running as admin or a leftover zombie process. Verify then fails
+        // and the plugin does not load. See issue #175
+        {
+            var method = memory.GetMethod("MemoryReader.ReadProcesses::Read64");
+            var originalIl = method.Body.Instructions.ToArray();
+            var listCtor = originalIl.Select(instruction => instruction.Operand)
+                                     .OfType<MethodReference>()
+                                     .First(reference => reference is { Name: ".ctor" } &&
+                                                         reference.DeclaringType.Name == "List`1");
+            var listAdd = originalIl.Select(instruction => instruction.Operand)
+                                    .OfType<MethodReference>()
+                                    .First(reference => reference.Name == "Add" &&
+                                                        reference.DeclaringType.Name == "List`1");
+            var processType = originalIl.Select(instruction => instruction.Operand)
+                                        .OfType<MethodReference>()
+                                        .First(reference => reference.DeclaringType.Name == "Process")
+                                        .DeclaringType;
+            var getCurrentProcess = new MethodReference("GetCurrentProcess", processType, processType);
+            var getId = new MethodReference("get_Id", memory.Assembly.MainModule.TypeSystem.Int32, processType)
+            {
+                HasThis = true
+            };
+
+            method.Body.ExceptionHandlers.Clear();
+            var ilProcessor = method.Body.GetILProcessor();
+            ilProcessor.Clear();
+            ilProcessor.Emit(OpCodes.Newobj, listCtor);
+            ilProcessor.Emit(OpCodes.Dup);
+            ilProcessor.Emit(OpCodes.Call, getCurrentProcess);
+            ilProcessor.Emit(OpCodes.Callvirt, getId);
+            ilProcessor.Emit(OpCodes.Callvirt, listAdd);
+            ilProcessor.Emit(OpCodes.Ret);
+        }
+
         memory.WriteOut();
     }
 }

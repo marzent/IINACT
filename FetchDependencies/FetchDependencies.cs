@@ -6,9 +6,14 @@ namespace FetchDependencies;
 public class FetchDependencies
 {
     private const string VersionUrlGlobal = "https://www.iinact.com/updater/version";
-    private const string VersionUrlChinese = "https://cninact.diemoe.net/CN解析/版本.txt";
     private const string PluginUrlGlobal = "https://www.iinact.com/updater/download";
-    private const string PluginUrlChinese = "https://cninact.diemoe.net/CN解析/FFXIV_ACT_Plugin.dll";
+    private const string FallbackReleaseUrlGlobal = "https://api.github.com/repos/ravahn/FFXIV_ACT_Plugin/releases/latest";
+
+    // The CN client needs a CN build of FFXIV_ACT_Plugin. Its releases share the same plugin assembly version
+    // across client patches (e.g. 3.0.3.0-CN7.57 and 3.0.3.0-CN7.58), so updates are tracked by release tag.
+    private const string ReleaseUrlChinese = "https://api.github.com/repos/NewMoe-Technology/FFXIV_ACT_Plugin_CN/releases/latest";
+    private const string PluginAssetNameChinese = "FFXIV_ACT_Plugin.zip";
+    private const string ReleaseTagFileChinese = "FFXIV_ACT_Plugin.release";
 
     private Version PluginVersion { get; }
     private string DependenciesDir { get; }
@@ -23,28 +28,40 @@ public class FetchDependencies
         HttpClient = httpClient;
     }
 
+    private string ReleaseTagPathChinese => Path.Combine(DependenciesDir, ReleaseTagFileChinese);
+
     public void GetFfxivPlugin()
     {
         var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
         var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
         
-        if (!NeedsUpdate(pluginPath))
+        if (!NeedsUpdate(pluginPath, out var release))
             return;
-        
-        if (!File.Exists(pluginZipPath))
-        {
-            DownloadPlugin(pluginZipPath);
-        }
 
         try
         {
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            if (!File.Exists(pluginZipPath))
+            {
+                release = DownloadPlugin(pluginZipPath, release);
+            }
+
+            try
+            {
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
+            catch (InvalidDataException)
+            {
+                File.Delete(pluginZipPath);
+                release = DownloadPlugin(pluginZipPath, release);
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
         }
-        catch (InvalidDataException)
+        catch when (IsUsable(pluginPath))
         {
+            // A failed update (e.g. the release check succeeds but the asset download times out)
+            // must not keep IINACT from loading when a working plugin is already installed.
             File.Delete(pluginZipPath);
-            DownloadPlugin(pluginZipPath);
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            return;
         }
         File.Delete(pluginZipPath);
 
@@ -55,10 +72,33 @@ public class FetchDependencies
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();
+
+        if (IsChinese)
+        {
+            if (release != null)
+                File.WriteAllText(ReleaseTagPathChinese, release.Tag);
+            else
+                File.Delete(ReleaseTagPathChinese);
+        }
     }
 
-    private bool NeedsUpdate(string dllPath)
+    private static bool IsUsable(string dllPath)
     {
+        if (!File.Exists(dllPath)) return false;
+        try
+        {
+            using var plugin = new TargetAssembly(dllPath);
+            return plugin.ApiVersionMatches();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool NeedsUpdate(string dllPath, out ReleaseInfo? release)
+    {
+        release = null;
         if (!File.Exists(dllPath)) return true;
         try
         {
@@ -68,9 +108,18 @@ public class FetchDependencies
                 return true;
             
             using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+            if (IsChinese)
+            {
+                release = GetLatestRelease(ReleaseUrlChinese, PluginAssetNameChinese, cancelAfterDelay.Token);
+                var installedTag = File.Exists(ReleaseTagPathChinese)
+                                       ? File.ReadAllText(ReleaseTagPathChinese).Trim()
+                                       : null;
+                return installedTag != release.Tag;
+            }
+
             var remoteVersionString = HttpClient
-                                      .GetStringAsync(IsChinese ? VersionUrlChinese : VersionUrlGlobal,
-                                                      cancelAfterDelay.Token).Result;
+                                      .GetStringAsync(VersionUrlGlobal, cancelAfterDelay.Token).Result;
             var remoteVersion = new Version(remoteVersionString);
             return remoteVersion > plugin.Version;
         }
@@ -80,28 +129,48 @@ public class FetchDependencies
         }
     }
 
-    private void DownloadPlugin(string pluginZipPath)
+    private ReleaseInfo? DownloadPlugin(string pluginZipPath, ReleaseInfo? release)
     {
+        if (IsChinese)
+        {
+            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            release ??= GetLatestRelease(ReleaseUrlChinese, PluginAssetNameChinese, cancelAfterDelay.Token);
+            DownloadFile(release.DownloadUrl, pluginZipPath);
+            return release;
+        }
+
         try
         {
-            DownloadFile(IsChinese ? PluginUrlChinese : PluginUrlGlobal, pluginZipPath);
+            DownloadFile(PluginUrlGlobal, pluginZipPath);
         }
         catch
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/ravahn/FFXIV_ACT_Plugin/releases/latest");
-            request.Headers.UserAgent.ParseAdd("IINACT/1.0");
-            using var response = HttpClient.Send(request);
-            response.EnsureSuccessStatusCode();
-
-            using var stream = response.Content.ReadAsStream();
-            var json = JsonNode.Parse(stream);
-            var downloadUrl = json?["assets"]?[0]?["browser_download_url"]?.ToString();
-
-            if (string.IsNullOrEmpty(downloadUrl))
-                throw new Exception("Could not find fallback download URL from GitHub API.");
-
-            DownloadFile(downloadUrl, pluginZipPath);
+            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var fallback = GetLatestRelease(FallbackReleaseUrlGlobal, null, cancelAfterDelay.Token);
+            DownloadFile(fallback.DownloadUrl, pluginZipPath);
         }
+
+        return null;
+    }
+
+    private ReleaseInfo GetLatestRelease(string releaseUrl, string? assetName, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, releaseUrl);
+        request.Headers.UserAgent.ParseAdd("IINACT/1.0");
+        using var response = HttpClient.Send(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        using var stream = response.Content.ReadAsStream(cancellationToken);
+        var json = JsonNode.Parse(stream);
+        var tag = json?["tag_name"]?.ToString();
+        var asset = json?["assets"]?.AsArray()
+                        .FirstOrDefault(a => assetName == null || a?["name"]?.ToString() == assetName);
+        var downloadUrl = asset?["browser_download_url"]?.ToString();
+
+        if (string.IsNullOrEmpty(tag) || string.IsNullOrEmpty(downloadUrl))
+            throw new Exception($"Could not find a plugin download in {releaseUrl}.");
+
+        return new ReleaseInfo(tag, downloadUrl);
     }
 
     private void DownloadFile(string url, string path)
@@ -114,4 +183,6 @@ public class FetchDependencies
         downloadStream.CopyTo(zipFileStream);
         zipFileStream.Close();
     }
+
+    private sealed record ReleaseInfo(string Tag, string DownloadUrl);
 }

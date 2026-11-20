@@ -37,21 +37,31 @@ public class FetchDependencies
         
         if (!NeedsUpdate(pluginPath, out var release))
             return;
-        
-        if (!File.Exists(pluginZipPath))
-        {
-            release = DownloadPlugin(pluginZipPath, release);
-        }
 
         try
         {
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            if (!File.Exists(pluginZipPath))
+            {
+                release = DownloadPlugin(pluginZipPath, release);
+            }
+
+            try
+            {
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
+            catch (InvalidDataException)
+            {
+                File.Delete(pluginZipPath);
+                release = DownloadPlugin(pluginZipPath, release);
+                ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            }
         }
-        catch (InvalidDataException)
+        catch when (IsUsable(pluginPath))
         {
+            // A failed update (e.g. the release check succeeds but the asset download times out)
+            // must not keep IINACT from loading when a working plugin is already installed.
             File.Delete(pluginZipPath);
-            release = DownloadPlugin(pluginZipPath, release);
-            ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
+            return;
         }
         File.Delete(pluginZipPath);
 
@@ -69,6 +79,20 @@ public class FetchDependencies
                 File.WriteAllText(ReleaseTagPathChinese, release.Tag);
             else
                 File.Delete(ReleaseTagPathChinese);
+        }
+    }
+
+    private static bool IsUsable(string dllPath)
+    {
+        if (!File.Exists(dllPath)) return false;
+        try
+        {
+            using var plugin = new TargetAssembly(dllPath);
+            return plugin.ApiVersionMatches();
+        }
+        catch
+        {
+            return false;
         }
     }
 

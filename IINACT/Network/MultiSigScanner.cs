@@ -506,7 +506,7 @@ public class MultiSigScanner : IDisposable
 
     private void SetupCopy()
     {
-        var handle = PInvoke.CreateFile(Module.FileName,
+        using var handle = PInvoke.CreateFile(Module.FileName,
                 GenericRead,
                 FILE_SHARE_MODE.FILE_SHARE_READ, 
                 null,
@@ -520,7 +520,7 @@ public class MultiSigScanner : IDisposable
             return;
         }
         
-        var map = PInvoke.CreateFileMapping(handle,
+        using var map = PInvoke.CreateFileMapping(handle,
             null,
             PAGE_PROTECTION_FLAGS.PAGE_READONLY | PAGE_PROTECTION_FLAGS.SEC_IMAGE,
             0,
@@ -568,9 +568,6 @@ public class MultiSigScanner : IDisposable
         {
             PInvoke.UnmapViewOfFile((MEMORY_MAPPED_VIEW_ADDRESS)view.Value);   
         }
-        Plugin.Log.Debug("[MultiSigScanner] Unmapped. Closing handles.");
-        PInvoke.CloseHandle((HANDLE)handle.DangerousGetHandle());
-        PInvoke.CloseHandle((HANDLE)map.DangerousGetHandle());
-        Plugin.Log.Debug("[MultiSigScanner] Handles closed.");
+        Plugin.Log.Debug("[MultiSigScanner] Unmapped.");
     }
 }
